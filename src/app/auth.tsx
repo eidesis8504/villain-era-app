@@ -26,7 +26,8 @@ const Ctx = createContext<Auth | null>(null)
 
 // 검색엔진·링크 미리보기·배포 스크린샷 봇에는 게스트 계정을 만들지 않는다
 const BOT_UA = /bot\b|crawl|spider|slurp|HeadlessChrome|Lighthouse|facebookexternalhit|kakaotalk-scrap|Yeti|Daumoa/i
-export const isBot = () => BOT_UA.test(navigator.userAgent)
+// 실제 기기로 위장한 스크린샷 봇도 자동화 브라우저 표시(navigator.webdriver)는 남는다
+export const isBot = () => BOT_UA.test(navigator.userAgent) || navigator.webdriver === true
 
 // StrictMode에서 두 번 실행돼도 계정이 하나만 만들어지도록 한 번만 부팅한다
 let boot: Promise<{ session: Session | null; error: string | null }> | null = null

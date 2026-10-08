@@ -7,6 +7,10 @@
 - 문서(`docs/`, `README.md`, `CLAUDE.md`)와 `supabase/`만 바뀐 커밋은 `netlify.toml`의 `ignore` 규칙으로 빌드를 건너뛴다.
 - 2026-10-08에 팀 크레딧이 소진되어 운영 배포가 다음 결제 주기(11월 초 예상)까지 멈춰 있다. 미리보기 배포는 가능.
 
+## 공개 저장소 (2026-10-08 전환)
+- GitHub 저장소는 **공개**다. Netlify 무료 플랜은 비공개 저장소에서 팀원 외 기여자(커밋의 `Co-Authored-By` 줄 포함)가 있는 커밋의 빌드를 막기 때문에 공개로 바꿨다.
+- 비밀값(Supabase secret 키, 토큰, 비밀번호, 관리자 코드)은 절대 커밋하지 않는다. `.env.local`은 git에서 제외되어 있고, 서버 비밀값은 Supabase Vault에만 둔다.
+
 ## 건드리지 않는 것
 - Netlify `project-villain-era`(기능 검증용 웹), `~/Desktop/deploy` 폴더, Supabase 프로젝트 `VILLAIN ERA`(뭄바이).
 

@@ -1,6 +1,9 @@
 [build]
   command = "npm run build"
   publish = "dist"
+  # 무료 플랜 크레딧 절약: 문서·DB 마이그레이션·Edge Function만 바뀐 커밋은 빌드하지 않는다 (종료 코드 0 = 건너뜀).
+  # 비교 기준(CACHED_COMMIT_REF)이 없거나 같은 커밋 재시도면 항상 빌드한다.
+  ignore = '[ -n "$CACHED_COMMIT_REF" ] && [ "$CACHED_COMMIT_REF" != "$COMMIT_REF" ] && git diff --quiet "$CACHED_COMMIT_REF" "$COMMIT_REF" -- . ":(exclude)docs" ":(exclude)README.md" ":(exclude)CLAUDE.md" ":(exclude)supabase"'
 
 [build.environment]
   NODE_VERSION = "24"

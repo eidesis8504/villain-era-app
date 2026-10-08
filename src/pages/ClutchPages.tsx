@@ -339,7 +339,7 @@ export function ClutchFemalePage() {
   const f = k.A(id)
 
   if (k.error) return <Screen title="산란" back="/clutch"><ErrorBox error={k.error} /></Screen>
-  if (k.loading) return <Screen title="산란" back="/clutch"><Spinner center /></Screen>
+  if (k.loading || (k.fetching && !f)) return <Screen title="산란" back="/clutch"><Spinner center /></Screen>
   if (!f) return <Screen title="산란" back="/clutch"><div className="empty">개체를 찾을 수 없어요</div></Screen>
 
   const T = today()

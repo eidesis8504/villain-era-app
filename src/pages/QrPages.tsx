@@ -14,7 +14,7 @@ export function QrPage() {
   const a = k.A(id)
 
   if (k.error) return <Screen title="QR 라벨" back="/animals"><ErrorBox error={k.error} /></Screen>
-  if (k.loading) return <Screen title="QR 라벨" back="/animals"><Spinner center /></Screen>
+  if (k.loading || (k.fetching && !a)) return <Screen title="QR 라벨" back="/animals"><Spinner center /></Screen>
   if (!a) return <Screen title="QR 라벨" back="/animals"><div className="empty">개체를 찾을 수 없어요</div></Screen>
 
   const { n, cells } = qrMatrix(animalQrText(a.code))
@@ -84,8 +84,8 @@ export function AnimalByCode() {
   const { code = '' } = useParams()
   const k = useKeeper()
   const c = decodeURIComponent(code).toUpperCase()
-  if (k.loading) return <Screen title="개체 찾기" back="/animals"><Spinner center /></Screen>
   const a = k.byCode.get(c)
+  if (k.loading || (k.fetching && !a)) return <Screen title="개체 찾기" back="/animals"><Spinner center /></Screen>
   if (a) return <Navigate to={`/animals/${a.id}`} replace />
   return (
     <Screen title="개체 찾기" back="/animals">

@@ -118,7 +118,7 @@ export default function AnimalDetailPage() {
   const a = k.A(id)
 
   if (k.error) return <Screen title="개체 상세" back="/animals"><ErrorBox error={k.error} /></Screen>
-  if (k.loading) return <Screen title="개체 상세" back="/animals"><Spinner center /></Screen>
+  if (k.loading || (k.fetching && !a)) return <Screen title="개체 상세" back="/animals"><Spinner center /></Screen>
   if (!a) return <Screen title="개체 상세" back="/animals"><div className="empty">개체를 찾을 수 없어요</div></Screen>
 
   const l = k.lastW(a.id)

@@ -138,6 +138,7 @@ export function useKeeper() {
   const clutches = c.data ?? EMPTY
   const breeders = b.data ?? EMPTY
   const loading = a.isLoading || w.isLoading || c.isLoading || b.isLoading
+  const fetching = a.isFetching || w.isFetching || c.isFetching || b.isFetching
   const error = a.error || w.error || c.error || b.error
 
   const derived = useMemo(() => {
@@ -184,6 +185,7 @@ export function useKeeper() {
 
   return {
     loading,
+    fetching,
     error,
     animals,
     weights,
@@ -200,7 +202,8 @@ export type Keeper = ReturnType<typeof useKeeper>
 export function useRefresh() {
   const qc = useQueryClient()
   return useCallback(
-    (...keys: string[]) => Promise.all(keys.map((k) => qc.invalidateQueries({ queryKey: [k] }))),
+    // 지금 화면에 없는 목록도 바로 다시 받아, 이동한 화면에 옛 데이터가 잠깐 보이지 않게 한다
+    (...keys: string[]) => Promise.all(keys.map((k) => qc.invalidateQueries({ queryKey: [k], refetchType: 'all' }))),
     [qc],
   )
 }

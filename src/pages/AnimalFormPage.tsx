@@ -70,7 +70,7 @@ export default function AnimalFormPage() {
   const editing = id ? k.A(id) : null
   const title = id ? '개체 정보 수정' : '개체 등록'
   if (k.error) return <Screen title={title} back="/animals"><ErrorBox error={k.error} /></Screen>
-  if (k.loading) return <Screen title={title} back="/animals"><Spinner center /></Screen>
+  if (k.loading || (k.fetching && id && !editing)) return <Screen title={title} back="/animals"><Spinner center /></Screen>
   if (id && !editing) return <Screen title={title} back="/animals"><div className="empty">개체를 찾을 수 없어요</div></Screen>
   // 데이터가 준비된 뒤에 폼을 만든다 (수정 화면은 기존 값으로 시작)
   return <AnimalForm key={id ?? 'new'} k={k} editing={editing} />

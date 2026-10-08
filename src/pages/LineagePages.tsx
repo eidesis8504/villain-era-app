@@ -13,7 +13,7 @@ export function LineagePage() {
   const a = k.A(id)
 
   if (k.error) return <Screen title="혈통" back="/lineage"><ErrorBox error={k.error} /></Screen>
-  if (k.loading) return <Screen title="혈통" back="/lineage"><Spinner center /></Screen>
+  if (k.loading || (k.fetching && !a)) return <Screen title="혈통" back="/lineage"><Spinner center /></Screen>
   if (!a) return <Screen title="혈통" back="/lineage"><div className="empty">개체를 찾을 수 없어요</div></Screen>
 
   const s1 = k.A(a.sire_id)

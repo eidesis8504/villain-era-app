@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState, type ReactNode } from 'react'
 import { Outlet } from 'react-router'
 import { useViewport } from './layout'
-import { AuthProvider, useAuth } from './auth'
+import { AuthProvider, isBot, useAuth } from './auth'
 import { UIProvider } from './ui'
 
 const SPLASH_KEY = 've-splash'
@@ -46,6 +46,16 @@ function Gate({ children }: { children: ReactNode }) {
     return (
       <FullCenter>
         <div className="spinner" />
+      </FullCenter>
+    )
+  }
+  if (!session && !bootError && isBot()) {
+    return (
+      <FullCenter>
+        <div style={{ textAlign: 'center' }}>
+          <div style={{ font: '700 28px var(--sans)', letterSpacing: '.04em', color: 'var(--blue)' }}>VILLAIN ERA</div>
+          <div style={{ fontSize: 14, color: 'var(--sub)', marginTop: 6 }}>파충류 사육 관리 · 커뮤니티</div>
+        </div>
       </FullCenter>
     )
   }

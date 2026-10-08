@@ -24,6 +24,10 @@ type Auth = {
 
 const Ctx = createContext<Auth | null>(null)
 
+// 검색엔진·링크 미리보기·배포 스크린샷 봇에는 게스트 계정을 만들지 않는다
+const BOT_UA = /bot\b|crawl|spider|slurp|HeadlessChrome|Lighthouse|facebookexternalhit|kakaotalk-scrap|Yeti|Daumoa/i
+export const isBot = () => BOT_UA.test(navigator.userAgent)
+
 // StrictMode에서 두 번 실행돼도 계정이 하나만 만들어지도록 한 번만 부팅한다
 let boot: Promise<{ session: Session | null; error: string | null }> | null = null
 
@@ -31,6 +35,7 @@ function startSession() {
   boot ??= (async () => {
     const { data } = await supabase.auth.getSession()
     if (data.session) return { session: data.session, error: null }
+    if (isBot()) return { session: null, error: null }
     const { data: d2, error } = await supabase.auth.signInAnonymously()
     if (error) {
       boot = null

@@ -79,18 +79,24 @@ export type Database = {
           female_id: string
           male_id: string | null
           owner_id: string
+          gravid_on: string | null
+          lay_expected_on: string | null
         }
         Insert: {
           created_at?: string
           female_id: string
           male_id?: string | null
           owner_id?: string
+          gravid_on?: string | null
+          lay_expected_on?: string | null
         }
         Update: {
           created_at?: string
           female_id?: string
           male_id?: string | null
           owner_id?: string
+          gravid_on?: string | null
+          lay_expected_on?: string | null
         }
         Relationships: []
       }
@@ -108,6 +114,9 @@ export type Database = {
           owner_id: string
           seq: number
           sire_id: string | null
+          expected_from: string | null
+          expected_to: string | null
+          incubation_temp: number | null
         }
         Insert: {
           created_at?: string
@@ -122,6 +131,9 @@ export type Database = {
           owner_id?: string
           seq: number
           sire_id?: string | null
+          expected_from?: string | null
+          expected_to?: string | null
+          incubation_temp?: number | null
         }
         Update: {
           created_at?: string
@@ -136,6 +148,9 @@ export type Database = {
           owner_id?: string
           seq?: number
           sire_id?: string | null
+          expected_from?: string | null
+          expected_to?: string | null
+          incubation_temp?: number | null
         }
         Relationships: []
       }
@@ -955,6 +970,75 @@ export type Database = {
           owner_id?: string
           treatment?: string
           visited_on?: string
+        }
+        Relationships: []
+      }
+      matings: {
+        Row: {
+          created_at: string
+          female_id: string
+          id: string
+          locked: boolean
+          male_id: string | null
+          note: string
+          owner_id: string
+          paired_on: string
+        }
+        Insert: {
+          created_at?: string
+          female_id: string
+          id?: string
+          locked?: boolean
+          male_id?: string | null
+          note?: string
+          owner_id?: string
+          paired_on: string
+        }
+        Update: {
+          created_at?: string
+          female_id?: string
+          id?: string
+          locked?: boolean
+          male_id?: string | null
+          note?: string
+          owner_id?: string
+          paired_on?: string
+        }
+        Relationships: []
+      }
+      egg_checks: {
+        Row: {
+          checked_on: string
+          clutch_id: string
+          count: number
+          created_at: string
+          id: number
+          note: string
+          owner_id: string
+          photo_path: string | null
+          status: string
+        }
+        Insert: {
+          checked_on: string
+          clutch_id: string
+          count?: number
+          created_at?: string
+          id?: never
+          note?: string
+          owner_id?: string
+          photo_path?: string | null
+          status: string
+        }
+        Update: {
+          checked_on?: string
+          clutch_id?: string
+          count?: number
+          created_at?: string
+          id?: never
+          note?: string
+          owner_id?: string
+          photo_path?: string | null
+          status?: string
         }
         Relationships: []
       }

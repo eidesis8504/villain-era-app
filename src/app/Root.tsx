@@ -1,8 +1,9 @@
 import { useEffect, useRef, useState, type ReactNode } from 'react'
 import { Outlet } from 'react-router'
 import { useViewport } from './layout'
-import { AuthProvider, isBot, useAuth } from './auth'
+import { AuthProvider, useAuth } from './auth'
 import { UIProvider } from './ui'
+import Welcome from './Welcome'
 
 const SPLASH_KEY = 've-splash'
 
@@ -39,7 +40,7 @@ function FullCenter({ children }: { children: ReactNode }) {
   )
 }
 
-// 기기 계정 준비가 끝나야 앱 화면을 연다
+// 기기 계정이 없으면 환영 화면, 있으면 프로필 준비가 끝난 뒤 앱 화면을 연다
 function Gate({ children }: { children: ReactNode }) {
   const { ready, bootError, session, profile, profileLoading, profileError, refreshProfile, retry } = useAuth()
   if (!ready || (session && profileLoading)) {
@@ -49,16 +50,7 @@ function Gate({ children }: { children: ReactNode }) {
       </FullCenter>
     )
   }
-  if (!session && !bootError && isBot()) {
-    return (
-      <FullCenter>
-        <div style={{ textAlign: 'center' }}>
-          <div style={{ font: '700 28px var(--sans)', letterSpacing: '.04em', color: 'var(--blue)' }}>VILLAIN ERA</div>
-          <div style={{ fontSize: 14, color: 'var(--sub)', marginTop: 6 }}>파충류 사육 관리 · 커뮤니티</div>
-        </div>
-      </FullCenter>
-    )
-  }
+  if (!session && !bootError) return <Welcome />
   if (bootError || !session || profileError || !profile) {
     return (
       <FullCenter>

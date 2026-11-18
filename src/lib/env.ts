@@ -42,3 +42,7 @@ export function detectEnv(ua: string, standalone: boolean, touch = false): Env {
 export function currentEnv(): Env {
   return detectEnv(navigator.userAgent, isStandalone(), (navigator.maxTouchPoints ?? 0) > 1)
 }
+
+// 검색엔진·링크 미리보기·자동화 브라우저 (방문 집계에서 뺀다)
+const BOT_UA = /bot\b|crawl|spider|slurp|HeadlessChrome|Lighthouse|facebookexternalhit|kakaotalk-scrap|Yeti|Daumoa/i
+export const isBot = () => BOT_UA.test(navigator.userAgent) || navigator.webdriver === true

@@ -1,4 +1,5 @@
 import { useNavigate } from 'react-router'
+import { InstallHint } from '../app/InstallHint'
 import { displayName, useMe } from '../app/auth'
 import { useViewport } from '../app/layout'
 import { Screen } from '../app/Screen'
@@ -63,6 +64,20 @@ export default function HomePage() {
                   {unread}
                 </span>
               )}
+            </button>
+          </div>
+        )}
+
+        <InstallHint hasRecords={k.animals.length > 0} />
+
+        {!k.loading && k.animals.length === 0 && (
+          <div className="span-all card" data-test="first-animal" style={{ padding: 18, display: 'flex', flexDirection: 'column', gap: 10 }}>
+            <div style={{ fontSize: 17, fontWeight: 700 }}>첫 개체를 등록해 보세요</div>
+            <div className="hint" style={{ fontSize: 13 }}>
+              개체를 등록하면 체중·급여·건강 기록과 혈통·번식 관리를 시작할 수 있어요. 개체 ID와 QR 라벨도 바로 만들어져요.
+            </div>
+            <button type="button" className="btn btn-primary" onClick={() => nav('/animals/new')}>
+              + 첫 개체 등록하기
             </button>
           </div>
         )}

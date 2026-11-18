@@ -4,6 +4,7 @@ import { useNotifications } from '../data/community'
 import { useChecks, useKeeper, useTodos } from '../data/keeper'
 import { gap, today } from '../lib/date'
 import { todosOn } from '../lib/todo'
+import { trackOpen, trackView } from '../lib/track'
 import { Avatar } from '../ui/kit'
 import { displayName, useAuth } from './auth'
 import { useViewport } from './layout'
@@ -160,6 +161,20 @@ function NotificationWatcher() {
 export function AppShell() {
   const { desk } = useViewport()
   const nav = useNavigate()
+  const loc = useLocation()
+
+  // 사용 흔적: 앱 열기(하루 1번, 다시 보일 때 날짜가 바뀌었으면 또) + 기록이 남지 않는 화면 보기
+  useEffect(() => {
+    trackOpen()
+    const onVis = () => {
+      if (document.visibilityState === 'visible') trackOpen()
+    }
+    document.addEventListener('visibilitychange', onVis)
+    return () => document.removeEventListener('visibilitychange', onVis)
+  }, [])
+  useEffect(() => {
+    trackView(loc.pathname)
+  }, [loc.pathname])
 
   // 푸시 알림을 눌렀을 때 서비스워커가 보내는 이동 요청
   useEffect(() => {

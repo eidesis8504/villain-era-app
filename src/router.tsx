@@ -19,9 +19,18 @@ import { Spinner } from './ui/kit'
 
 // 카메라 QR 인식 라이브러리는 스캔 화면에서만 불러온다
 const ScanPage = lazy(() => import('./pages/ScanPage'))
+// 약관·정책·지원 페이지는 계정 없이 열린다 (앱 화면 밖 라우트)
+const PrivacyPage = lazy(() => import('./pages/legal/PrivacyPage'))
+const TermsPage = lazy(() => import('./pages/legal/TermsPage'))
+const PolicyPage = lazy(() => import('./pages/legal/PolicyPage'))
+const SupportPage = lazy(() => import('./pages/legal/SupportPage'))
 const wait = (el: ReactNode) => <Suspense fallback={<Spinner center />}>{el}</Suspense>
 
 export const router = createBrowserRouter([
+  { path: 'privacy', element: wait(<PrivacyPage />) },
+  { path: 'terms', element: wait(<TermsPage />) },
+  { path: 'policy', element: wait(<PolicyPage />) },
+  { path: 'support', element: wait(<SupportPage />) },
   {
     element: <Root />,
     children: [

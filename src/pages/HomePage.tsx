@@ -9,6 +9,7 @@ import { useChecks, useKeeper, useTodos } from '../data/keeper'
 import { dateLbl, today } from '../lib/date'
 import { todosOn } from '../lib/todo'
 import { PostCard, todoRow } from './shared'
+import { SurveyCard } from './SurveyCard'
 
 export default function HomePage() {
   const { desk, tablet } = useViewport()
@@ -81,6 +82,8 @@ export default function HomePage() {
             </button>
           </div>
         )}
+
+        <SurveyCard />
 
         {notice && (
           <div

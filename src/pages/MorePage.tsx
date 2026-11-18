@@ -9,7 +9,9 @@ import { useKeeper } from '../data/keeper'
 import { squareImage, upload } from '../lib/media'
 import { currentSubscription, disablePush, enablePush, isIOS, isStandalone, pushSupport } from '../lib/push'
 import { errMsg, publicUrl, supabase } from '../lib/supabase'
+import { APP_VERSION } from '../lib/version'
 import { Avatar, Seg, Sheet, Toggle } from '../ui/kit'
+import { FeedbackSheet } from './FeedbackSheet'
 
 function ProfileSheet({ profile, onClose }: { profile: Profile; onClose: () => void }) {
   const ui = useUI()
@@ -224,7 +226,7 @@ export default function MorePage() {
   const { isAdmin } = useAuth()
   const k = useKeeper()
   const posts = useMyPostCount().data ?? 0
-  const [sheet, setSheet] = useState<null | 'profile' | 'admin'>(null)
+  const [sheet, setSheet] = useState<null | 'profile' | 'admin' | 'feedback'>(null)
   const badge = badgeOf(profile)
 
   const update = async (patch: Partial<Pick<Profile, 'coi_limit' | 'todo_alarm'>>) => {
@@ -276,6 +278,24 @@ export default function MorePage() {
   return (
     <Screen title="전체">
       <div className="page">
+        <div
+          data-test="feedback-card"
+          className="welcome-card"
+          onClick={() => setSheet('feedback')}
+          style={{ cursor: 'pointer', flexDirection: 'row', alignItems: 'center', gap: 12 }}
+        >
+          <span className="beta" style={{ flex: 'none' }}>
+            BETA
+          </span>
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <div className="welcome-card-title" style={{ fontSize: 14 }}>
+              의견 보내기
+            </div>
+            <div style={{ fontSize: 12 }}>불편한 점·바라는 기능을 알려 주세요</div>
+          </div>
+          <span style={{ color: 'var(--blue)', fontWeight: 700 }}>›</span>
+        </div>
+
         <div data-test="profile-card" className="card card-pad" onClick={() => setSheet('profile')} style={{ display: 'flex', alignItems: 'center', gap: 14, cursor: 'pointer' }}>
           <Avatar name={displayName(profile)} url={profile.avatar_url} size={56} />
           <div style={{ flex: 1, minWidth: 0 }}>
@@ -331,7 +351,7 @@ export default function MorePage() {
         </div>
 
         <div className="mono" style={{ fontSize: 11, lineHeight: 1.6, color: 'var(--muted-2)', textAlign: 'center' }}>
-          VILLAIN ERA beta · 이 기기 게스트 계정
+          VILLAIN ERA {APP_VERSION} · 이 기기 게스트 계정
           <br />
           기록은 서버에 저장돼요 · 브라우저 데이터를 지우면 이 계정에 다시 들어올 수 없어요
           <br />
@@ -340,6 +360,7 @@ export default function MorePage() {
       </div>
       {sheet === 'profile' && <ProfileSheet profile={profile} onClose={() => setSheet(null)} />}
       {sheet === 'admin' && <AdminCodeSheet onClose={() => setSheet(null)} />}
+      {sheet === 'feedback' && <FeedbackSheet onClose={() => setSheet(null)} />}
     </Screen>
   )
 }

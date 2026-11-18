@@ -191,7 +191,7 @@ export function TransferSheet({ animal, existing, onClose }: { animal: Animal; e
   const [inc, setInc] = useState({ w: true, l: true, c: true })
   const [busy, setBusy] = useState(false)
   const [made, setMade] = useState<Transfer | null>(existing ?? null)
-  const LBL = { w: '체중 기록', l: '혈통 정보', c: '산란 기록' } as const
+  const LBL = { w: '체중·급여 기록', l: '혈통 정보', c: '산란 기록' } as const
 
   const create = async () => {
     setBusy(true)

@@ -8,6 +8,9 @@ import { useNotices, useNotifications, usePopularPosts } from '../data/community
 import { useChecks, useKeeper, useTodos } from '../data/keeper'
 import { dateLbl, today } from '../lib/date'
 import { todosOn } from '../lib/todo'
+import { REFUSE_ALERT } from '../lib/feeding'
+import { nm } from '../lib/format'
+import { feedLine } from './FeedingPages'
 import { PostCard, todoRow } from './shared'
 import { SurveyCard } from './SurveyCard'
 
@@ -31,6 +34,10 @@ export default function HomePage() {
   const measured = k.owned.filter((a) => k.lastW(a.id)?.date.startsWith(month)).length
   const eggs = k.clutches.reduce((n, c) => n + k.incub(c), 0)
   const cols = desk || tablet ? 'minmax(0,1fr) minmax(0,1fr)' : 'minmax(0,1fr)'
+  // 급여 확인 필요: 주기를 넘겼거나 연속 거부 3회 이상
+  const feedAttn = k.owned
+    .map((x) => ({ x, s: k.feedSum(x.id) }))
+    .filter(({ s }) => s.overdue || s.refuseStreak >= REFUSE_ALERT)
 
   const stat = (label: string, value: number | string, unit: string, to: string) => (
     <div className="stat" onClick={() => nav(to)}>
@@ -116,6 +123,32 @@ export default function HomePage() {
                 + 개체 등록
               </button>
             </div>
+          </div>
+        )}
+
+        {feedAttn.length > 0 && (
+          <div className="card card-pad span-all" data-test="feed-attention" style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
+              <span className="section-title">급여 확인 필요</span>
+              <button type="button" onClick={() => nav('/feedings')} style={{ fontSize: 13, fontWeight: 600, color: 'var(--blue)' }}>
+                한꺼번에 기록
+              </button>
+            </div>
+            {feedAttn.slice(0, 5).map(({ x, s }) => (
+              <div key={x.id} className="list-row" style={{ padding: '8px 0' }} onClick={() => nav(`/animals/${x.id}/feeding`)}>
+                <span style={{ flex: 1, minWidth: 0 }}>
+                  <span className="ellipsis" style={{ display: 'block', fontSize: 14, fontWeight: 600 }}>
+                    {nm(x)} <span className="mono" style={{ fontSize: 11, color: 'var(--muted-2)' }}>{x.code}</span>
+                  </span>
+                  <span style={{ display: 'block', fontSize: 12, color: 'var(--warn)' }}>
+                    {s.refuseStreak >= REFUSE_ALERT ? `연속 거부 ${s.refuseStreak}회 · ` : ''}
+                    {feedLine(s)}
+                  </span>
+                </span>
+                <span style={{ color: 'var(--muted-2)' }}>›</span>
+              </div>
+            ))}
+            {feedAttn.length > 5 && <div className="hint">외 {feedAttn.length - 5}마리</div>}
           </div>
         )}
 

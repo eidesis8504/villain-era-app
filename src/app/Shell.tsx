@@ -15,7 +15,7 @@ function navRoot(path: string) {
   if (path.startsWith('/animals') || path.startsWith('/a/')) return 'animals'
   if (path.startsWith('/scan')) return 'scan'
   if (path.startsWith('/community')) return 'community'
-  if (['/todo', '/weights', '/clutch', '/lineage'].some((p) => path.startsWith(p))) return 'home'
+  if (['/todo', '/weights', '/clutch', '/lineage', '/feedings'].some((p) => path.startsWith(p))) return 'home'
   return 'more'
 }
 
@@ -32,6 +32,10 @@ function useSideCounts() {
     return {
       owned: k.owned.length,
       incub: k.clutches.reduce((n, c) => n + k.incub(c), 0),
+      feed: k.owned.filter((a) => {
+        const f = k.feedSum(a.id)
+        return f.overdue || f.refuseStreak >= 3
+      }).length,
       stale: k.owned.filter((a) => {
         const l = k.lastW(a.id)
         return !l || gap(l.date, T) > 14
@@ -72,6 +76,7 @@ function Sidebar() {
         {item('/animals', '개체', c.owned, 'var(--muted-2)', 'nav-animals')}
         {item('/lineage', '혈통')}
         {item('/clutch', '산란', c.incub)}
+        {item('/feedings', '급여', c.feed, 'var(--warn)')}
         {item('/weights', '체중', c.stale, 'var(--warn)')}
         {item('/todo', '오늘의 할 일', c.remain)}
       </div>

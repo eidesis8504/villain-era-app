@@ -27,6 +27,8 @@ const WeightAllPage = named(() => import('./pages/WeightPages'), 'WeightAllPage'
 const TodoPage = lazy(() => import('./pages/TodoPage'))
 const TransferClaimPage = lazy(() => import('./pages/TransferClaimPage'))
 const BlockedPage = lazy(() => import('./pages/BlockedPage'))
+const FeedingListPage = named(() => import('./pages/FeedingPages'), 'FeedingListPage')
+const FeedingBulkPage = named(() => import('./pages/FeedingPages'), 'FeedingBulkPage')
 // 카메라 QR 인식 라이브러리는 스캔 화면에서만 불러온다
 const ScanPage = lazy(() => import('./pages/ScanPage'))
 // 약관·정책·지원 페이지는 계정 없이 열린다 (앱 화면 밖 라우트)
@@ -54,6 +56,8 @@ export const router = createBrowserRouter([
           { path: 'animals/:id', element: <AnimalDetailPage /> },
           { path: 'animals/:id/edit', element: <AnimalFormPage /> },
           { path: 'animals/:id/weight', element: wait(<WeightPage />) },
+          { path: 'animals/:id/feeding', element: wait(<FeedingListPage />) },
+          { path: 'feedings', element: wait(<FeedingBulkPage />) },
           { path: 'animals/:id/lineage', element: wait(<LineagePage />) },
           { path: 'animals/:id/qr', element: wait(<QrPage />) },
           { path: 'a/:code', element: wait(<AnimalByCode />) },

@@ -8,6 +8,9 @@ import { fd, fw, nm, sexLbl } from '../lib/format'
 import { spInfo, spOf } from '../lib/species'
 import { errMsg, publicUrl, supabase } from '../lib/supabase'
 import { ErrorBox, Spinner } from '../ui/kit'
+import { FEED_RESULT_LABEL, REFUSE_ALERT } from '../lib/feeding'
+import { FeedingSheet } from './FeedingSheet'
+import { feedLine } from './FeedingPages'
 import { TransferSheet, WeightSheet } from './sheets'
 
 type Ev = { k: string; date: string; kind: string; col: string; title: string; sub: string }
@@ -31,6 +34,18 @@ function feed(k: Keeper, a: Animal, sent: Transfer[]): Ev[] {
       sub: p ? `직전 ${yd(p.measured_on)} ${fw(p.grams)}` + (df! < 0 ? ' · 감소 경고' : '') : '첫 측정',
     })
   })
+  k.fs(a.id)
+    .slice(-10)
+    .forEach((x) => {
+      ev.push({
+        k: x.fed_on + '.' + String(x.id).padStart(9, '0'),
+        date: yd(x.fed_on),
+        kind: '급여',
+        col: x.result === 'refused' ? 'var(--warn)' : x.result === 'unknown' ? 'var(--muted-2)' : 'var(--blue)',
+        title: FEED_RESULT_LABEL[x.result] + (x.food ? ` · ${x.food}` : '') + (x.amount ? ` ${x.amount}` : ''),
+        sub: x.note || '급여 기록',
+      })
+    })
   k.clutches
     .filter((c) => c.dam_id === a.id || c.sire_id === a.id)
     .forEach((c) => {
@@ -112,7 +127,7 @@ export default function AnimalDetailPage() {
   const refresh = useRefresh()
   const k = useKeeper()
   const transfers = useTransfers().data ?? []
-  const [sheet, setSheet] = useState<null | 'weight' | 'transfer'>(null)
+  const [sheet, setSheet] = useState<null | 'weight' | 'transfer' | 'feeding'>(null)
   const [showCode, setShowCode] = useState<Transfer | null>(null)
   const [cancelling, setCancelling] = useState(false)
   const a = k.A(id)
@@ -122,6 +137,7 @@ export default function AnimalDetailPage() {
   if (!a) return <Screen title="개체 상세" back="/animals"><div className="empty">개체를 찾을 수 없어요</div></Screen>
 
   const l = k.lastW(a.id)
+  const fsum = k.feedSum(a.id)
   const sire = k.A(a.sire_id)
   const dam = k.A(a.dam_id)
   const cs = k.clutches.filter((c) => (a.sex === 'F' ? c.dam_id === a.id : c.sire_id === a.id))
@@ -256,7 +272,16 @@ export default function AnimalDetailPage() {
             </div>
           )}
 
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 8 }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2,1fr)', gap: 8 }}>
+            {stat(
+              '급여',
+              fsum.last ? (fsum.daysSince === 0 ? '오늘' : `${fsum.daysSince}일 전`) : '—',
+              fsum.last
+                ? FEED_RESULT_LABEL[fsum.last.result] + (fsum.refuseStreak >= 2 ? ` · 거부 ${fsum.refuseStreak}회` : '')
+                : '기록 없음',
+              fsum.refuseStreak >= REFUSE_ALERT || fsum.overdue ? 'var(--warn)' : 'var(--blue)',
+              () => nav(`/animals/${a.id}/feeding`),
+            )}
             {stat(
               '체중',
               l ? fw(l.g) : '—',
@@ -276,8 +301,11 @@ export default function AnimalDetailPage() {
             )}
           </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
-            <button type="button" className="btn btn-primary btn-sm" onClick={() => setSheet('weight')}>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 8 }}>
+            <button type="button" data-test="feed-open" className="btn btn-primary btn-sm" onClick={() => setSheet('feeding')}>
+              + 급여
+            </button>
+            <button type="button" className="btn btn-outline btn-sm" onClick={() => setSheet('weight')}>
               + 체중
             </button>
             <button
@@ -293,7 +321,7 @@ export default function AnimalDetailPage() {
         <div style={{ display: 'flex', flexDirection: 'column', gap: 8, minWidth: 0 }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', paddingTop: 6 }}>
             <span className="section-title">활동 기록</span>
-            <span style={{ fontSize: 12, color: 'var(--muted)' }}>체중 · 산란 · 분양</span>
+            <span style={{ fontSize: 12, color: 'var(--muted)' }}>{feedLine(fsum)}</span>
           </div>
           <div>
             {feed(k, a, sent).map((f, i) => (
@@ -315,6 +343,7 @@ export default function AnimalDetailPage() {
         </div>
       </div>
       {sheet === 'weight' && <WeightSheet k={k} animal={a} onClose={() => setSheet(null)} />}
+      {sheet === 'feeding' && <FeedingSheet k={k} animal={a} onClose={() => setSheet(null)} />}
       {sheet === 'transfer' && <TransferSheet animal={a} onClose={() => setSheet(null)} />}
       {showCode && <TransferSheet animal={a} existing={showCode} onClose={() => setShowCode(null)} />}
     </Screen>

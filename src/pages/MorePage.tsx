@@ -252,6 +252,7 @@ export default function MorePage() {
         row('개체 등록·관리', `${k.owned.length}마리`, () => nav('/animals')),
         row('혈통 관리', '페어링 검사', () => nav('/lineage')),
         row('산란 관리', `${k.breeders.length}마리`, () => nav('/clutch')),
+        row('급여 기록', '한꺼번에 기록', () => nav('/feedings')),
         row('체중 측정', '', () => nav('/weights')),
         row('오늘의 할 일', '', () => nav('/todo')),
       ],

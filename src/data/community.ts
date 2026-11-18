@@ -24,6 +24,19 @@ export type Notification = Tables<'notifications'>
 const AUTHOR = 'author:profiles!posts_author_id_fkey(id, nickname, role, badge, avatar_url)'
 export const CATS = ['자유', 'Q&A', '정보', '사육일지'] as const
 
+// 알림 종류 이름 (알림함·배너)
+export const KIND_LABEL: Record<string, string> = {
+  todo: '할 일',
+  weight: '체중',
+  feeding: '급여',
+  health: '건강',
+  hatch: '번식',
+  comment: '커뮤니티',
+  notice: '공지',
+  transfer: '분양',
+  system: '운영',
+}
+
 export function usePosts(cat: string) {
   const { uid } = useAuth()
   return useQuery({

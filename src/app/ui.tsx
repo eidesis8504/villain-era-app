@@ -1,5 +1,6 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
 import { useNavigate } from 'react-router'
+import { KIND_LABEL } from '../data/community'
 import { useViewport } from './layout'
 
 type Tone = 'ok' | 'warn'
@@ -57,7 +58,7 @@ export function UIProvider({ children }: { children: ReactNode }) {
           <span className="ve-mark">VE</span>
           <div style={{ flex: 1, minWidth: 0 }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 11, color: 'var(--muted)' }}>
-              <span>VILLAIN ERA · {banner.kind === 'todo' ? '할 일 알림' : '알림'}</span>
+              <span>VILLAIN ERA · {banner.kind && KIND_LABEL[banner.kind] ? `${KIND_LABEL[banner.kind]} 알림` : '알림'}</span>
               <span>지금</span>
             </div>
             <div className="ellipsis" style={{ fontSize: 14, fontWeight: 700, marginTop: 2 }}>

@@ -152,7 +152,7 @@ function NotificationWatcher() {
       return
     }
     const fresh = data.filter(
-      (n) => n.id > seen.current! && !n.read_at && ['todo', 'comment', 'notice', 'transfer'].includes(n.kind),
+      (n) => n.id > seen.current! && !n.read_at && ['todo', 'comment', 'notice', 'transfer', 'feeding', 'hatch', 'health'].includes(n.kind),
     )
     if (fresh.length) {
       const n = fresh[0]

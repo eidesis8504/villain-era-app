@@ -4,6 +4,7 @@ import { badgeOf, displayName, useAuth, useMe } from '../app/auth'
 import { Screen } from '../app/Screen'
 import { useUI } from '../app/ui'
 import { useToggleLike } from '../data/actions'
+import { ContentMenu } from './ReportSheet'
 import { badgeColor, CATS, useComments, useLiked, usePost, usePosts, type Attach, type MediaItem } from '../data/community'
 import { useKeeper, useRefresh, type Keeper } from '../data/keeper'
 import { isoDay, yd } from '../lib/date'
@@ -115,6 +116,7 @@ export function PostPage() {
   const [comment, setComment] = useState('')
   const [busy, setBusy] = useState(false)
   const [confirm, setConfirm] = useState(false)
+  const [menu, setMenu] = useState<null | { kind: 'post' | 'comment'; id: string; authorId: string; authorName: string }>(null)
 
   if (q.isLoading) return <Screen title="게시글" back="/community"><Spinner center /></Screen>
   if (q.error) return <Screen title="게시글" back="/community"><ErrorBox error={q.error} onRetry={() => q.refetch()} /></Screen>
@@ -171,7 +173,23 @@ export function PostPage() {
             </span>
           )}
           <span className="mono">· {yd(isoDay(p.created_at))}</span>
+          {!mine && (
+            <button
+              type="button"
+              aria-label="글 메뉴"
+              data-test="post-menu"
+              onClick={() => setMenu({ kind: 'post', id: p.id, authorId: p.author_id, authorName: displayName(p.author) })}
+              style={{ marginLeft: 'auto', padding: '0 4px', fontSize: 18, color: 'var(--muted)' }}
+            >
+              ⋯
+            </button>
+          )}
         </div>
+        {p.hidden && (
+          <div className="welcome-card warn" style={{ fontSize: 12 }}>
+            신고가 많아 숨겨진 글이에요 · 작성자와 운영자에게만 보여요
+          </div>
+        )}
         {p.body.trim() && <div style={{ fontSize: 15, lineHeight: 1.7, whiteSpace: 'pre-wrap', overflowWrap: 'anywhere' }}>{p.body}</div>}
 
         {p.media.length > 0 && (
@@ -259,7 +277,19 @@ export function PostPage() {
                     {cb}
                   </span>
                 )}
+                {c.hidden && <span className="tag warn">숨김</span>}
                 {c.adopted && <span style={{ marginLeft: 'auto', fontSize: 11, fontWeight: 700, color: 'var(--blue)' }}>✓ 채택된 답변</span>}
+                {c.author_id !== uid && (
+                  <button
+                    type="button"
+                    aria-label="댓글 메뉴"
+                    data-test="comment-menu"
+                    onClick={() => setMenu({ kind: 'comment', id: c.id, authorId: c.author_id, authorName: displayName(c.author) })}
+                    style={{ marginLeft: c.adopted ? 4 : 'auto', padding: '0 4px', fontSize: 16, color: 'var(--muted)' }}
+                  >
+                    ⋯
+                  </button>
+                )}
               </div>
               <div style={{ fontSize: 14, lineHeight: 1.6, whiteSpace: 'pre-wrap', overflowWrap: 'anywhere' }}>{c.body}</div>
               {mine && qa && !p.has_adopted && c.author_id !== uid && (
@@ -297,6 +327,15 @@ export function PostPage() {
           </button>
         </div>
       </div>
+      {menu && (
+        <ContentMenu
+          target={menu}
+          mine={menu.authorId === uid}
+          canDelete={false}
+          onBlocked={menu.kind === 'post' ? () => nav('/community', { replace: true }) : undefined}
+          onClose={() => setMenu(null)}
+        />
+      )}
       {confirm && (
         <Sheet title="게시물 삭제" onClose={() => setConfirm(false)}>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>

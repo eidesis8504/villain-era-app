@@ -5,6 +5,7 @@ import { AppShell } from './app/Shell'
 import AnimalDetailPage from './pages/AnimalDetailPage'
 import AnimalFormPage from './pages/AnimalFormPage'
 import AnimalsPage from './pages/AnimalsPage'
+import BlockedPage from './pages/BlockedPage'
 import { ClutchFemalePage, ClutchPage } from './pages/ClutchPages'
 import { CommunityPage, PostPage, WritePage } from './pages/CommunityPages'
 import HomePage from './pages/HomePage'
@@ -56,6 +57,7 @@ export const router = createBrowserRouter([
           { path: 'community/new', element: <WritePage /> },
           { path: 'community/:id', element: <PostPage /> },
           { path: 'more', element: <MorePage /> },
+          { path: 'blocked', element: <BlockedPage /> },
           { path: 'notices', element: <NoticesPage /> },
           { path: 'alerts', element: <AlertsPage /> },
           { path: 'transfer', element: <TransferClaimPage /> },

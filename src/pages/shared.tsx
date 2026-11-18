@@ -66,6 +66,7 @@ export function PostCard({ p, compact }: { p: Post; compact?: boolean }) {
         {p.has_adopted && <span className="tag solid">채택 완료</span>}
         {qaOpen && <span className="tag warn">답변 대기</span>}
         {p.attach && <span className="tag gray">기록 첨부</span>}
+        {p.hidden && <span className="tag warn">숨김</span>}
       </div>
       <div style={{ fontSize: 15, fontWeight: 700, lineHeight: 1.4 }}>{p.title}</div>
       {p.body && <div className="ellipsis" style={{ fontSize: 13, color: 'var(--muted)' }}>{p.body}</div>}

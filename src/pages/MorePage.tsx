@@ -277,6 +277,7 @@ export default function MorePage() {
       '계정',
       [
         row('프로필 편집', '사진 · 닉네임 · 소개', () => setSheet('profile')),
+        row('차단 관리', '', () => nav('/blocked')),
         row(isAdmin ? '운영자 권한' : '관리자 코드 입력', isAdmin ? '적용됨' : '운영자 전용', () =>
           isAdmin ? ui.toast('이미 운영자 권한이 적용된 계정이에요') : setSheet('admin'),
         ),

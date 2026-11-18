@@ -17,12 +17,22 @@ export const supabase = createClient<Database>(url, key, {
   },
 })
 
-export type Bucket = 'avatars' | 'animal-photos' | 'post-media'
+export type Bucket = 'avatars' | 'animal-photos' | 'post-media' | 'health-photos'
 
 export function publicUrl(bucket: Bucket, path: string | null | undefined) {
   if (!path) return ''
   if (/^https?:\/\//.test(path)) return path
   return `${url}/storage/v1/object/public/${bucket}/${path}`
+}
+
+// 비공개 버킷(증상 사진)은 서명된 임시 주소로만 보여 준다
+export async function signedUrls(bucket: Bucket, paths: string[], sec = 3600): Promise<Record<string, string>> {
+  if (!paths.length) return {}
+  const { data, error } = await supabase.storage.from(bucket).createSignedUrls(paths, sec)
+  if (error) throw error
+  const out: Record<string, string> = {}
+  for (const d of data ?? []) if (d.path && d.signedUrl) out[d.path] = d.signedUrl
+  return out
 }
 
 // Postgres raise exception / PostgREST 오류를 사용자에게 보여줄 한국어 문장으로

@@ -9,7 +9,11 @@ import { useKeeper } from '../data/keeper'
 import { squareImage, upload } from '../lib/media'
 import { currentSubscription, disablePush, enablePush, isIOS, isStandalone, pushSupport } from '../lib/push'
 import { errMsg, publicUrl, supabase } from '../lib/supabase'
+import { isNative } from '../lib/native'
+import { APP_VERSION } from '../lib/version'
 import { Avatar, Seg, Sheet, Toggle } from '../ui/kit'
+import { DeleteAccountSheet } from './DeleteAccountSheet'
+import { FeedbackSheet } from './FeedbackSheet'
 
 function ProfileSheet({ profile, onClose }: { profile: Profile; onClose: () => void }) {
   const ui = useUI()
@@ -224,7 +228,7 @@ export default function MorePage() {
   const { isAdmin } = useAuth()
   const k = useKeeper()
   const posts = useMyPostCount().data ?? 0
-  const [sheet, setSheet] = useState<null | 'profile' | 'admin'>(null)
+  const [sheet, setSheet] = useState<null | 'profile' | 'admin' | 'feedback' | 'delete'>(null)
   const badge = badgeOf(profile)
 
   const update = async (patch: Partial<Pick<Profile, 'coi_limit' | 'todo_alarm'>>) => {
@@ -249,6 +253,7 @@ export default function MorePage() {
         row('개체 등록·관리', `${k.owned.length}마리`, () => nav('/animals')),
         row('혈통 관리', '페어링 검사', () => nav('/lineage')),
         row('산란 관리', `${k.breeders.length}마리`, () => nav('/clutch')),
+        row('급여 기록', '한꺼번에 기록', () => nav('/feedings')),
         row('체중 측정', '', () => nav('/weights')),
         row('오늘의 할 일', '', () => nav('/todo')),
       ],
@@ -263,9 +268,21 @@ export default function MorePage() {
       ],
     ],
     [
+      '안내',
+      [
+        row('도움말·문의', '', () => nav('/support')),
+        row('개인정보 처리방침', '', () => nav('/privacy')),
+        row('이용약관', '', () => nav('/terms')),
+        row('커뮤니티 운영정책', '', () => nav('/policy')),
+      ],
+    ],
+    [
       '계정',
       [
         row('프로필 편집', '사진 · 닉네임 · 소개', () => setSheet('profile')),
+        row('차단 관리', '', () => nav('/blocked')),
+        row('계정과 기록 삭제', '되돌릴 수 없어요', () => setSheet('delete')),
+        ...(isAdmin ? [row('검증 현황', '운영자 전용', () => nav('/admin'))] : []),
         row(isAdmin ? '운영자 권한' : '관리자 코드 입력', isAdmin ? '적용됨' : '운영자 전용', () =>
           isAdmin ? ui.toast('이미 운영자 권한이 적용된 계정이에요') : setSheet('admin'),
         ),
@@ -276,6 +293,24 @@ export default function MorePage() {
   return (
     <Screen title="전체">
       <div className="page">
+        <div
+          data-test="feedback-card"
+          className="welcome-card"
+          onClick={() => setSheet('feedback')}
+          style={{ cursor: 'pointer', flexDirection: 'row', alignItems: 'center', gap: 12 }}
+        >
+          <span className="beta" style={{ flex: 'none' }}>
+            BETA
+          </span>
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <div className="welcome-card-title" style={{ fontSize: 14 }}>
+              의견 보내기
+            </div>
+            <div style={{ fontSize: 12 }}>불편한 점·바라는 기능을 알려 주세요</div>
+          </div>
+          <span style={{ color: 'var(--blue)', fontWeight: 700 }}>›</span>
+        </div>
+
         <div data-test="profile-card" className="card card-pad" onClick={() => setSheet('profile')} style={{ display: 'flex', alignItems: 'center', gap: 14, cursor: 'pointer' }}>
           <Avatar name={displayName(profile)} url={profile.avatar_url} size={56} />
           <div style={{ flex: 1, minWidth: 0 }}>
@@ -326,12 +361,19 @@ export default function MorePage() {
               </div>
               <Toggle label="할 일 알림" on={profile.todo_alarm} onClick={() => update({ todo_alarm: !profile.todo_alarm })} />
             </div>
-            <PushToggle />
+            {isNative() ? (
+              <div>
+                <div style={{ fontSize: 14, fontWeight: 600 }}>기기 알림</div>
+                <div style={{ fontSize: 12, color: 'var(--muted)' }}>스토어 앱의 기기 알림은 정식 버전에서 지원해요 · 알림함과 앱 안 배너로는 계속 알려 드려요</div>
+              </div>
+            ) : (
+              <PushToggle />
+            )}
           </div>
         </div>
 
         <div className="mono" style={{ fontSize: 11, lineHeight: 1.6, color: 'var(--muted-2)', textAlign: 'center' }}>
-          VILLAIN ERA beta · 이 기기 게스트 계정
+          VILLAIN ERA {APP_VERSION} · 이 기기 게스트 계정
           <br />
           기록은 서버에 저장돼요 · 브라우저 데이터를 지우면 이 계정에 다시 들어올 수 없어요
           <br />
@@ -340,6 +382,8 @@ export default function MorePage() {
       </div>
       {sheet === 'profile' && <ProfileSheet profile={profile} onClose={() => setSheet(null)} />}
       {sheet === 'admin' && <AdminCodeSheet onClose={() => setSheet(null)} />}
+      {sheet === 'feedback' && <FeedbackSheet onClose={() => setSheet(null)} />}
+      {sheet === 'delete' && <DeleteAccountSheet onClose={() => setSheet(null)} />}
     </Screen>
   )
 }

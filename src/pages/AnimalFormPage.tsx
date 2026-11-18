@@ -23,6 +23,7 @@ type Form = {
   status: AnimalStatus
   photo: { blob: Blob; url: string } | null
   photoPath: string | null
+  feedEvery: string
 }
 
 const LAST_SP = 've-last-species'
@@ -41,6 +42,7 @@ function initialForm(k: Keeper, editing: Animal | null): Form {
       status: editing.status as AnimalStatus,
       photo: null,
       photoPath: editing.photo_path,
+      feedEvery: editing.feed_every_days ? String(editing.feed_every_days) : '',
     }
   }
   let sp = DEFAULT_SPECIES
@@ -61,6 +63,7 @@ function initialForm(k: Keeper, editing: Animal | null): Form {
     status: 'keeping',
     photo: null,
     photoPath: null,
+    feedEvery: '',
   }
 }
 
@@ -127,7 +130,14 @@ function AnimalForm({ k, editing }: { k: Keeper; editing: Animal | null }) {
     }
   }
 
+  const feedN = f.feedEvery.trim() ? Number(f.feedEvery) : null
+  const feedBad = feedN !== null && !(Number.isInteger(feedN) && feedN >= 1 && feedN <= 60)
+
   const save = async () => {
+    if (feedBad) {
+      setTried(true)
+      return ui.toast('급여 주기는 1–60일 사이로 입력해 주세요', 'warn')
+    }
     if (!f.hatch) {
       setTried(true)
       return ui.toast('필수 항목을 확인해 주세요', 'warn')
@@ -145,6 +155,7 @@ function AnimalForm({ k, editing }: { k: Keeper; editing: Animal | null }) {
         sire_id: f.sire || null,
         dam_id: f.dam || null,
         photo_path: newPath,
+        feed_every_days: feedN,
       }
       if (editing) {
         const { error } = await supabase.from('animals').update({ ...rec, status: f.status }).eq('id', editing.id)
@@ -291,6 +302,26 @@ function AnimalForm({ k, editing }: { k: Keeper; editing: Animal | null }) {
           <div className="label">{spi.morphLbl}</div>
           <input className="input" value={f.morph} maxLength={60} onChange={(e) => set({ morph: e.target.value })} placeholder={spi.morphPh} />
           <Chips wrap small style={{ marginTop: 8 }} items={spi.morphs.map((m) => [m, m] as const)} value={f.morph} onChange={(morph) => set({ morph })} />
+        </div>
+
+        <div>
+          <div className="label">
+            급여 주기 <span style={{ fontWeight: 400, color: 'var(--muted-2)' }}>· 선택 · 일</span>
+          </div>
+          <input
+            type="number"
+            inputMode="numeric"
+            data-test="feed-every"
+            className={`input mono${tried && feedBad ? ' bad' : ''}`}
+            value={f.feedEvery}
+            min={1}
+            max={60}
+            onChange={(e) => set({ feedEvery: e.target.value })}
+            placeholder={`예: ${spi.feed.everyDays} (감수 전 기본값)`}
+          />
+          <div className="hint" style={{ marginTop: 6 }}>
+            정해 두면 주기를 넘긴 개체를 홈에서 알려 주고, 주기의 2배가 지나면 알림을 보내요. 비워 두면 알리지 않아요.
+          </div>
         </div>
 
         <div>

@@ -4,6 +4,7 @@ import { useNotifications } from '../data/community'
 import { useChecks, useKeeper, useTodos } from '../data/keeper'
 import { gap, today } from '../lib/date'
 import { todosOn } from '../lib/todo'
+import { trackOpen, trackView } from '../lib/track'
 import { Avatar } from '../ui/kit'
 import { displayName, useAuth } from './auth'
 import { useViewport } from './layout'
@@ -14,7 +15,7 @@ function navRoot(path: string) {
   if (path.startsWith('/animals') || path.startsWith('/a/')) return 'animals'
   if (path.startsWith('/scan')) return 'scan'
   if (path.startsWith('/community')) return 'community'
-  if (['/todo', '/weights', '/clutch', '/lineage'].some((p) => path.startsWith(p))) return 'home'
+  if (['/todo', '/weights', '/clutch', '/lineage', '/feedings'].some((p) => path.startsWith(p))) return 'home'
   return 'more'
 }
 
@@ -31,6 +32,10 @@ function useSideCounts() {
     return {
       owned: k.owned.length,
       incub: k.clutches.reduce((n, c) => n + k.incub(c), 0),
+      feed: k.owned.filter((a) => {
+        const f = k.feedSum(a.id)
+        return f.overdue || f.refuseStreak >= 3
+      }).length,
       stale: k.owned.filter((a) => {
         const l = k.lastW(a.id)
         return !l || gap(l.date, T) > 14
@@ -71,6 +76,7 @@ function Sidebar() {
         {item('/animals', '개체', c.owned, 'var(--muted-2)', 'nav-animals')}
         {item('/lineage', '혈통')}
         {item('/clutch', '산란', c.incub)}
+        {item('/feedings', '급여', c.feed, 'var(--warn)')}
         {item('/weights', '체중', c.stale, 'var(--warn)')}
         {item('/todo', '오늘의 할 일', c.remain)}
       </div>
@@ -84,6 +90,7 @@ function Sidebar() {
         {item('/scan', 'QR 스캔')}
         {item('/transfer', '분양 받기')}
         {item('/more', '설정')}
+        {isAdmin && item('/admin', '검증 현황')}
       </div>
       <div className="side-foot">
         <Avatar name={name} url={profile?.avatar_url} size={36} />
@@ -146,7 +153,7 @@ function NotificationWatcher() {
       return
     }
     const fresh = data.filter(
-      (n) => n.id > seen.current! && !n.read_at && ['todo', 'comment', 'notice', 'transfer'].includes(n.kind),
+      (n) => n.id > seen.current! && !n.read_at && ['todo', 'comment', 'notice', 'transfer', 'feeding', 'hatch', 'health'].includes(n.kind),
     )
     if (fresh.length) {
       const n = fresh[0]
@@ -160,6 +167,20 @@ function NotificationWatcher() {
 export function AppShell() {
   const { desk } = useViewport()
   const nav = useNavigate()
+  const loc = useLocation()
+
+  // 사용 흔적: 앱 열기(하루 1번, 다시 보일 때 날짜가 바뀌었으면 또) + 기록이 남지 않는 화면 보기
+  useEffect(() => {
+    trackOpen()
+    const onVis = () => {
+      if (document.visibilityState === 'visible') trackOpen()
+    }
+    document.addEventListener('visibilitychange', onVis)
+    return () => document.removeEventListener('visibilitychange', onVis)
+  }, [])
+  useEffect(() => {
+    trackView(loc.pathname)
+  }, [loc.pathname])
 
   // 푸시 알림을 눌렀을 때 서비스워커가 보내는 이동 요청
   useEffect(() => {

@@ -1,16 +1,20 @@
 import { useState } from 'react'
-import { useNavigate, useParams } from 'react-router'
+import { useLocation, useNavigate, useParams } from 'react-router'
 import { badgeOf, displayName, useAuth, useMe } from '../app/auth'
 import { Screen } from '../app/Screen'
 import { useUI } from '../app/ui'
 import { useToggleLike } from '../data/actions'
 import { badgeColor, CATS, useComments, useLiked, usePost, usePosts, type Attach, type MediaItem } from '../data/community'
+import { useHealthLogs, useVetVisits } from '../data/health'
 import { useKeeper, useRefresh, type Keeper } from '../data/keeper'
-import { isoDay, yd } from '../lib/date'
+import { isoDay, today, yd } from '../lib/date'
 import { fd, fw, nm } from '../lib/format'
 import { fmtDur, prepareImage, prepareVideo, removeFiles, upload, videoExt, type MediaDraft } from '../lib/media'
-import { errMsg, publicUrl, supabase } from '../lib/supabase'
+import { buildConsult } from '../lib/health'
+import { errMsg, publicUrl, signedUrls, supabase } from '../lib/supabase'
 import { Chips, ErrorBox, Seg, Sheet, Sparkline, Spinner, Toggle } from '../ui/kit'
+import { HealthCardView } from './ConsultCard'
+import { ContentMenu } from './ReportSheet'
 import { PostCard } from './shared'
 
 export function CommunityPage() {
@@ -49,6 +53,7 @@ export function CommunityPage() {
 }
 
 function AttachView({ at }: { at: Attach }) {
+  if (at.kind === 'health') return <HealthCardView data={at} photoUrls={(at.photos ?? []).map((p) => publicUrl('post-media', p))} />
   const kindLbl = { weight: '체중 기록', clutch: '산란 기록', line: '혈통 정보' }[at.kind]
   return (
     <div className="card" style={{ borderRadius: 14, padding: '12px 14px', display: 'flex', flexDirection: 'column', gap: 8 }}>
@@ -115,6 +120,7 @@ export function PostPage() {
   const [comment, setComment] = useState('')
   const [busy, setBusy] = useState(false)
   const [confirm, setConfirm] = useState(false)
+  const [menu, setMenu] = useState<null | { kind: 'post' | 'comment'; id: string; authorId: string; authorName: string }>(null)
 
   if (q.isLoading) return <Screen title="게시글" back="/community"><Spinner center /></Screen>
   if (q.error) return <Screen title="게시글" back="/community"><ErrorBox error={q.error} onRetry={() => q.refetch()} /></Screen>
@@ -171,7 +177,23 @@ export function PostPage() {
             </span>
           )}
           <span className="mono">· {yd(isoDay(p.created_at))}</span>
+          {!mine && (
+            <button
+              type="button"
+              aria-label="글 메뉴"
+              data-test="post-menu"
+              onClick={() => setMenu({ kind: 'post', id: p.id, authorId: p.author_id, authorName: displayName(p.author) })}
+              style={{ marginLeft: 'auto', padding: '0 4px', fontSize: 18, color: 'var(--muted)' }}
+            >
+              ⋯
+            </button>
+          )}
         </div>
+        {p.hidden && (
+          <div className="welcome-card warn" style={{ fontSize: 12 }}>
+            신고가 많아 숨겨진 글이에요 · 작성자와 운영자에게만 보여요
+          </div>
+        )}
         {p.body.trim() && <div style={{ fontSize: 15, lineHeight: 1.7, whiteSpace: 'pre-wrap', overflowWrap: 'anywhere' }}>{p.body}</div>}
 
         {p.media.length > 0 && (
@@ -259,7 +281,19 @@ export function PostPage() {
                     {cb}
                   </span>
                 )}
+                {c.hidden && <span className="tag warn">숨김</span>}
                 {c.adopted && <span style={{ marginLeft: 'auto', fontSize: 11, fontWeight: 700, color: 'var(--blue)' }}>✓ 채택된 답변</span>}
+                {c.author_id !== uid && (
+                  <button
+                    type="button"
+                    aria-label="댓글 메뉴"
+                    data-test="comment-menu"
+                    onClick={() => setMenu({ kind: 'comment', id: c.id, authorId: c.author_id, authorName: displayName(c.author) })}
+                    style={{ marginLeft: c.adopted ? 4 : 'auto', padding: '0 4px', fontSize: 16, color: 'var(--muted)' }}
+                  >
+                    ⋯
+                  </button>
+                )}
               </div>
               <div style={{ fontSize: 14, lineHeight: 1.6, whiteSpace: 'pre-wrap', overflowWrap: 'anywhere' }}>{c.body}</div>
               {mine && qa && !p.has_adopted && c.author_id !== uid && (
@@ -297,6 +331,15 @@ export function PostPage() {
           </button>
         </div>
       </div>
+      {menu && (
+        <ContentMenu
+          target={menu}
+          mine={menu.authorId === uid}
+          canDelete={false}
+          onBlocked={menu.kind === 'post' ? () => nav('/community', { replace: true }) : undefined}
+          onClose={() => setMenu(null)}
+        />
+      )}
       {confirm && (
         <Sheet title="게시물 삭제" onClose={() => setConfirm(false)}>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
@@ -358,20 +401,41 @@ export function WritePage() {
   const refresh = useRefresh()
   const { uid } = useMe()
   const k = useKeeper()
-  const [cat, setCat] = useState<string>('자유')
+  const loc = useLocation()
+  const init = loc.state as { attach?: 'health'; animal?: string; photos?: string[] } | null
+  const logsQ = useHealthLogs()
+  const visitsQ = useVetVisits()
+  const [cat, setCat] = useState<string>(init?.attach === 'health' ? 'Q&A' : '자유')
   const [title, setTitle] = useState('')
   const [body, setBody] = useState('')
   const [media, setMedia] = useState<MediaDraft[]>([])
   const [mBusy, setMBusy] = useState(false)
-  const [att, setAtt] = useState(false)
-  const [aid, setAid] = useState('')
-  const [attType, setAttType] = useState<'weight' | 'clutch' | 'line'>('weight')
+  const [att, setAtt] = useState(!!init?.attach)
+  const [aid, setAid] = useState(init?.animal ?? '')
+  const [attType, setAttType] = useState<'weight' | 'clutch' | 'line' | 'health'>(init?.attach === 'health' ? 'health' : 'weight')
   const [tried, setTried] = useState(false)
   const [busy, setBusy] = useState<string>('')
 
   const nImg = media.filter((m) => m.t === 'img').length
   const nVid = media.filter((m) => m.t === 'vid').length
-  const sn = att && aid ? snap(k, aid, attType) : null
+  const healthSnap = (): Attach | null => {
+    const a = k.A(aid)
+    if (!a) return null
+    return {
+      ...buildConsult({
+        label: `${nm(a)} ${a.code}`,
+        weights: k.ws(aid),
+        feeds: k.fs(aid),
+        logs: (logsQ.data ?? []).filter((x) => x.animal_id === aid),
+        visits: (visitsQ.data ?? []).filter((x) => x.animal_id === aid),
+        today: today(),
+      }),
+      photos: [],
+    }
+  }
+  const sn = att && aid ? (attType === 'health' ? healthSnap() : snap(k, aid, attType)) : null
+  // 상담 카드 화면에서 고른 증상 사진 (같은 개체일 때만)
+  const healthPhotos = attType === 'health' && init?.animal === aid ? (init?.photos ?? []) : []
   const titleErr = tried && title.trim().length < 2
   const bodyErr = tried && !body.trim() && !media.length
 
@@ -422,10 +486,24 @@ export function WritePage() {
         }
         items.push({ t: m.t, path, thumb, dur: m.dur })
       }
+      let attach = sn
+      if (sn?.kind === 'health' && healthPhotos.length) {
+        setBusy('사진 올리는 중…')
+        const signed = await signedUrls('health-photos', healthPhotos, 600)
+        const copied: string[] = []
+        for (const p of healthPhotos) {
+          if (!signed[p]) continue
+          const blob = await (await fetch(signed[p])).blob()
+          const path = await upload('post-media', uid, blob, 'jpg', folder)
+          uploaded.push(path)
+          copied.push(path)
+        }
+        attach = { ...sn, photos: copied }
+      }
       setBusy('등록 중…')
       const { data, error } = await supabase
         .from('posts')
-        .insert({ cat, title: title.trim(), body: body.trim(), attach: sn, media: items })
+        .insert({ cat, title: title.trim(), body: body.trim(), attach, media: items })
         .select('id')
         .single()
       if (error) throw error
@@ -550,12 +628,13 @@ export function WritePage() {
                   ['weight', '체중'],
                   ['clutch', '산란'],
                   ['line', '혈통'],
+                  ['health', '건강'],
                 ]}
                 value={attType}
                 onChange={setAttType}
               />
               <div style={{ fontSize: 12, fontWeight: 600, color: sn ? 'var(--blue)' : 'var(--warn)' }}>
-                {!aid ? '첨부할 개체를 선택해 주세요' : sn ? `첨부됨 · ${sn.label} ${{ weight: '체중 기록', clutch: '산란 기록', line: '혈통 정보' }[sn.kind]}` : '이 개체에는 해당 기록이 없어요'}
+                {!aid ? '첨부할 개체를 선택해 주세요' : sn ? `첨부됨 · ${sn.label} ${{ weight: '체중 기록', clutch: '산란 기록', line: '혈통 정보', health: '상담 카드' }[sn.kind]}${healthPhotos.length ? ` · 증상 사진 ${healthPhotos.length}장` : ''}` : '이 개체에는 해당 기록이 없어요'}
               </div>
             </div>
           )}

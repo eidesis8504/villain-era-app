@@ -868,3 +868,196 @@ select.input {
     font-size: 16px !important;
   }
 }
+
+/* ── 환영 화면 · 안내 카드 ─────────────────── */
+.welcome {
+  min-height: 100dvh;
+  background: var(--cream);
+  display: flex;
+  justify-content: center;
+  padding: calc(max(44px, 10vh) + var(--safe-top)) 22px calc(28px + var(--safe-bottom));
+}
+.welcome-in {
+  width: 100%;
+  max-width: 420px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+.welcome-brand {
+  font: 700 30px var(--sans);
+  letter-spacing: 0.04em;
+  color: var(--blue);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.beta {
+  font: 600 11px var(--mono);
+  letter-spacing: 0.12em;
+  color: var(--blue);
+  border: 1.5px solid var(--blue);
+  border-radius: 999px;
+  padding: 2px 8px;
+}
+.welcome-title {
+  font-size: 22px;
+  font-weight: 700;
+}
+.welcome-sub {
+  font-size: 15px;
+  color: var(--sub);
+  margin-top: 4px;
+}
+.welcome-feat {
+  list-style: none;
+  margin: 0;
+  padding: 14px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  font-size: 14px;
+}
+.welcome-feat li::before {
+  content: '·';
+  color: var(--blue);
+  font-weight: 700;
+  margin-right: 8px;
+}
+.welcome-card {
+  background: var(--blue-soft);
+  border-radius: 14px;
+  padding: 14px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--sub);
+}
+.welcome-card.warn {
+  background: var(--warn-soft);
+}
+.welcome-card-title {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--ink);
+}
+.welcome-card-how {
+  font-weight: 600;
+  color: var(--ink);
+}
+.welcome-steps {
+  margin: 4px 0 0;
+  padding-left: 20px;
+  color: var(--ink);
+}
+.welcome-fine {
+  font-size: 12px;
+  line-height: 1.7;
+  color: var(--muted);
+  text-align: center;
+}
+
+/* ── 약관·정책·지원 페이지 ─────────────────── */
+.legal-wrap {
+  min-height: 100dvh;
+  background: var(--cream);
+}
+.legal-hdr {
+  position: sticky;
+  top: 0;
+  z-index: 5;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: calc(52px + var(--safe-top));
+  padding: var(--safe-top) 12px 0;
+  background: var(--cream);
+  border-bottom: 1px solid var(--line-soft);
+}
+.legal-brand {
+  font: 700 17px var(--sans);
+  letter-spacing: 0.04em;
+  color: var(--blue);
+  text-decoration: none;
+}
+.legal {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 20px 20px calc(40px + var(--safe-bottom));
+  font-size: 14px;
+  line-height: 1.75;
+  color: var(--sub);
+}
+.legal h1 {
+  font-size: 22px;
+  color: var(--ink);
+  margin: 4px 0 8px;
+}
+.legal h2 {
+  font-size: 16px;
+  color: var(--ink);
+  margin: 26px 0 6px;
+}
+.legal h3 {
+  font-size: 14px;
+  color: var(--ink);
+  margin: 16px 0 4px;
+}
+.legal p,
+.legal ul,
+.legal ol {
+  margin: 6px 0;
+}
+.legal ul,
+.legal ol {
+  padding-left: 20px;
+}
+.legal table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+  margin: 8px 0;
+  display: block;
+  overflow-x: auto;
+}
+.legal th,
+.legal td {
+  border: 1px solid var(--line);
+  padding: 8px;
+  text-align: left;
+  vertical-align: top;
+  min-width: 90px;
+}
+.legal th {
+  background: #f3f1eb;
+  color: var(--ink);
+}
+.legal-draft {
+  font-size: 12px;
+  color: var(--warn);
+  background: var(--warn-soft);
+  border-radius: 10px;
+  padding: 8px 12px;
+}
+.legal-links {
+  margin-top: 32px;
+  font-size: 13px;
+}
+.legal-foot {
+  font-size: 12px;
+  color: var(--muted);
+}
+.legal details {
+  border-bottom: 1px solid var(--line);
+  padding: 10px 0;
+}
+.legal summary {
+  font-weight: 700;
+  color: var(--ink);
+  cursor: pointer;
+}

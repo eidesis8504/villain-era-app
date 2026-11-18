@@ -5,6 +5,7 @@ import { useKeeper, type Animal, type Weight } from '../data/keeper'
 import { gap, today, yd } from '../lib/date'
 import { fd, fw, nm } from '../lib/format'
 import { ErrorBox, Spinner } from '../ui/kit'
+import { FeedStrip } from './FeedingSheet'
 import { WeightSheet } from './sheets'
 
 export function WeightPage() {
@@ -103,6 +104,10 @@ export function WeightPage() {
               <span>{yd(w[0].measured_on)}</span>
               <span>최저 {fw(lo)}</span>
               <span>{l ? yd(l.date) : ''}</span>
+            </div>
+            <div style={{ borderTop: '1px solid var(--line-soft)', marginTop: 12, paddingTop: 10 }}>
+              <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--sub)', marginBottom: 6 }}>최근 30일 급여</div>
+              <FeedStrip list={k.fs(a.id)} />
             </div>
           </div>
         ) : (

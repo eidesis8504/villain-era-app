@@ -2,6 +2,7 @@
 import { useQuery } from '@tanstack/react-query'
 import { useAuth } from '../app/auth'
 import type { Tables } from '../lib/database.types'
+import type { HealthAttach } from '../lib/health'
 import { supabase } from '../lib/supabase'
 
 export type Author = { id: string; nickname: string | null; role: string; badge: string | null; avatar_url: string | null }
@@ -10,6 +11,7 @@ export type Attach =
   | { kind: 'weight'; label: string; last: string; diff: string; pts: number[]; count: number }
   | { kind: 'clutch'; label: string; n: number; eggs: number; fert: number; hatched: number; dead: number }
   | { kind: 'line'; label: string; sire: string; dam: string; coi: string }
+  | HealthAttach
 export type Post = Omit<Tables<'posts'>, 'media' | 'attach'> & {
   media: MediaItem[]
   attach: Attach | null
@@ -21,6 +23,19 @@ export type Notification = Tables<'notifications'>
 
 const AUTHOR = 'author:profiles!posts_author_id_fkey(id, nickname, role, badge, avatar_url)'
 export const CATS = ['자유', 'Q&A', '정보', '사육일지'] as const
+
+// 알림 종류 이름 (알림함·배너)
+export const KIND_LABEL: Record<string, string> = {
+  todo: '할 일',
+  weight: '체중',
+  feeding: '급여',
+  health: '건강',
+  hatch: '번식',
+  comment: '커뮤니티',
+  notice: '공지',
+  transfer: '분양',
+  system: '운영',
+}
 
 export function usePosts(cat: string) {
   const { uid } = useAuth()

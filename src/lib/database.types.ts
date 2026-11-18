@@ -31,6 +31,7 @@ export type Database = {
           species: string
           status: string
           updated_at: string
+          feed_every_days: number | null
         }
         Insert: {
           clutch_id?: string | null
@@ -49,6 +50,7 @@ export type Database = {
           species?: string
           status?: string
           updated_at?: string
+          feed_every_days?: number | null
         }
         Update: {
           clutch_id?: string | null
@@ -67,6 +69,7 @@ export type Database = {
           species?: string
           status?: string
           updated_at?: string
+          feed_every_days?: number | null
         }
         Relationships: []
       }
@@ -76,18 +79,24 @@ export type Database = {
           female_id: string
           male_id: string | null
           owner_id: string
+          gravid_on: string | null
+          lay_expected_on: string | null
         }
         Insert: {
           created_at?: string
           female_id: string
           male_id?: string | null
           owner_id?: string
+          gravid_on?: string | null
+          lay_expected_on?: string | null
         }
         Update: {
           created_at?: string
           female_id?: string
           male_id?: string | null
           owner_id?: string
+          gravid_on?: string | null
+          lay_expected_on?: string | null
         }
         Relationships: []
       }
@@ -105,6 +114,9 @@ export type Database = {
           owner_id: string
           seq: number
           sire_id: string | null
+          expected_from: string | null
+          expected_to: string | null
+          incubation_temp: number | null
         }
         Insert: {
           created_at?: string
@@ -119,6 +131,9 @@ export type Database = {
           owner_id?: string
           seq: number
           sire_id?: string | null
+          expected_from?: string | null
+          expected_to?: string | null
+          incubation_temp?: number | null
         }
         Update: {
           created_at?: string
@@ -133,6 +148,9 @@ export type Database = {
           owner_id?: string
           seq?: number
           sire_id?: string | null
+          expected_from?: string | null
+          expected_to?: string | null
+          incubation_temp?: number | null
         }
         Relationships: []
       }
@@ -144,6 +162,7 @@ export type Database = {
           created_at: string
           id: string
           post_id: string
+          hidden: boolean
         }
         Insert: {
           adopted?: boolean
@@ -152,6 +171,7 @@ export type Database = {
           created_at?: string
           id?: string
           post_id: string
+          hidden?: boolean
         }
         Update: {
           adopted?: boolean
@@ -160,6 +180,7 @@ export type Database = {
           created_at?: string
           id?: string
           post_id?: string
+          hidden?: boolean
         }
         Relationships: [
           {
@@ -334,6 +355,7 @@ export type Database = {
           like_count: number
           media: Json
           title: string
+          hidden: boolean
         }
         Insert: {
           attach?: Json | null
@@ -347,6 +369,7 @@ export type Database = {
           like_count?: number
           media?: Json
           title: string
+          hidden?: boolean
         }
         Update: {
           attach?: Json | null
@@ -360,6 +383,7 @@ export type Database = {
           like_count?: number
           media?: Json
           title?: string
+          hidden?: boolean
         }
         Relationships: [
           {
@@ -385,6 +409,9 @@ export type Database = {
           status: string
           todo_alarm: boolean
           tz: string
+          first_platform: string | null
+          is_test: boolean
+          source: string | null
         }
         Insert: {
           activated_at?: string | null
@@ -399,6 +426,9 @@ export type Database = {
           status?: string
           todo_alarm?: boolean
           tz?: string
+          first_platform?: string | null
+          is_test?: boolean
+          source?: string | null
         }
         Update: {
           activated_at?: string | null
@@ -413,6 +443,9 @@ export type Database = {
           status?: string
           todo_alarm?: boolean
           tz?: string
+          first_platform?: string | null
+          is_test?: boolean
+          source?: string | null
         }
         Relationships: []
       }
@@ -595,6 +628,420 @@ export type Database = {
         }
         Relationships: []
       }
+      app_config: {
+        Row: {
+          key: string
+          updated_at: string
+          value: Json
+        }
+        Insert: {
+          key: string
+          updated_at?: string
+          value: Json
+        }
+        Update: {
+          key?: string
+          updated_at?: string
+          value?: Json
+        }
+        Relationships: []
+      }
+      landing_views: {
+        Row: {
+          created_at: string
+          day: string
+          id: number
+          inapp: string | null
+          platform: string
+          src: string
+        }
+        Insert: {
+          created_at?: string
+          day?: string
+          id?: never
+          inapp?: string | null
+          platform: string
+          src?: string
+        }
+        Update: {
+          created_at?: string
+          day?: string
+          id?: never
+          inapp?: string | null
+          platform?: string
+          src?: string
+        }
+        Relationships: []
+      }
+      usage_events: {
+        Row: {
+          created_at: string
+          day: string
+          name: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          day: string
+          name: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          day?: string
+          name?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      feedback: {
+        Row: {
+          app_version: string
+          body: string
+          created_at: string
+          id: number
+          kind: string
+          path: string
+          status: string
+          ua: string
+          user_id: string
+        }
+        Insert: {
+          app_version?: string
+          body: string
+          created_at?: string
+          id?: never
+          kind: string
+          path?: string
+          status?: string
+          ua?: string
+          user_id?: string
+        }
+        Update: {
+          app_version?: string
+          body?: string
+          created_at?: string
+          id?: never
+          kind?: string
+          path?: string
+          status?: string
+          ua?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      survey_responses: {
+        Row: {
+          best_feature: string
+          created_at: string
+          nps: number
+          survey: string
+          user_id: string
+          wish: string
+        }
+        Insert: {
+          best_feature?: string
+          created_at?: string
+          nps: number
+          survey?: string
+          user_id?: string
+          wish?: string
+        }
+        Update: {
+          best_feature?: string
+          created_at?: string
+          nps?: number
+          survey?: string
+          user_id?: string
+          wish?: string
+        }
+        Relationships: []
+      }
+      client_errors: {
+        Row: {
+          app_version: string
+          created_at: string
+          id: number
+          message: string
+          path: string
+          stack: string
+          ua: string
+          user_id: string
+        }
+        Insert: {
+          app_version?: string
+          created_at?: string
+          id?: never
+          message?: string
+          path?: string
+          stack?: string
+          ua?: string
+          user_id?: string
+        }
+        Update: {
+          app_version?: string
+          created_at?: string
+          id?: never
+          message?: string
+          path?: string
+          stack?: string
+          ua?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      blocks: {
+        Row: {
+          blocked_id: string
+          blocker_id: string
+          created_at: string
+        }
+        Insert: {
+          blocked_id: string
+          blocker_id?: string
+          created_at?: string
+        }
+        Update: {
+          blocked_id?: string
+          blocker_id?: string
+          created_at?: string
+        }
+        Relationships: []
+      }
+      reports: {
+        Row: {
+          created_at: string
+          id: number
+          note: string
+          reason: string
+          reporter_id: string
+          status: string
+          target_id: string
+          target_kind: string
+          target_user: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: never
+          note?: string
+          reason: string
+          reporter_id?: string
+          status?: string
+          target_id: string
+          target_kind: string
+          target_user?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: never
+          note?: string
+          reason?: string
+          reporter_id?: string
+          status?: string
+          target_id?: string
+          target_kind?: string
+          target_user?: string | null
+        }
+        Relationships: []
+      }
+      banned_words: {
+        Row: {
+          created_at: string
+          word: string
+        }
+        Insert: {
+          created_at?: string
+          word: string
+        }
+        Update: {
+          created_at?: string
+          word?: string
+        }
+        Relationships: []
+      }
+      feedings: {
+        Row: {
+          amount: string
+          animal_id: string
+          created_at: string
+          fed_on: string
+          food: string
+          id: number
+          note: string
+          owner_id: string
+          result: string
+        }
+        Insert: {
+          amount?: string
+          animal_id: string
+          created_at?: string
+          fed_on: string
+          food?: string
+          id?: never
+          note?: string
+          owner_id?: string
+          result: string
+        }
+        Update: {
+          amount?: string
+          animal_id?: string
+          created_at?: string
+          fed_on?: string
+          food?: string
+          id?: never
+          note?: string
+          owner_id?: string
+          result?: string
+        }
+        Relationships: []
+      }
+      health_logs: {
+        Row: {
+          animal_id: string
+          area: string
+          created_at: string
+          id: number
+          level: number
+          logged_on: string
+          note: string
+          owner_id: string
+          photos: Json
+          resolved_on: string | null
+        }
+        Insert: {
+          animal_id: string
+          area: string
+          created_at?: string
+          id?: never
+          level?: number
+          logged_on: string
+          note?: string
+          owner_id?: string
+          photos?: Json
+          resolved_on?: string | null
+        }
+        Update: {
+          animal_id?: string
+          area?: string
+          created_at?: string
+          id?: never
+          level?: number
+          logged_on?: string
+          note?: string
+          owner_id?: string
+          photos?: Json
+          resolved_on?: string | null
+        }
+        Relationships: []
+      }
+      vet_visits: {
+        Row: {
+          animal_id: string
+          clinic: string
+          cost: number | null
+          created_at: string
+          diagnosis: string
+          id: number
+          next_visit: string | null
+          owner_id: string
+          treatment: string
+          visited_on: string
+        }
+        Insert: {
+          animal_id: string
+          clinic?: string
+          cost?: number | null
+          created_at?: string
+          diagnosis?: string
+          id?: never
+          next_visit?: string | null
+          owner_id?: string
+          treatment?: string
+          visited_on: string
+        }
+        Update: {
+          animal_id?: string
+          clinic?: string
+          cost?: number | null
+          created_at?: string
+          diagnosis?: string
+          id?: never
+          next_visit?: string | null
+          owner_id?: string
+          treatment?: string
+          visited_on?: string
+        }
+        Relationships: []
+      }
+      matings: {
+        Row: {
+          created_at: string
+          female_id: string
+          id: string
+          locked: boolean
+          male_id: string | null
+          note: string
+          owner_id: string
+          paired_on: string
+        }
+        Insert: {
+          created_at?: string
+          female_id: string
+          id?: string
+          locked?: boolean
+          male_id?: string | null
+          note?: string
+          owner_id?: string
+          paired_on: string
+        }
+        Update: {
+          created_at?: string
+          female_id?: string
+          id?: string
+          locked?: boolean
+          male_id?: string | null
+          note?: string
+          owner_id?: string
+          paired_on?: string
+        }
+        Relationships: []
+      }
+      egg_checks: {
+        Row: {
+          checked_on: string
+          clutch_id: string
+          count: number
+          created_at: string
+          id: number
+          note: string
+          owner_id: string
+          photo_path: string | null
+          status: string
+        }
+        Insert: {
+          checked_on: string
+          clutch_id: string
+          count?: number
+          created_at?: string
+          id?: never
+          note?: string
+          owner_id?: string
+          photo_path?: string | null
+          status: string
+        }
+        Update: {
+          checked_on?: string
+          clutch_id?: string
+          count?: number
+          created_at?: string
+          id?: never
+          note?: string
+          owner_id?: string
+          photo_path?: string | null
+          status?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
@@ -651,6 +1098,15 @@ export type Database = {
         }
         Returns: undefined
       }
+      log_landing: { Args: { p_src: string; p_platform: string; p_inapp: string | null }; Returns: undefined }
+      set_first_touch: { Args: { p_source: string; p_platform: string }; Returns: undefined }
+      track: { Args: { p_names: string[] }; Returns: undefined }
+      log_client_error: { Args: { p_message: string; p_stack: string; p_path: string; p_version: string; p_ua: string }; Returns: undefined }
+      report_content: { Args: { p_kind: string; p_id: string; p_reason: string; p_note?: string }; Returns: undefined }
+      admin_moderate: { Args: { p_report: number; p_action: string }; Returns: undefined }
+      delete_my_account: { Args: never; Returns: undefined }
+      admin_metrics: { Args: never; Returns: Json }
+      admin_set_config: { Args: { p_key: string; p_value: Json }; Returns: undefined }
     }
     Enums: {
       [_ in never]: never

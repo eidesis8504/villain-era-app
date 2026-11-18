@@ -1,13 +1,18 @@
 import { useNavigate } from 'react-router'
+import { InstallHint } from '../app/InstallHint'
 import { displayName, useMe } from '../app/auth'
 import { useViewport } from '../app/layout'
 import { Screen } from '../app/Screen'
 import { useToggleCheck } from '../data/actions'
 import { useNotices, useNotifications, usePopularPosts } from '../data/community'
 import { useChecks, useKeeper, useTodos } from '../data/keeper'
-import { dateLbl, today } from '../lib/date'
+import { dateLbl, gap, today, yd } from '../lib/date'
 import { todosOn } from '../lib/todo'
+import { REFUSE_ALERT } from '../lib/feeding'
+import { nm } from '../lib/format'
+import { feedLine } from './FeedingPages'
 import { PostCard, todoRow } from './shared'
+import { SurveyCard } from './SurveyCard'
 
 export default function HomePage() {
   const { desk, tablet } = useViewport()
@@ -28,7 +33,21 @@ export default function HomePage() {
   const month = T.slice(0, 7)
   const measured = k.owned.filter((a) => k.lastW(a.id)?.date.startsWith(month)).length
   const eggs = k.clutches.reduce((n, c) => n + k.incub(c), 0)
+  // 7일 안 부화 예정(인큐 중인 알이 남은 차수) · 산란 예정(그라비드 확인 후 아직 산란 전)
+  const soon = k.clutches.filter((c) => k.incub(c) > 0 && c.expected_from && gap(T, c.expected_from) <= 7)
+  const soonEggs = soon.reduce((n, c) => n + k.incub(c), 0)
+  const layDue = k.breeders
+    .filter((b) => {
+      if (!b.gravid_on || !b.lay_expected_on) return false
+      const laidAfter = k.clutches.some((c) => c.dam_id === b.female_id && c.laid_on >= b.gravid_on!)
+      return !laidAfter && gap(T, b.lay_expected_on) <= 7
+    })
+    .sort((x, y) => (x.lay_expected_on! < y.lay_expected_on! ? -1 : 1))
   const cols = desk || tablet ? 'minmax(0,1fr) minmax(0,1fr)' : 'minmax(0,1fr)'
+  // 급여 확인 필요: 주기를 넘겼거나 연속 거부 3회 이상
+  const feedAttn = k.owned
+    .map((x) => ({ x, s: k.feedSum(x.id) }))
+    .filter(({ s }) => s.overdue || s.refuseStreak >= REFUSE_ALERT)
 
   const stat = (label: string, value: number | string, unit: string, to: string) => (
     <div className="stat" onClick={() => nav(to)}>
@@ -67,6 +86,10 @@ export default function HomePage() {
           </div>
         )}
 
+        <InstallHint hasRecords={k.animals.length > 0} />
+
+        <SurveyCard />
+
         {notice && (
           <div
             className="span-all"
@@ -92,7 +115,7 @@ export default function HomePage() {
 
         <div className="span-all" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(150px,1fr))', gap: 10 }}>
           {stat('사육 개체', k.owned.length, ' 마리', '/animals')}
-          {stat('부화 중인 알', eggs, ' 개', '/clutch')}
+          {stat('부화 중인 알', eggs, soonEggs ? ` 개 · 7일 안 ${soonEggs}` : ' 개', '/clutch')}
           {stat('이번 달 체중 측정', measured, ` / ${k.owned.length}`, '/weights')}
           {stat('남은 할 일', rows.length - done, ` / ${rows.length}건`, '/todo')}
         </div>
@@ -110,6 +133,52 @@ export default function HomePage() {
                 + 개체 등록
               </button>
             </div>
+          </div>
+        )}
+
+        {layDue.length > 0 && (
+          <div className="card card-pad span-all" data-test="lay-due" style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+            <span className="section-title">산란 예정</span>
+            {layDue.slice(0, 5).map((b) => {
+              const f = k.A(b.female_id)
+              const d = gap(T, b.lay_expected_on!)
+              return (
+                <div key={b.female_id} className="list-row" style={{ padding: '8px 0' }} onClick={() => nav(`/clutch/${b.female_id}`)}>
+                  <span style={{ flex: 1, fontSize: 14, fontWeight: 600 }}>{nm(f)}</span>
+                  <span className="mono" style={{ fontSize: 12, color: d <= 3 ? 'var(--warn)' : 'var(--blue)' }}>
+                    {yd(b.lay_expected_on)} {d > 0 ? `D-${d}` : d === 0 ? '오늘' : `D+${-d}`}
+                  </span>
+                  <span style={{ color: 'var(--muted-2)' }}>›</span>
+                </div>
+              )
+            })}
+            <div className="hint">산란통을 미리 준비해 주세요</div>
+          </div>
+        )}
+
+        {feedAttn.length > 0 && (
+          <div className="card card-pad span-all" data-test="feed-attention" style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
+              <span className="section-title">급여 확인 필요</span>
+              <button type="button" onClick={() => nav('/feedings')} style={{ fontSize: 13, fontWeight: 600, color: 'var(--blue)' }}>
+                한꺼번에 기록
+              </button>
+            </div>
+            {feedAttn.slice(0, 5).map(({ x, s }) => (
+              <div key={x.id} className="list-row" style={{ padding: '8px 0' }} onClick={() => nav(`/animals/${x.id}/feeding`)}>
+                <span style={{ flex: 1, minWidth: 0 }}>
+                  <span className="ellipsis" style={{ display: 'block', fontSize: 14, fontWeight: 600 }}>
+                    {nm(x)} <span className="mono" style={{ fontSize: 11, color: 'var(--muted-2)' }}>{x.code}</span>
+                  </span>
+                  <span style={{ display: 'block', fontSize: 12, color: 'var(--warn)' }}>
+                    {s.overdue && !(s.refuseStreak >= REFUSE_ALERT) ? '급여 주기 지남 · ' : ''}
+                    {feedLine(s)}
+                  </span>
+                </span>
+                <span style={{ color: 'var(--muted-2)' }}>›</span>
+              </div>
+            ))}
+            {feedAttn.length > 5 && <div className="hint">외 {feedAttn.length - 5}마리</div>}
           </div>
         )}
 

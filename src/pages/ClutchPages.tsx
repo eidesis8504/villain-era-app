@@ -3,11 +3,14 @@ import { useNavigate, useParams } from 'react-router'
 import { Screen } from '../app/Screen'
 import { useUI } from '../app/ui'
 import { useKeeper, useRefresh, type Clutch, type Keeper } from '../data/keeper'
+import { useEggChecks, useMatings } from '../data/breeding'
+import { breedTimeline, EGG_STATUS_LABEL, hatchDday, incubationRange } from '../lib/breeding'
 import { gap, today, yd } from '../lib/date'
 import { nm } from '../lib/format'
 import { spInfo, spOf } from '../lib/species'
 import { errMsg, supabase } from '../lib/supabase'
 import { ErrorBox, PairCard, Sheet, Spinner, Stepper } from '../ui/kit'
+import { EggCheckSheet, GravidSheet, MatingSheet } from './BreedingSheets'
 
 function BreederSheet({ k, onClose }: { k: Keeper; onClose: () => void }) {
   const ui = useUI()
@@ -90,6 +93,8 @@ function ClutchSheet({ k, damId, onClose }: { k: Keeper; damId: string; onClose:
   const [m, setM] = useState(breeder?.male_id ?? '')
   const [eggs, setEggs] = useState(spi.eggsDef)
   const [fert, setFert] = useState(spi.eggsDef)
+  const [temp, setTemp] = useState('23.0')
+  const [range, setRange] = useState<{ from: string; to: string } | null>(null)
   const [tried, setTried] = useState(false)
   const [busy, setBusy] = useState(false)
   const n = k.clutches.filter((c) => c.dam_id === damId).reduce((x, c) => Math.max(x, c.seq), 0) + 1
@@ -97,13 +102,27 @@ function ClutchSheet({ k, damId, onClose }: { k: Keeper; damId: string; onClose:
   const pi = m ? k.lineage.pairInfo(m, damId, k.coiLimit) : null
   const bl = !!pi?.blocked
   const fut = date > today()
+  const tempN = Number(temp)
+  const tempOk = temp.trim() !== '' && tempN >= 15 && tempN <= 40
+  const auto = tempOk ? incubationRange(dam.species, tempN, date) : null
+  const exp = range ?? auto
   const err = bl ? `근친 페어링 차단 — COI ${pi!.txt}가 기준 ${k.coiLimit}%를 넘어요` : fut ? '미래 날짜는 등록할 수 없어요' : tried && !m ? '부(수컷)를 선택해 주세요' : ''
 
   const save = async () => {
     if (bl) return ui.toast(`차단: ${nm(k.A(m))} × ${nm(dam)} COI ${pi!.txt}`, 'warn')
     if (fut || !m || !date) return setTried(true)
     setBusy(true)
-    const { error } = await supabase.from('clutches').insert({ dam_id: damId, sire_id: m, seq: n, laid_on: date, eggs, fertile: fert })
+    const { error } = await supabase.from('clutches').insert({
+      dam_id: damId,
+      sire_id: m,
+      seq: n,
+      laid_on: date,
+      eggs,
+      fertile: fert,
+      incubation_temp: tempOk ? Math.round(tempN * 10) / 10 : null,
+      expected_from: exp?.from ?? null,
+      expected_to: exp && exp.to >= exp.from ? exp.to : (exp?.from ?? null),
+    })
     if (error) {
       setBusy(false)
       return ui.toast(errMsg(error, '산란을 등록하지 못했어요'), 'warn')
@@ -155,6 +174,38 @@ function ClutchSheet({ k, damId, onClose }: { k: Keeper; damId: string; onClose:
         <div style={{ fontSize: 13, color: 'var(--sub)' }}>
           무정란 <b className="mono">{eggs - fert}</b>개는 폐기로 기록돼요 · 유정란은 인큐 중으로 등록
         </div>
+        {fert > 0 && (
+          <div className="card" style={{ padding: 12, display: 'flex', flexDirection: 'column', gap: 8 }}>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 2fr', gap: 10, alignItems: 'end' }}>
+              <div>
+                <div className="label">인큐 온도 (°C)</div>
+                <input
+                  className="input mono"
+                  inputMode="decimal"
+                  data-test="incubation-temp"
+                  value={temp}
+                  onChange={(e) => (setTemp(e.target.value), setRange(null))}
+                />
+              </div>
+              <div style={{ fontSize: 13, color: 'var(--sub)', paddingBottom: 12 }}>
+                {exp ? (
+                  <>
+                    부화 예정 <b className="mono">{yd(exp.from)} ~ {yd(exp.to)}</b>
+                  </>
+                ) : (
+                  '15~40°C 사이로 입력해 주세요'
+                )}
+              </div>
+            </div>
+            {exp && (
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
+                <input type="date" className="input mono" value={exp.from} onChange={(e) => setRange({ from: e.target.value, to: exp.to })} />
+                <input type="date" className="input mono" value={exp.to} min={exp.from} onChange={(e) => setRange({ from: exp.from, to: e.target.value })} />
+              </div>
+            )}
+            <div className="hint">온도별 종 기본값으로 계산한 범위예요(감수 전 기본값) · 직접 고칠 수 있고, 7일 전과 당일에 알려 드려요</div>
+          </div>
+        )}
         {err && <div className="err">{err}</div>}
         <button type="button" className={`btn btn-primary${bl || fut ? ' off' : ''}`} onClick={save} disabled={busy}>
           {bl ? '차단됨 — 등록 불가' : `${n}차 산란 등록`}
@@ -335,7 +386,11 @@ export function ClutchFemalePage() {
   const { id = '' } = useParams()
   const nav = useNavigate()
   const k = useKeeper()
-  const [sheet, setSheet] = useState<null | { type: 'clutch' } | { type: 'hatch'; clutch: Clutch }>(null)
+  const [sheet, setSheet] = useState<
+    null | { type: 'clutch' } | { type: 'hatch'; clutch: Clutch } | { type: 'mating' } | { type: 'gravid' } | { type: 'egg'; clutch: Clutch }
+  >(null)
+  const matingsQ = useMatings()
+  const eggQ = useEggChecks()
   const f = k.A(id)
 
   if (k.error) return <Screen title="산란" back="/clutch"><ErrorBox error={k.error} /></Screen>
@@ -350,6 +405,16 @@ export function ClutchFemalePage() {
   const desc = [...k.lineage.desc(id)].map((x) => k.A(x)!).filter(Boolean)
   desc.sort((x, y) => ((x.hatch_date ?? '') < (y.hatch_date ?? '') ? 1 : -1))
   const sum = (fn: (c: Clutch) => number) => cs.reduce((n, c) => n + fn(c), 0)
+  const myMatings = (matingsQ.data ?? []).filter((x) => x.female_id === id)
+  const csIds = new Set(cs.map((c) => c.id))
+  const myEggs = (eggQ.data ?? []).filter((x) => csIds.has(x.clutch_id))
+  const timeline = breedTimeline({ matings: myMatings, breeder: b ?? null, clutches: cs, eggChecks: myEggs, hatched: (c) => k.hatched(c as Clutch) })
+  // 지금 단계: 인큐 중 알 > 산란 예정(그라비드) > 메이팅 > 대기
+  const incubating = cs.some((c) => k.incub(c) > 0)
+  const lastLay = cs[0]?.laid_on ?? ''
+  const gravidOpen = !!b?.gravid_on && b.gravid_on > lastLay
+  const stage = incubating ? 3 : gravidOpen ? 1 : myMatings.some((x) => x.paired_on > lastLay) ? 0 : cs[0] && k.hatched(cs[0]).length ? 4 : -1
+  const STEPS = ['메이팅', '그라비드', '산란', '인큐', '부화']
 
   return (
     <Screen title={`산란 · ${nm(f)}`} back="/clutch">
@@ -381,6 +446,33 @@ export function ClutchFemalePage() {
                 <div style={{ fontSize: 11, opacity: 0.85 }}>{l}</div>
               </div>
             ))}
+          </div>
+        </div>
+
+        <div className="card" style={{ padding: '12px 14px', display: 'flex', flexDirection: 'column', gap: 10 }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5,1fr)', gap: 4 }} aria-label="번식 단계">
+            {STEPS.map((t, i) => (
+              <div key={t} style={{ textAlign: 'center' }}>
+                <div style={{ height: 6, borderRadius: 3, background: i <= stage ? 'var(--blue)' : 'var(--seg)' }} />
+                <div style={{ fontSize: 11, marginTop: 4, fontWeight: i === stage ? 700 : 500, color: i === stage ? 'var(--blue)' : 'var(--muted)' }}>{t}</div>
+              </div>
+            ))}
+          </div>
+          {gravidOpen && b?.lay_expected_on && (
+            <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--warn)' }}>
+              산란 예정 {yd(b.lay_expected_on)} (D{(() => {
+                const d = gap(T, b.lay_expected_on!)
+                return d >= 0 ? '-' + d : '+' + -d
+              })()}) · 산란통을 준비해 주세요
+            </div>
+          )}
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
+            <button type="button" data-test="mating-open" className="btn btn-outline btn-sm" onClick={() => setSheet({ type: 'mating' })}>
+              메이팅 기록
+            </button>
+            <button type="button" data-test="gravid-open" className="btn btn-outline btn-sm" onClick={() => setSheet({ type: 'gravid' })} disabled={!b}>
+              그라비드 체크
+            </button>
           </div>
         </div>
 
@@ -441,14 +533,60 @@ export function ClutchFemalePage() {
                   ))}
                 </div>
               )}
+              {inc > 0 && c.expected_from && (
+                <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--blue)' }}>
+                  부화 예정 {yd(c.expected_from)}~{yd(c.expected_to ?? c.expected_from)}
+                  {(() => {
+                    const d = hatchDday(c.expected_from, T)
+                    return d === null ? '' : d > 0 ? ` (D-${d})` : d === 0 ? ' (오늘부터)' : ' (예정 범위 안)'
+                  })()}
+                  {c.incubation_temp != null && <span style={{ color: 'var(--muted)' }}> · {Number(c.incubation_temp).toFixed(1)}°C</span>}
+                </div>
+              )}
+              {(() => {
+                const last = myEggs.filter((e) => e.clutch_id === c.id).slice(-3)
+                return last.length ? (
+                  <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+                    {last.map((e) => (
+                      <span key={e.id} className={`tag${e.status === 'normal' || e.status === 'pipping' ? '' : ' warn'}`}>
+                        {yd(e.checked_on).slice(3)} {EGG_STATUS_LABEL[e.status]} {e.count}
+                      </span>
+                    ))}
+                  </div>
+                ) : null
+              })()}
               {inc > 0 && (
-                <button type="button" className="btn btn-outline btn-xs" onClick={() => setSheet({ type: 'hatch', clutch: c })}>
-                  부화 · 폐사 기록
-                </button>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
+                  <button type="button" className="btn btn-outline btn-xs" onClick={() => setSheet({ type: 'egg', clutch: c })}>
+                    알 상태 기록
+                  </button>
+                  <button type="button" className="btn btn-outline btn-xs" onClick={() => setSheet({ type: 'hatch', clutch: c })}>
+                    부화 · 폐사 기록
+                  </button>
+                </div>
               )}
             </div>
           )
         })}
+
+        {timeline.length > 0 && (
+          <>
+            <div style={{ fontSize: 15, fontWeight: 700, paddingTop: 6 }}>번식 기록</div>
+            <div className="list-card" style={{ padding: '0 16px' }}>
+              {timeline.slice(0, 12).map((e, i) => (
+                <div key={i} className="list-row" style={{ padding: '10px 0', alignItems: 'flex-start' }}>
+                  <span className="mono" style={{ fontSize: 12, color: 'var(--muted)', width: 58, flex: 'none' }}>
+                    {yd(e.date)}
+                  </span>
+                  <span style={{ flex: 1, minWidth: 0 }}>
+                    <span style={{ display: 'block', fontSize: 14, fontWeight: 600 }}>{e.title}</span>
+                    {e.sub && <span style={{ display: 'block', fontSize: 12, color: 'var(--muted)' }}>{e.sub}</span>}
+                  </span>
+                </div>
+              ))}
+            </div>
+          </>
+        )}
 
         <div style={{ fontSize: 15, fontWeight: 700, paddingTop: 6 }}>
           후손{' '}
@@ -474,6 +612,9 @@ export function ClutchFemalePage() {
       </div>
       {sheet?.type === 'clutch' && <ClutchSheet k={k} damId={id} onClose={() => setSheet(null)} />}
       {sheet?.type === 'hatch' && <HatchSheet k={k} clutch={sheet.clutch} onClose={() => setSheet(null)} />}
+      {sheet?.type === 'mating' && <MatingSheet k={k} female={f} onClose={() => setSheet(null)} />}
+      {sheet?.type === 'gravid' && b && <GravidSheet female={f} breeder={b} onClose={() => setSheet(null)} />}
+      {sheet?.type === 'egg' && <EggCheckSheet clutch={sheet.clutch} onClose={() => setSheet(null)} />}
     </Screen>
   )
 }

@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router'
 import { useAuth } from '../app/auth'
 import { Screen } from '../app/Screen'
 import { useUI } from '../app/ui'
-import { useNotices, useNotifications } from '../data/community'
+import { useNotices, useNotifications, KIND_LABEL } from '../data/community'
 import { useRefresh } from '../data/keeper'
 import { isoDay, md, yd } from '../lib/date'
 import { errMsg, supabase } from '../lib/supabase'
@@ -116,6 +116,9 @@ export function AlertsPage() {
           >
             <span style={{ width: 8, height: 8, borderRadius: 4, background: n.read_at ? '#D6D2C8' : 'var(--warn)', marginTop: 6, flex: 'none' }} />
             <div style={{ flex: 1, minWidth: 0 }}>
+              <div style={{ fontSize: 11, fontWeight: 700, color: n.kind === 'feeding' || n.kind === 'health' ? 'var(--warn)' : 'var(--blue)' }}>
+                {KIND_LABEL[n.kind] ?? '알림'}
+              </div>
               <div style={{ fontSize: 14, fontWeight: 600 }}>{n.title}</div>
               <div style={{ fontSize: 12, color: 'var(--muted)', marginTop: 2, overflowWrap: 'anywhere' }}>{n.body}</div>
             </div>

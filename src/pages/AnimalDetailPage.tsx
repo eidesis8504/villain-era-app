@@ -3,11 +3,19 @@ import { useNavigate, useParams } from 'react-router'
 import { Screen } from '../app/Screen'
 import { useUI } from '../app/ui'
 import { useKeeper, useRefresh, useTransfers, type Animal, type Keeper, type Origin, type Transfer } from '../data/keeper'
-import { isoDay, yd } from '../lib/date'
+import { gap, isoDay, today, yd } from '../lib/date'
 import { fd, fw, nm, sexLbl } from '../lib/format'
 import { spInfo, spOf } from '../lib/species'
 import { errMsg, publicUrl, supabase } from '../lib/supabase'
 import { ErrorBox, Spinner } from '../ui/kit'
+import { useMatings } from '../data/breeding'
+import { useHealthLogs, useVetVisits } from '../data/health'
+import type { Mating } from '../lib/breeding'
+import { FEED_RESULT_LABEL, REFUSE_ALERT } from '../lib/feeding'
+import { HEALTH_NOTICE, LEVEL_LABEL, type HealthLog, type VetVisit } from '../lib/health'
+import { SymptomSheet, VetSheet } from './HealthSheets'
+import { FeedingSheet } from './FeedingSheet'
+import { feedLine } from './FeedingPages'
 import { TransferSheet, WeightSheet } from './sheets'
 
 type Ev = { k: string; date: string; kind: string; col: string; title: string; sub: string }
@@ -16,8 +24,39 @@ const ITEMS = (t: Transfer) =>
   [t.include_weights && '체중 기록', t.include_lineage && '혈통 정보', t.include_clutches && '산란 기록'].filter(Boolean).join(', ') ||
   '기본 정보만'
 
-function feed(k: Keeper, a: Animal, sent: Transfer[]): Ev[] {
+function feed(k: Keeper, a: Animal, sent: Transfer[], logs: HealthLog[], visits: VetVisit[], matings: Mating[]): Ev[] {
   const ev: Ev[] = []
+  matings
+    .filter((m) => m.female_id === a.id || m.male_id === a.id)
+    .slice(-5)
+    .forEach((m) => {
+      const partner = k.A(m.female_id === a.id ? m.male_id : m.female_id)
+      ev.push({ k: m.paired_on + '.m', date: yd(m.paired_on), kind: '메이팅', col: 'var(--blue)', title: `메이팅 · ${partner ? nm(partner) : '상대 미상'}`, sub: m.locked ? '락 확인' : m.note || '메이팅 기록' })
+    })
+  const br = k.breeders.find((b) => b.female_id === a.id)
+  if (br?.gravid_on) {
+    ev.push({ k: br.gravid_on + '.g', date: yd(br.gravid_on), kind: '그라비드', col: 'var(--blue)', title: '그라비드 확인', sub: br.lay_expected_on ? `산란 예정 ${yd(br.lay_expected_on)}` : '' })
+  }
+  logs.slice(-10).forEach((x) =>
+    ev.push({
+      k: x.logged_on + '.h' + x.id,
+      date: yd(x.logged_on),
+      kind: '증상',
+      col: 'var(--warn)',
+      title: `${x.area} · ${LEVEL_LABEL[x.level]}` + (x.resolved_on ? ' (해결)' : ''),
+      sub: x.note || '증상 기록',
+    }),
+  )
+  visits.slice(-5).forEach((v) =>
+    ev.push({
+      k: v.visited_on + '.v' + v.id,
+      date: yd(v.visited_on),
+      kind: '진료',
+      col: 'var(--sub)',
+      title: `${v.clinic || '병원'}${v.diagnosis ? ' · ' + v.diagnosis : ''}`,
+      sub: v.next_visit ? `재진 ${yd(v.next_visit)}` : v.treatment || '진료 기록',
+    }),
+  )
   const w = k.ws(a.id)
   w.forEach((x, i) => {
     const p = w[i - 1]
@@ -31,6 +70,18 @@ function feed(k: Keeper, a: Animal, sent: Transfer[]): Ev[] {
       sub: p ? `직전 ${yd(p.measured_on)} ${fw(p.grams)}` + (df! < 0 ? ' · 감소 경고' : '') : '첫 측정',
     })
   })
+  k.fs(a.id)
+    .slice(-10)
+    .forEach((x) => {
+      ev.push({
+        k: x.fed_on + '.' + String(x.id).padStart(9, '0'),
+        date: yd(x.fed_on),
+        kind: '급여',
+        col: x.result === 'refused' ? 'var(--warn)' : x.result === 'unknown' ? 'var(--muted-2)' : 'var(--blue)',
+        title: FEED_RESULT_LABEL[x.result] + (x.food ? ` · ${x.food}` : '') + (x.amount ? ` ${x.amount}` : ''),
+        sub: x.note || '급여 기록',
+      })
+    })
   k.clutches
     .filter((c) => c.dam_id === a.id || c.sire_id === a.id)
     .forEach((c) => {
@@ -112,7 +163,10 @@ export default function AnimalDetailPage() {
   const refresh = useRefresh()
   const k = useKeeper()
   const transfers = useTransfers().data ?? []
-  const [sheet, setSheet] = useState<null | 'weight' | 'transfer'>(null)
+  const [sheet, setSheet] = useState<null | 'weight' | 'transfer' | 'feeding' | 'symptom' | 'vet'>(null)
+  const healthLogs = useHealthLogs().data
+  const vetVisits = useVetVisits().data
+  const matings = useMatings().data ?? []
   const [showCode, setShowCode] = useState<Transfer | null>(null)
   const [cancelling, setCancelling] = useState(false)
   const a = k.A(id)
@@ -122,6 +176,11 @@ export default function AnimalDetailPage() {
   if (!a) return <Screen title="개체 상세" back="/animals"><div className="empty">개체를 찾을 수 없어요</div></Screen>
 
   const l = k.lastW(a.id)
+  const fsum = k.feedSum(a.id)
+  const myLogs = (healthLogs ?? []).filter((x) => x.animal_id === a.id)
+  const myVisits = (vetVisits ?? []).filter((x) => x.animal_id === a.id)
+  const openLogs = myLogs.filter((x) => !x.resolved_on)
+  const nextVisit = myVisits.map((v) => v.next_visit).filter((d): d is string => !!d && d >= today()).sort()[0]
   const sire = k.A(a.sire_id)
   const dam = k.A(a.dam_id)
   const cs = k.clutches.filter((c) => (a.sex === 'F' ? c.dam_id === a.id : c.sire_id === a.id))
@@ -256,7 +315,16 @@ export default function AnimalDetailPage() {
             </div>
           )}
 
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 8 }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2,1fr)', gap: 8 }}>
+            {stat(
+              '급여',
+              fsum.last ? (fsum.daysSince === 0 ? '오늘' : `${fsum.daysSince}일 전`) : '—',
+              fsum.last
+                ? FEED_RESULT_LABEL[fsum.last.result] + (fsum.refuseStreak >= 2 ? ` · 거부 ${fsum.refuseStreak}회` : '')
+                : '기록 없음',
+              fsum.refuseStreak >= REFUSE_ALERT || fsum.overdue ? 'var(--warn)' : 'var(--blue)',
+              () => nav(`/animals/${a.id}/feeding`),
+            )}
             {stat(
               '체중',
               l ? fw(l.g) : '—',
@@ -276,8 +344,11 @@ export default function AnimalDetailPage() {
             )}
           </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
-            <button type="button" className="btn btn-primary btn-sm" onClick={() => setSheet('weight')}>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 8 }}>
+            <button type="button" data-test="feed-open" className="btn btn-primary btn-sm" onClick={() => setSheet('feeding')}>
+              + 급여
+            </button>
+            <button type="button" className="btn btn-outline btn-sm" onClick={() => setSheet('weight')}>
               + 체중
             </button>
             <button
@@ -288,15 +359,52 @@ export default function AnimalDetailPage() {
               분양 이전
             </button>
           </div>
+
+          <div className="card card-pad" data-test="health-section" style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
+              <span className="section-title">건강</span>
+              <button type="button" onClick={() => nav(`/animals/${a.id}/health`)} style={{ fontSize: 13, fontWeight: 600, color: 'var(--blue)' }}>
+                기록 보기
+              </button>
+            </div>
+            {openLogs.length > 0 ? (
+              <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+                {openLogs.slice(-3).map((x) => (
+                  <span key={x.id} className="tag warn">
+                    {x.area} · {LEVEL_LABEL[x.level]}
+                  </span>
+                ))}
+              </div>
+            ) : (
+              <div style={{ fontSize: 13, color: 'var(--muted)' }}>진행 중인 증상이 없어요</div>
+            )}
+            {nextVisit && (
+              <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--blue)' }}>
+                다음 재진 {yd(nextVisit)} (D-{gap(today(), nextVisit)})
+              </div>
+            )}
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 8 }}>
+              <button type="button" className="btn btn-outline btn-xs" onClick={() => setSheet('symptom')}>
+                + 증상
+              </button>
+              <button type="button" className="btn btn-outline btn-xs" onClick={() => setSheet('vet')}>
+                + 진료
+              </button>
+              <button type="button" className="btn btn-outline btn-xs" onClick={() => nav(`/animals/${a.id}/consult`)}>
+                상담 카드
+              </button>
+            </div>
+            <div className="hint">{HEALTH_NOTICE}</div>
+          </div>
         </div>
 
         <div style={{ display: 'flex', flexDirection: 'column', gap: 8, minWidth: 0 }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', paddingTop: 6 }}>
             <span className="section-title">활동 기록</span>
-            <span style={{ fontSize: 12, color: 'var(--muted)' }}>체중 · 산란 · 분양</span>
+            <span style={{ fontSize: 12, color: 'var(--muted)' }}>{feedLine(fsum)}</span>
           </div>
           <div>
-            {feed(k, a, sent).map((f, i) => (
+            {feed(k, a, sent, myLogs, myVisits, matings).map((f, i) => (
               <div key={i} style={{ display: 'grid', gridTemplateColumns: '62px 1fr', gap: 10, padding: '12px 0', borderTop: '1px solid var(--line)' }}>
                 <span className="mono" style={{ fontWeight: 500, fontSize: 12, color: 'var(--muted)', paddingTop: 2 }}>
                   {f.date}
@@ -315,6 +423,9 @@ export default function AnimalDetailPage() {
         </div>
       </div>
       {sheet === 'weight' && <WeightSheet k={k} animal={a} onClose={() => setSheet(null)} />}
+      {sheet === 'feeding' && <FeedingSheet k={k} animal={a} onClose={() => setSheet(null)} />}
+      {sheet === 'symptom' && <SymptomSheet animal={a} onClose={() => setSheet(null)} />}
+      {sheet === 'vet' && <VetSheet animal={a} onClose={() => setSheet(null)} />}
       {sheet === 'transfer' && <TransferSheet animal={a} onClose={() => setSheet(null)} />}
       {showCode && <TransferSheet animal={a} existing={showCode} onClose={() => setShowCode(null)} />}
     </Screen>

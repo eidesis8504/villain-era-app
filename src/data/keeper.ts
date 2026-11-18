@@ -4,6 +4,7 @@ import { useCallback, useMemo } from 'react'
 import { useAuth } from '../app/auth'
 import type { Tables } from '../lib/database.types'
 import { addD, today } from '../lib/date'
+import { feedSummary, type Feeding } from '../lib/feeding'
 import { round1 } from '../lib/format'
 import { Lineage } from '../lib/lineage'
 import { supabase } from '../lib/supabase'
@@ -60,6 +61,18 @@ export function useWeights() {
           supabase.from('weights').select('id, animal_id, measured_on, grams').order('measured_on').range(f, t),
         )
       ).map((w) => ({ ...w, grams: Number(w.grams) })),
+  })
+}
+
+export function useFeedings() {
+  const { uid } = useAuth()
+  return useQuery({
+    queryKey: ['feedings', uid],
+    enabled: !!uid,
+    queryFn: () =>
+      fetchAll((f, t) =>
+        supabase.from('feedings').select('id, animal_id, fed_on, result, food, amount, note').order('fed_on').order('id').range(f, t),
+      ) as Promise<Feeding[]>,
   })
 }
 
@@ -133,13 +146,15 @@ export function useKeeper() {
   const w = useWeights()
   const c = useClutches()
   const b = useBreeders()
+  const fd = useFeedings()
   const animals = a.data ?? EMPTY
+  const feedings = fd.data ?? EMPTY
   const weights = w.data ?? EMPTY
   const clutches = c.data ?? EMPTY
   const breeders = b.data ?? EMPTY
-  const loading = a.isLoading || w.isLoading || c.isLoading || b.isLoading
-  const fetching = a.isFetching || w.isFetching || c.isFetching || b.isFetching
-  const error = a.error || w.error || c.error || b.error
+  const loading = a.isLoading || w.isLoading || c.isLoading || b.isLoading || fd.isLoading
+  const fetching = a.isFetching || w.isFetching || c.isFetching || b.isFetching || fd.isFetching
+  const error = a.error || w.error || c.error || b.error || fd.error
 
   const derived = useMemo(() => {
     const byId = new Map(animals.map((x) => [x.id, x]))
@@ -151,6 +166,12 @@ export function useKeeper() {
       else wBy.set(r.animal_id, [r])
     }
     for (const list of wBy.values()) list.sort((x, y) => (x.measured_on < y.measured_on ? -1 : 1))
+    const fBy = new Map<string, Feeding[]>()
+    for (const r of feedings) {
+      const list = fBy.get(r.animal_id)
+      if (list) list.push(r)
+      else fBy.set(r.animal_id, [r])
+    }
     const hatchedBy = new Map<string, Animal[]>()
     for (const x of animals) {
       if (!x.clutch_id) continue
@@ -168,6 +189,9 @@ export function useKeeper() {
       const p = list[list.length - 2] ?? null
       return { date: l.measured_on, g: l.grams, diff: p ? round1(l.grams - p.grams) : null, prev: p }
     }
+    const fs = (id: string) => fBy.get(id) ?? []
+    const T = today()
+    const feedSum = (id: string) => feedSummary(fs(id), byId.get(id)?.feed_every_days ?? null, T)
     const hatched = (cl: Clutch) => hatchedBy.get(cl.id) ?? []
     const incub = (cl: Clutch) => Math.max(0, cl.fertile - hatched(cl).length - cl.dead)
     return {
@@ -176,12 +200,14 @@ export function useKeeper() {
       A,
       ws,
       lastW,
+      fs,
+      feedSum,
       hatched,
       incub,
       lineage,
       owned: animals.filter((x) => x.status === 'keeping'),
     }
-  }, [animals, weights])
+  }, [animals, weights, feedings])
 
   return {
     loading,
@@ -189,6 +215,7 @@ export function useKeeper() {
     error,
     animals,
     weights,
+    feedings,
     clutches,
     breeders,
     coiLimit: Number(profile?.coi_limit ?? 6.25),

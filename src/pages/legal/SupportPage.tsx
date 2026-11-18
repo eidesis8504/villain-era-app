@@ -1,0 +1,58 @@
+// 도움말·문의 (스토어 지원 URL, 계정 삭제 안내 URL로도 쓴다)
+import { OPERATOR } from '../../lib/operator'
+import { LegalLayout } from './LegalLayout'
+
+export default function SupportPage() {
+  const O = OPERATOR
+  return (
+    <LegalLayout title="도움말·문의">
+      <p>{O.service}를 쓰다가 궁금한 점이 있으면 아래를 먼저 확인해 주세요.</p>
+
+      <h2>자주 묻는 질문</h2>
+      <details>
+        <summary>기록이 사라졌어요</summary>
+        <p>
+          {O.service}는 가입 없이 기기·브라우저마다 게스트 계정을 만들어요. 다른 기기나 브라우저, 홈 화면 앱에서 열면 새 계정으로
+          시작하고, 브라우저 데이터를 지우면 기존 계정에 다시 들어올 수 없어요. 아이폰 사파리는 오랫동안 열지 않은 사이트의
+          저장 데이터를 지울 수 있으니, 처음부터 홈 화면에 추가해 쓰는 것을 권해요.
+        </p>
+      </details>
+      <details>
+        <summary>홈 화면에 앱처럼 추가하려면</summary>
+        <p>
+          아이폰: 사파리에서 열고 아래 공유 버튼(□↑) → ‘홈 화면에 추가’ → 홈 화면 아이콘으로 열어 시작해요.
+          <br />
+          안드로이드: 크롬에서 열고 ⋮ 메뉴 → ‘홈 화면에 추가’ 또는 ‘앱 설치’를 눌러요.
+        </p>
+      </details>
+      <details>
+        <summary>할 일 알림이 오지 않아요</summary>
+        <p>
+          전체 › 설정 › 기기 알림을 켜 주세요. 아이폰은 홈 화면에 추가한 앱에서만 알림을 켤 수 있어요(iOS 16.4 이상). 알림 권한을
+          거절했다면 기기 설정에서 다시 허용해 주세요.
+        </p>
+      </details>
+      <details>
+        <summary>분양 이전은 어떻게 하나요</summary>
+        <p>
+          개체 상세 › 분양 이전에서 함께 보낼 기록을 고르고 코드를 만들어요. 받는 사람이 전체 › 분양 받기에서 코드를 입력하거나 QR을
+          스캔하면 같은 ID로 기록이 옮겨져요.
+        </p>
+      </details>
+      <details id="delete">
+        <summary>계정과 기록을 지우려면</summary>
+        <p>
+          앱의 <b>전체 › 계정 › 계정과 기록 삭제</b>를 누르면 개체·기록·사진·글·댓글이 모두 바로 지워져요. 앱을 열 수 없다면 아래
+          이메일로 요청해 주세요. 게스트 계정은 기기 정보로만 구분돼 이메일로는 본인 확인이 어려울 수 있어요.
+        </p>
+      </details>
+
+      <h2>문의</h2>
+      <p>
+        이메일 <a href={`mailto:${O.email}`}>{O.email}</a> · 운영 {O.name}
+        <br />
+        앱 안에서는 전체 › 의견 보내기로도 알려 주실 수 있어요.
+      </p>
+    </LegalLayout>
+  )
+}

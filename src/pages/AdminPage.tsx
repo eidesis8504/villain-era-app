@@ -357,7 +357,7 @@ function ReportsTab() {
   )
   return (
     <div className="page">
-      <div className="hint">운영정책: 신고는 24시간 안에 확인해요 · 서로 다른 3명이 신고한 글·댓글은 이미 숨겨져 있어요</div>
+      <div className="hint">운영정책: 신고는 24시간 안에 확인해요 · 가입 하루가 지난 회원 3명이 신고한 글·댓글은 이미 숨겨져 있어요</div>
       {(q.data ?? []).map((r) => (
         <div key={r.id} className="card" style={{ padding: 12, display: 'flex', flexDirection: 'column', gap: 6 }}>
           <div style={{ display: 'flex', gap: 6, alignItems: 'center', fontSize: 12 }}>

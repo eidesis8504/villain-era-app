@@ -74,7 +74,7 @@ export function ContentMenu({
             onChange={(e) => setNote(e.target.value.slice(0, 300))}
             placeholder="자세한 내용 (선택)"
           />
-          <div className="hint">서로 다른 회원 3명이 신고한 글·댓글은 운영자가 확인하기 전까지 자동으로 숨겨져요.</div>
+          <div className="hint">가입한 지 하루가 지난 서로 다른 회원 3명이 신고한 글·댓글은 운영자가 확인하기 전까지 자동으로 숨겨져요.</div>
           <button
             type="button"
             data-test="report-send"

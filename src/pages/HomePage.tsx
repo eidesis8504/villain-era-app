@@ -171,7 +171,7 @@ export default function HomePage() {
                     {nm(x)} <span className="mono" style={{ fontSize: 11, color: 'var(--muted-2)' }}>{x.code}</span>
                   </span>
                   <span style={{ display: 'block', fontSize: 12, color: 'var(--warn)' }}>
-                    {s.refuseStreak >= REFUSE_ALERT ? `연속 거부 ${s.refuseStreak}회 · ` : ''}
+                    {s.overdue && !(s.refuseStreak >= REFUSE_ALERT) ? '급여 주기 지남 · ' : ''}
                     {feedLine(s)}
                   </span>
                 </span>

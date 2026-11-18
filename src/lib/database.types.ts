@@ -903,6 +903,7 @@ export type Database = {
       log_client_error: { Args: { p_message: string; p_stack: string; p_path: string; p_version: string; p_ua: string }; Returns: undefined }
       report_content: { Args: { p_kind: string; p_id: string; p_reason: string; p_note?: string }; Returns: undefined }
       admin_moderate: { Args: { p_report: number; p_action: string }; Returns: undefined }
+      delete_my_account: { Args: never; Returns: undefined }
     }
     Enums: {
       [_ in never]: never

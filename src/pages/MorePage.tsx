@@ -11,6 +11,7 @@ import { currentSubscription, disablePush, enablePush, isIOS, isStandalone, push
 import { errMsg, publicUrl, supabase } from '../lib/supabase'
 import { APP_VERSION } from '../lib/version'
 import { Avatar, Seg, Sheet, Toggle } from '../ui/kit'
+import { DeleteAccountSheet } from './DeleteAccountSheet'
 import { FeedbackSheet } from './FeedbackSheet'
 
 function ProfileSheet({ profile, onClose }: { profile: Profile; onClose: () => void }) {
@@ -226,7 +227,7 @@ export default function MorePage() {
   const { isAdmin } = useAuth()
   const k = useKeeper()
   const posts = useMyPostCount().data ?? 0
-  const [sheet, setSheet] = useState<null | 'profile' | 'admin' | 'feedback'>(null)
+  const [sheet, setSheet] = useState<null | 'profile' | 'admin' | 'feedback' | 'delete'>(null)
   const badge = badgeOf(profile)
 
   const update = async (patch: Partial<Pick<Profile, 'coi_limit' | 'todo_alarm'>>) => {
@@ -278,6 +279,7 @@ export default function MorePage() {
       [
         row('프로필 편집', '사진 · 닉네임 · 소개', () => setSheet('profile')),
         row('차단 관리', '', () => nav('/blocked')),
+        row('계정과 기록 삭제', '되돌릴 수 없어요', () => setSheet('delete')),
         row(isAdmin ? '운영자 권한' : '관리자 코드 입력', isAdmin ? '적용됨' : '운영자 전용', () =>
           isAdmin ? ui.toast('이미 운영자 권한이 적용된 계정이에요') : setSheet('admin'),
         ),
@@ -371,6 +373,7 @@ export default function MorePage() {
       {sheet === 'profile' && <ProfileSheet profile={profile} onClose={() => setSheet(null)} />}
       {sheet === 'admin' && <AdminCodeSheet onClose={() => setSheet(null)} />}
       {sheet === 'feedback' && <FeedbackSheet onClose={() => setSheet(null)} />}
+      {sheet === 'delete' && <DeleteAccountSheet onClose={() => setSheet(null)} />}
     </Screen>
   )
 }

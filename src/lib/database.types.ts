@@ -385,6 +385,9 @@ export type Database = {
           status: string
           todo_alarm: boolean
           tz: string
+          first_platform: string | null
+          is_test: boolean
+          source: string | null
         }
         Insert: {
           activated_at?: string | null
@@ -399,6 +402,9 @@ export type Database = {
           status?: string
           todo_alarm?: boolean
           tz?: string
+          first_platform?: string | null
+          is_test?: boolean
+          source?: string | null
         }
         Update: {
           activated_at?: string | null
@@ -413,6 +419,9 @@ export type Database = {
           status?: string
           todo_alarm?: boolean
           tz?: string
+          first_platform?: string | null
+          is_test?: boolean
+          source?: string | null
         }
         Relationships: []
       }
@@ -595,6 +604,168 @@ export type Database = {
         }
         Relationships: []
       }
+      app_config: {
+        Row: {
+          key: string
+          updated_at: string
+          value: Json
+        }
+        Insert: {
+          key: string
+          updated_at?: string
+          value: Json
+        }
+        Update: {
+          key?: string
+          updated_at?: string
+          value?: Json
+        }
+        Relationships: []
+      }
+      landing_views: {
+        Row: {
+          created_at: string
+          day: string
+          id: number
+          inapp: string | null
+          platform: string
+          src: string
+        }
+        Insert: {
+          created_at?: string
+          day?: string
+          id?: never
+          inapp?: string | null
+          platform: string
+          src?: string
+        }
+        Update: {
+          created_at?: string
+          day?: string
+          id?: never
+          inapp?: string | null
+          platform?: string
+          src?: string
+        }
+        Relationships: []
+      }
+      usage_events: {
+        Row: {
+          created_at: string
+          day: string
+          name: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          day: string
+          name: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          day?: string
+          name?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      feedback: {
+        Row: {
+          app_version: string
+          body: string
+          created_at: string
+          id: number
+          kind: string
+          path: string
+          status: string
+          ua: string
+          user_id: string
+        }
+        Insert: {
+          app_version?: string
+          body: string
+          created_at?: string
+          id?: never
+          kind: string
+          path?: string
+          status?: string
+          ua?: string
+          user_id?: string
+        }
+        Update: {
+          app_version?: string
+          body?: string
+          created_at?: string
+          id?: never
+          kind?: string
+          path?: string
+          status?: string
+          ua?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      survey_responses: {
+        Row: {
+          best_feature: string
+          created_at: string
+          nps: number
+          survey: string
+          user_id: string
+          wish: string
+        }
+        Insert: {
+          best_feature?: string
+          created_at?: string
+          nps: number
+          survey?: string
+          user_id?: string
+          wish?: string
+        }
+        Update: {
+          best_feature?: string
+          created_at?: string
+          nps?: number
+          survey?: string
+          user_id?: string
+          wish?: string
+        }
+        Relationships: []
+      }
+      client_errors: {
+        Row: {
+          app_version: string
+          created_at: string
+          id: number
+          message: string
+          path: string
+          stack: string
+          ua: string
+          user_id: string
+        }
+        Insert: {
+          app_version?: string
+          created_at?: string
+          id?: never
+          message?: string
+          path?: string
+          stack?: string
+          ua?: string
+          user_id?: string
+        }
+        Update: {
+          app_version?: string
+          created_at?: string
+          id?: never
+          message?: string
+          path?: string
+          stack?: string
+          ua?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
@@ -651,6 +822,10 @@ export type Database = {
         }
         Returns: undefined
       }
+      log_landing: { Args: { p_src: string; p_platform: string; p_inapp: string | null }; Returns: undefined }
+      set_first_touch: { Args: { p_source: string; p_platform: string }; Returns: undefined }
+      track: { Args: { p_names: string[] }; Returns: undefined }
+      log_client_error: { Args: { p_message: string; p_stack: string; p_path: string; p_version: string; p_ua: string }; Returns: undefined }
     }
     Enums: {
       [_ in never]: never

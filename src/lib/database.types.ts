@@ -144,6 +144,7 @@ export type Database = {
           created_at: string
           id: string
           post_id: string
+          hidden: boolean
         }
         Insert: {
           adopted?: boolean
@@ -152,6 +153,7 @@ export type Database = {
           created_at?: string
           id?: string
           post_id: string
+          hidden?: boolean
         }
         Update: {
           adopted?: boolean
@@ -160,6 +162,7 @@ export type Database = {
           created_at?: string
           id?: string
           post_id?: string
+          hidden?: boolean
         }
         Relationships: [
           {
@@ -334,6 +337,7 @@ export type Database = {
           like_count: number
           media: Json
           title: string
+          hidden: boolean
         }
         Insert: {
           attach?: Json | null
@@ -347,6 +351,7 @@ export type Database = {
           like_count?: number
           media?: Json
           title: string
+          hidden?: boolean
         }
         Update: {
           attach?: Json | null
@@ -360,6 +365,7 @@ export type Database = {
           like_count?: number
           media?: Json
           title?: string
+          hidden?: boolean
         }
         Relationships: [
           {
@@ -766,6 +772,75 @@ export type Database = {
         }
         Relationships: []
       }
+      blocks: {
+        Row: {
+          blocked_id: string
+          blocker_id: string
+          created_at: string
+        }
+        Insert: {
+          blocked_id: string
+          blocker_id?: string
+          created_at?: string
+        }
+        Update: {
+          blocked_id?: string
+          blocker_id?: string
+          created_at?: string
+        }
+        Relationships: []
+      }
+      reports: {
+        Row: {
+          created_at: string
+          id: number
+          note: string
+          reason: string
+          reporter_id: string
+          status: string
+          target_id: string
+          target_kind: string
+          target_user: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: never
+          note?: string
+          reason: string
+          reporter_id?: string
+          status?: string
+          target_id: string
+          target_kind: string
+          target_user?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: never
+          note?: string
+          reason?: string
+          reporter_id?: string
+          status?: string
+          target_id?: string
+          target_kind?: string
+          target_user?: string | null
+        }
+        Relationships: []
+      }
+      banned_words: {
+        Row: {
+          created_at: string
+          word: string
+        }
+        Insert: {
+          created_at?: string
+          word: string
+        }
+        Update: {
+          created_at?: string
+          word?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
@@ -826,6 +901,8 @@ export type Database = {
       set_first_touch: { Args: { p_source: string; p_platform: string }; Returns: undefined }
       track: { Args: { p_names: string[] }; Returns: undefined }
       log_client_error: { Args: { p_message: string; p_stack: string; p_path: string; p_version: string; p_ua: string }; Returns: undefined }
+      report_content: { Args: { p_kind: string; p_id: string; p_reason: string; p_note?: string }; Returns: undefined }
+      admin_moderate: { Args: { p_report: number; p_action: string }; Returns: undefined }
     }
     Enums: {
       [_ in never]: never

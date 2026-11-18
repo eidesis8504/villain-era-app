@@ -2,6 +2,7 @@
 import { useQuery } from '@tanstack/react-query'
 import { useAuth } from '../app/auth'
 import type { Tables } from '../lib/database.types'
+import type { HealthAttach } from '../lib/health'
 import { supabase } from '../lib/supabase'
 
 export type Author = { id: string; nickname: string | null; role: string; badge: string | null; avatar_url: string | null }
@@ -10,6 +11,7 @@ export type Attach =
   | { kind: 'weight'; label: string; last: string; diff: string; pts: number[]; count: number }
   | { kind: 'clutch'; label: string; n: number; eggs: number; fert: number; hatched: number; dead: number }
   | { kind: 'line'; label: string; sire: string; dam: string; coi: string }
+  | HealthAttach
 export type Post = Omit<Tables<'posts'>, 'media' | 'attach'> & {
   media: MediaItem[]
   attach: Attach | null

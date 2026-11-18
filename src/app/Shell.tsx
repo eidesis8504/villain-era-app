@@ -90,6 +90,7 @@ function Sidebar() {
         {item('/scan', 'QR 스캔')}
         {item('/transfer', '분양 받기')}
         {item('/more', '설정')}
+        {isAdmin && item('/admin', '검증 현황')}
       </div>
       <div className="side-foot">
         <Avatar name={name} url={profile?.avatar_url} size={36} />

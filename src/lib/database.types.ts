@@ -880,6 +880,84 @@ export type Database = {
         }
         Relationships: []
       }
+      health_logs: {
+        Row: {
+          animal_id: string
+          area: string
+          created_at: string
+          id: number
+          level: number
+          logged_on: string
+          note: string
+          owner_id: string
+          photos: Json
+          resolved_on: string | null
+        }
+        Insert: {
+          animal_id: string
+          area: string
+          created_at?: string
+          id?: never
+          level?: number
+          logged_on: string
+          note?: string
+          owner_id?: string
+          photos?: Json
+          resolved_on?: string | null
+        }
+        Update: {
+          animal_id?: string
+          area?: string
+          created_at?: string
+          id?: never
+          level?: number
+          logged_on?: string
+          note?: string
+          owner_id?: string
+          photos?: Json
+          resolved_on?: string | null
+        }
+        Relationships: []
+      }
+      vet_visits: {
+        Row: {
+          animal_id: string
+          clinic: string
+          cost: number | null
+          created_at: string
+          diagnosis: string
+          id: number
+          next_visit: string | null
+          owner_id: string
+          treatment: string
+          visited_on: string
+        }
+        Insert: {
+          animal_id: string
+          clinic?: string
+          cost?: number | null
+          created_at?: string
+          diagnosis?: string
+          id?: never
+          next_visit?: string | null
+          owner_id?: string
+          treatment?: string
+          visited_on: string
+        }
+        Update: {
+          animal_id?: string
+          clinic?: string
+          cost?: number | null
+          created_at?: string
+          diagnosis?: string
+          id?: never
+          next_visit?: string | null
+          owner_id?: string
+          treatment?: string
+          visited_on?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

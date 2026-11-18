@@ -31,6 +31,7 @@ export type Database = {
           species: string
           status: string
           updated_at: string
+          feed_every_days: number | null
         }
         Insert: {
           clutch_id?: string | null
@@ -49,6 +50,7 @@ export type Database = {
           species?: string
           status?: string
           updated_at?: string
+          feed_every_days?: number | null
         }
         Update: {
           clutch_id?: string | null
@@ -67,6 +69,7 @@ export type Database = {
           species?: string
           status?: string
           updated_at?: string
+          feed_every_days?: number | null
         }
         Relationships: []
       }
@@ -838,6 +841,42 @@ export type Database = {
         Update: {
           created_at?: string
           word?: string
+        }
+        Relationships: []
+      }
+      feedings: {
+        Row: {
+          amount: string
+          animal_id: string
+          created_at: string
+          fed_on: string
+          food: string
+          id: number
+          note: string
+          owner_id: string
+          result: string
+        }
+        Insert: {
+          amount?: string
+          animal_id: string
+          created_at?: string
+          fed_on: string
+          food?: string
+          id?: never
+          note?: string
+          owner_id?: string
+          result: string
+        }
+        Update: {
+          amount?: string
+          animal_id?: string
+          created_at?: string
+          fed_on?: string
+          food?: string
+          id?: never
+          note?: string
+          owner_id?: string
+          result?: string
         }
         Relationships: []
       }

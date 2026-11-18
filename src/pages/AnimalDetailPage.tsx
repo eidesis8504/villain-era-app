@@ -8,7 +8,9 @@ import { fd, fw, nm, sexLbl } from '../lib/format'
 import { spInfo, spOf } from '../lib/species'
 import { errMsg, publicUrl, supabase } from '../lib/supabase'
 import { ErrorBox, Spinner } from '../ui/kit'
+import { useMatings } from '../data/breeding'
 import { useHealthLogs, useVetVisits } from '../data/health'
+import type { Mating } from '../lib/breeding'
 import { FEED_RESULT_LABEL, REFUSE_ALERT } from '../lib/feeding'
 import { HEALTH_NOTICE, LEVEL_LABEL, type HealthLog, type VetVisit } from '../lib/health'
 import { SymptomSheet, VetSheet } from './HealthSheets'
@@ -22,8 +24,19 @@ const ITEMS = (t: Transfer) =>
   [t.include_weights && '체중 기록', t.include_lineage && '혈통 정보', t.include_clutches && '산란 기록'].filter(Boolean).join(', ') ||
   '기본 정보만'
 
-function feed(k: Keeper, a: Animal, sent: Transfer[], logs: HealthLog[], visits: VetVisit[]): Ev[] {
+function feed(k: Keeper, a: Animal, sent: Transfer[], logs: HealthLog[], visits: VetVisit[], matings: Mating[]): Ev[] {
   const ev: Ev[] = []
+  matings
+    .filter((m) => m.female_id === a.id || m.male_id === a.id)
+    .slice(-5)
+    .forEach((m) => {
+      const partner = k.A(m.female_id === a.id ? m.male_id : m.female_id)
+      ev.push({ k: m.paired_on + '.m', date: yd(m.paired_on), kind: '메이팅', col: 'var(--blue)', title: `메이팅 · ${partner ? nm(partner) : '상대 미상'}`, sub: m.locked ? '락 확인' : m.note || '메이팅 기록' })
+    })
+  const br = k.breeders.find((b) => b.female_id === a.id)
+  if (br?.gravid_on) {
+    ev.push({ k: br.gravid_on + '.g', date: yd(br.gravid_on), kind: '그라비드', col: 'var(--blue)', title: '그라비드 확인', sub: br.lay_expected_on ? `산란 예정 ${yd(br.lay_expected_on)}` : '' })
+  }
   logs.slice(-10).forEach((x) =>
     ev.push({
       k: x.logged_on + '.h' + x.id,
@@ -153,6 +166,7 @@ export default function AnimalDetailPage() {
   const [sheet, setSheet] = useState<null | 'weight' | 'transfer' | 'feeding' | 'symptom' | 'vet'>(null)
   const healthLogs = useHealthLogs().data
   const vetVisits = useVetVisits().data
+  const matings = useMatings().data ?? []
   const [showCode, setShowCode] = useState<Transfer | null>(null)
   const [cancelling, setCancelling] = useState(false)
   const a = k.A(id)
@@ -390,7 +404,7 @@ export default function AnimalDetailPage() {
             <span style={{ fontSize: 12, color: 'var(--muted)' }}>{feedLine(fsum)}</span>
           </div>
           <div>
-            {feed(k, a, sent, myLogs, myVisits).map((f, i) => (
+            {feed(k, a, sent, myLogs, myVisits, matings).map((f, i) => (
               <div key={i} style={{ display: 'grid', gridTemplateColumns: '62px 1fr', gap: 10, padding: '12px 0', borderTop: '1px solid var(--line)' }}>
                 <span className="mono" style={{ fontWeight: 500, fontSize: 12, color: 'var(--muted)', paddingTop: 2 }}>
                   {f.date}

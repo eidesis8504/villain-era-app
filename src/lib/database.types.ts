@@ -1105,6 +1105,8 @@ export type Database = {
       report_content: { Args: { p_kind: string; p_id: string; p_reason: string; p_note?: string }; Returns: undefined }
       admin_moderate: { Args: { p_report: number; p_action: string }; Returns: undefined }
       delete_my_account: { Args: never; Returns: undefined }
+      admin_metrics: { Args: never; Returns: Json }
+      admin_set_config: { Args: { p_key: string; p_value: Json }; Returns: undefined }
     }
     Enums: {
       [_ in never]: never

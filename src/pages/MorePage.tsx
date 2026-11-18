@@ -9,6 +9,7 @@ import { useKeeper } from '../data/keeper'
 import { squareImage, upload } from '../lib/media'
 import { currentSubscription, disablePush, enablePush, isIOS, isStandalone, pushSupport } from '../lib/push'
 import { errMsg, publicUrl, supabase } from '../lib/supabase'
+import { isNative } from '../lib/native'
 import { APP_VERSION } from '../lib/version'
 import { Avatar, Seg, Sheet, Toggle } from '../ui/kit'
 import { DeleteAccountSheet } from './DeleteAccountSheet'
@@ -360,7 +361,14 @@ export default function MorePage() {
               </div>
               <Toggle label="할 일 알림" on={profile.todo_alarm} onClick={() => update({ todo_alarm: !profile.todo_alarm })} />
             </div>
-            <PushToggle />
+            {isNative() ? (
+              <div>
+                <div style={{ fontSize: 14, fontWeight: 600 }}>기기 알림</div>
+                <div style={{ fontSize: 12, color: 'var(--muted)' }}>스토어 앱의 기기 알림은 정식 버전에서 지원해요 · 알림함과 앱 안 배너로는 계속 알려 드려요</div>
+              </div>
+            ) : (
+              <PushToggle />
+            )}
           </div>
         </div>
 

@@ -1,6 +1,7 @@
 // 하루 단위 사용 흔적 (외부 분석 도구 없이 우리 DB에만). 같은 날 같은 이름은 서버에서도 1행만 남는다.
 import { today } from './date'
 import { currentEnv, isBot } from './env'
+import { isNative } from './native'
 import { parseSource } from './source'
 import { supabase } from './supabase'
 
@@ -35,7 +36,7 @@ function send(names: string[]) {
 }
 
 export function trackOpen() {
-  send(currentEnv().standalone ? ['open', 'open_pwa'] : ['open'])
+  send(isNative() ? ['open', 'open_app'] : currentEnv().standalone ? ['open', 'open_pwa'] : ['open'])
 }
 
 export function trackView(pathname: string) {

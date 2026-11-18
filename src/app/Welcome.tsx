@@ -4,6 +4,7 @@ import { useEffect, useState, useSyncExternalStore } from 'react'
 import { Link } from 'react-router'
 import { currentEnv, type InApp } from '../lib/env'
 import { canInstall, onInstallChange, promptInstall } from '../lib/install'
+import { isNative } from '../lib/native'
 import { kakaoExternalUrl } from '../lib/source'
 import { logLandingOnce } from '../lib/track'
 import { useAuth } from './auth'
@@ -142,7 +143,7 @@ export default function Welcome() {
           {err && <div className="err" style={{ textAlign: 'center' }}>{err}</div>}
         </div>
         <div className="welcome-fine">
-          가입 없이 바로 시작해요 · 기록은 이 기기의 브라우저에 연결돼요
+          가입 없이 바로 시작해요 · 기록은 {isNative() ? '이 기기의 앱' : '이 기기의 브라우저'}에 연결돼요
           <br />
           시작하면 <Link to="/terms">이용약관</Link>과 <Link to="/privacy">개인정보 처리방침</Link>에 동의하게 돼요 · 만 14세 이상
         </div>

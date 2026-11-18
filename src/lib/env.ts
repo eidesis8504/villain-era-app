@@ -1,5 +1,6 @@
 // 접속 환경 판별: 기기 종류, 앱 안 브라우저, 홈 화면 앱 여부
 // 게스트 계정은 브라우저 저장소에 묶이므로, 기록이 끊기기 쉬운 환경(앱 안 브라우저·아이폰 사파리)을 안내하는 데 쓴다.
+import { isNative, nativePlatform } from './native'
 import { isStandalone } from './push'
 
 export type Platform = 'ios' | 'android' | 'desktop' | 'other'
@@ -40,6 +41,8 @@ export function detectEnv(ua: string, standalone: boolean, touch = false): Env {
 }
 
 export function currentEnv(): Env {
+  // 스토어 앱 안의 웹뷰는 앱 안 브라우저가 아니라 '설치한 앱'으로 본다
+  if (isNative()) return { platform: nativePlatform() === 'ios' ? 'ios' : 'android', inapp: null, standalone: true, iosSafari: false }
   return detectEnv(navigator.userAgent, isStandalone(), (navigator.maxTouchPoints ?? 0) > 1)
 }
 

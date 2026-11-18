@@ -1,6 +1,7 @@
 // QR 라벨: 개체 라벨은 앱 주소(/a/<ID>)를 담아 휴대폰 기본 카메라로도 바로 열린다.
 import qrcode from 'qrcode-generator'
 import { nm, sexLbl } from './format'
+import { appOrigin } from './native'
 
 export function qrMatrix(text: string) {
   const q = qrcode(0, 'M')
@@ -12,8 +13,8 @@ export function qrMatrix(text: string) {
   return { n, cells, q }
 }
 
-export const animalQrText = (code: string) => `${location.origin}/a/${encodeURIComponent(code)}`
-export const transferUrl = (code: string) => `${location.origin}/transfer?code=${code}`
+export const animalQrText = (code: string) => `${appOrigin()}/a/${encodeURIComponent(code)}`
+export const transferUrl = (code: string) => `${appOrigin()}/transfer?code=${code}`
 
 // 스캔한 문자열 → 개체 ID 또는 분양 코드
 export function parseScan(text: string): { kind: 'animal'; code: string } | { kind: 'transfer'; code: string } | null {

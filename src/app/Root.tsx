@@ -1,43 +1,34 @@
-import { useCallback, useEffect, useState, type ReactNode } from 'react'
+import { useCallback, useEffect, useRef, useState, type ReactNode } from 'react'
 import { Link, Outlet } from 'react-router'
-import { pickIndex, sizesOf, srcSetOf } from '../lib/splash'
+import { useViewport } from './layout'
 import { AuthProvider, useAuth } from './auth'
-import { SPLASH_ART } from './splashArt'
 import { UIProvider } from './ui'
 import Welcome from './Welcome'
 
 const SPLASH_KEY = 've-splash'
 
-// 앱을 켤 때 카드엽서 일러스트 6장 중 1장을 무작위로(각 1/6) 보여 준다.
-// 그림 전체가 화면 안에 들어가고, 남는 곳은 같은 그림을 흐리게 깔아 채운다.
-// 그림이 뜬 뒤 3초 뒤 닫힘 · 탭하면 바로 · 6초 안에 안 뜨면 닫힘 · 그림을 못 받으면 바로 닫힘
+// 앱을 켤 때 파란 화면에서 2.5초짜리 VILLAIN ERA 영상을 한 번 보여 준다.
+// 영상이 끝나면·탭하면 바로 닫힘 · 4.2초 안에 안 끝나면 닫힘 · 영상을 못 받거나 자동 재생이 막히면(아이폰 저전력 모드 등) 바로 닫힘
 function Splash({ onDone }: { onDone: () => void }) {
-  const [art] = useState(() => SPLASH_ART[pickIndex(Math.random(), SPLASH_ART.length)])
-  const [shown, setShown] = useState(false)
+  const { desk } = useViewport()
+  const ref = useRef<HTMLVideoElement>(null)
   useEffect(() => {
-    const cap = window.setTimeout(onDone, 6000)
-    return () => window.clearTimeout(cap)
-  }, [onDone])
-  useEffect(() => {
-    if (!shown) return
-    const t = window.setTimeout(onDone, 3000)
+    const t = window.setTimeout(onDone, 4200)
+    ref.current?.play().catch(onDone)
     return () => window.clearTimeout(t)
-  }, [shown, onDone])
+  }, [onDone])
   return (
-    <div className="splash" data-test="splash" data-art={art.slug} onClick={onDone}>
-      <img className="splash-bg" src={art.backdrop} alt="" aria-hidden="true" />
-      {!shown && <div className="splash-name">VILLAIN ERA</div>}
-      <img
-        className={`splash-art${shown ? ' on' : ''}`}
-        data-test="splash-art"
-        src={art.sources[0].url}
-        srcSet={srcSetOf(art.sources)}
-        sizes={sizesOf(art.ratio)}
-        alt=""
-        decoding="async"
-        fetchPriority="high"
-        onLoad={() => setShown(true)}
+    <div className="splash" data-test="splash" onClick={onDone}>
+      <div className="splash-name">VILLAIN ERA</div>
+      <video
+        ref={ref}
+        src="/splash.mp4"
+        muted
+        autoPlay
+        playsInline
+        onEnded={onDone}
         onError={onDone}
+        style={{ objectFit: desk ? 'contain' : 'cover' }}
       />
       <div className="splash-skip">탭하여 건너뛰기</div>
     </div>

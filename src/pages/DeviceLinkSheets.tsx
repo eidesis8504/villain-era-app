@@ -163,24 +163,34 @@ function CodeView() {
       <div className="hint" style={{ fontSize: 13 }}>
         새 기기에서 ‘이미 쓰던 기록이 있어요’를 누르고 이 코드를 입력하세요
       </div>
+      {/* 만드는 중·만료·표시 모두 같은 높이로 그려 아래 메뉴가 밀리지 않게 한다(누르려던 줄이 바뀌지 않도록) */}
       <div className="card card-pad" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8 }}>
-        {busy && !issued ? (
-          <Spinner />
-        ) : expired ? (
-          <div style={{ fontSize: 15, fontWeight: 700 }}>코드가 만료됐어요</div>
-        ) : issued ? (
-          <>
-            <div data-test="link-code" className="mono" style={{ fontSize: 30, fontWeight: 700, letterSpacing: '.14em' }}>
-              {formatCode(issued.code)}
-            </div>
-            <div data-test="link-remaining" className="hint">
-              {formatRemaining(left)} 남음
-            </div>
-            <button type="button" data-test="link-copy" className="btn btn-outline" onClick={copy} style={{ width: '100%' }}>
-              복사
-            </button>
-          </>
-        ) : null}
+        <div
+          data-test={issued && !expired ? 'link-code' : undefined}
+          className="mono"
+          style={{
+            fontSize: 30,
+            fontWeight: 700,
+            letterSpacing: '.14em',
+            color: issued && !expired ? undefined : 'var(--muted-2)',
+            textDecoration: expired ? 'line-through' : undefined,
+          }}
+        >
+          {issued ? formatCode(issued.code) : '····-····'}
+        </div>
+        <div data-test="link-remaining" className="hint">
+          {!issued ? (busy ? '코드를 만드는 중…' : '코드를 만들지 못했어요') : expired ? '코드가 만료됐어요' : `${formatRemaining(left)} 남음`}
+        </div>
+        <button
+          type="button"
+          data-test="link-copy"
+          className="btn btn-outline"
+          onClick={copy}
+          disabled={!issued || expired}
+          style={{ width: '100%' }}
+        >
+          복사
+        </button>
         {err && <div className="err">{err}</div>}
       </div>
       <ul style={noteStyle}>

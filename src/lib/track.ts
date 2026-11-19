@@ -39,6 +39,11 @@ export function trackOpen() {
   send(isNative() ? ['open', 'open_app'] : currentEnv().standalone ? ['open', 'open_pwa'] : ['open'])
 }
 
+// 다른 기기에서 이어 쓰기로 들어옴 (연결 코드 사용)
+export function trackDeviceLink() {
+  send(['device_link'])
+}
+
 export function trackView(pathname: string) {
   const v = viewName(pathname)
   if (v) send([v])

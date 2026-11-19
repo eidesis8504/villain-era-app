@@ -13,6 +13,7 @@ import { isNative } from '../lib/native'
 import { APP_VERSION } from '../lib/version'
 import { Avatar, Seg, Sheet, Toggle } from '../ui/kit'
 import { DeleteAccountSheet } from './DeleteAccountSheet'
+import { DeviceLinkSheet } from './DeviceLinkSheets'
 import { FeedbackSheet } from './FeedbackSheet'
 
 function ProfileSheet({ profile, onClose }: { profile: Profile; onClose: () => void }) {
@@ -151,7 +152,7 @@ function AdminCodeSheet({ onClose }: { onClose: () => void }) {
   return (
     <Sheet title="관리자 코드" onClose={onClose}>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-        <div className="hint">운영자에게 받은 코드를 입력하면 이 기기 계정에 운영자 권한(공지 작성 등)이 적용돼요.</div>
+        <div className="hint">운영자에게 받은 코드를 입력하면 이 계정에 운영자 권한(공지 작성 등)이 적용돼요.</div>
         <input
           className="input mono"
           style={{ letterSpacing: '.08em', fontWeight: 600 }}
@@ -228,7 +229,7 @@ export default function MorePage() {
   const { isAdmin } = useAuth()
   const k = useKeeper()
   const posts = useMyPostCount().data ?? 0
-  const [sheet, setSheet] = useState<null | 'profile' | 'admin' | 'feedback' | 'delete'>(null)
+  const [sheet, setSheet] = useState<null | 'profile' | 'admin' | 'feedback' | 'delete' | 'link'>(null)
   const badge = badgeOf(profile)
 
   const update = async (patch: Partial<Pick<Profile, 'coi_limit' | 'todo_alarm'>>) => {
@@ -280,6 +281,7 @@ export default function MorePage() {
       '계정',
       [
         row('프로필 편집', '사진 · 닉네임 · 소개', () => setSheet('profile')),
+        row('다른 기기에서 이어 쓰기', '코드로 연결', () => setSheet('link')),
         row('차단 관리', '', () => nav('/blocked')),
         row('계정과 기록 삭제', '되돌릴 수 없어요', () => setSheet('delete')),
         ...(isAdmin ? [row('검증 현황', '운영자 전용', () => nav('/admin'))] : []),
@@ -373,17 +375,18 @@ export default function MorePage() {
         </div>
 
         <div className="mono" style={{ fontSize: 11, lineHeight: 1.6, color: 'var(--muted-2)', textAlign: 'center' }}>
-          VILLAIN ERA {APP_VERSION} · 이 기기 게스트 계정
+          VILLAIN ERA {APP_VERSION} · 게스트 계정
           <br />
-          기록은 서버에 저장돼요 · 브라우저 데이터를 지우면 이 계정에 다시 들어올 수 없어요
+          기록은 서버에 저장돼요 · 다른 기기에서도 쓰려면 ‘다른 기기에서 이어 쓰기’
           <br />
-          로그인 기능이 추가되면 계정을 연결해 보관할 수 있어요
+          이 기기 데이터를 지우기 전에 다른 기기에 연결해 두세요
         </div>
       </div>
       {sheet === 'profile' && <ProfileSheet profile={profile} onClose={() => setSheet(null)} />}
       {sheet === 'admin' && <AdminCodeSheet onClose={() => setSheet(null)} />}
       {sheet === 'feedback' && <FeedbackSheet onClose={() => setSheet(null)} />}
       {sheet === 'delete' && <DeleteAccountSheet onClose={() => setSheet(null)} />}
+      {sheet === 'link' && <DeviceLinkSheet onClose={() => setSheet(null)} />}
     </Screen>
   )
 }

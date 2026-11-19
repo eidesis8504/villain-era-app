@@ -806,12 +806,23 @@ select.input {
   flex: none;
 }
 
+/* 스플래시: 카드엽서 일러스트 1장(무작위) — 그림 전체가 보이게 맞추고, 남는 곳은 같은 그림을 흐리게 */
 .splash {
   position: fixed;
   inset: 0;
   z-index: 60;
-  background: var(--blue);
+  background: #16161a;
   cursor: pointer;
+  overflow: hidden;
+}
+.splash-bg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  filter: blur(24px) brightness(0.7);
+  transform: scale(1.15); /* 흐림 때문에 가장자리가 비치지 않게 */
 }
 .splash-name {
   position: absolute;
@@ -822,22 +833,33 @@ select.input {
   font: 700 26px var(--sans);
   letter-spacing: 0.06em;
   color: var(--cream);
+  text-shadow: 0 2px 12px rgba(0, 0, 0, 0.45);
 }
-.splash video {
-  position: relative;
+.splash-art {
+  position: absolute;
+  left: 0;
+  top: var(--safe-top); /* 노치·홈 표시줄 영역은 피한다 */
   width: 100%;
-  height: 100%;
-  object-fit: cover;
-  display: block;
+  height: calc(100% - var(--safe-top) - var(--safe-bottom));
+  object-fit: contain;
+  opacity: 0;
+  transition: opacity 0.35s ease;
 }
+.splash-art.on {
+  opacity: 1;
+}
+/* 어떤 그림 위에서도 읽히도록 반투명 배경을 깐다 */
 .splash-skip {
   position: absolute;
-  bottom: calc(34px + var(--safe-bottom));
-  left: 0;
-  right: 0;
-  text-align: center;
+  bottom: calc(30px + var(--safe-bottom));
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 6px 12px;
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.38);
+  white-space: nowrap;
   font: 500 12px var(--mono);
-  color: rgba(250, 249, 246, 0.75);
+  color: rgba(250, 249, 246, 0.92);
 }
 
 .spinner {

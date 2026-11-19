@@ -18,7 +18,6 @@ type Auth = {
   bootError: string | null
   session: Session | null
   uid: string | null
-  isGuest: boolean
   profile: Profile | null
   profileLoading: boolean
   profileError: unknown
@@ -166,7 +165,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       bootError,
       session,
       uid,
-      isGuest: !!session?.user.is_anonymous,
       profile,
       profileLoading: !!uid && profileQ.isLoading,
       profileError: profileQ.error,

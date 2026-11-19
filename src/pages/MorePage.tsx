@@ -152,7 +152,7 @@ function AdminCodeSheet({ onClose }: { onClose: () => void }) {
   return (
     <Sheet title="관리자 코드" onClose={onClose}>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-        <div className="hint">운영자에게 받은 코드를 입력하면 이 기기 계정에 운영자 권한(공지 작성 등)이 적용돼요.</div>
+        <div className="hint">운영자에게 받은 코드를 입력하면 이 계정에 운영자 권한(공지 작성 등)이 적용돼요.</div>
         <input
           className="input mono"
           style={{ letterSpacing: '.08em', fontWeight: 600 }}
@@ -375,11 +375,11 @@ export default function MorePage() {
         </div>
 
         <div className="mono" style={{ fontSize: 11, lineHeight: 1.6, color: 'var(--muted-2)', textAlign: 'center' }}>
-          VILLAIN ERA {APP_VERSION} · 이 기기 게스트 계정
+          VILLAIN ERA {APP_VERSION} · 게스트 계정
           <br />
-          기록은 서버에 저장돼요 · 브라우저 데이터를 지우면 이 계정에 다시 들어올 수 없어요
+          기록은 서버에 저장돼요 · 다른 기기에서도 쓰려면 ‘다른 기기에서 이어 쓰기’
           <br />
-          로그인 기능이 추가되면 계정을 연결해 보관할 수 있어요
+          이 기기 데이터를 지우기 전에 다른 기기에 연결해 두세요
         </div>
       </div>
       {sheet === 'profile' && <ProfileSheet profile={profile} onClose={() => setSheet(null)} />}

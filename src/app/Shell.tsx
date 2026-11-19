@@ -47,7 +47,7 @@ function useSideCounts() {
 }
 
 function Sidebar() {
-  const { profile, isGuest, isAdmin } = useAuth()
+  const { profile, isAdmin } = useAuth()
   const c = useSideCounts()
   const nav = useNavigate()
   const loc = useLocation()
@@ -99,7 +99,7 @@ function Sidebar() {
             {name}
           </div>
           <div className="ellipsis" style={{ fontSize: 11, color: 'var(--muted)' }}>
-            {isAdmin ? '운영자' : isGuest ? '게스트 · 이 기기 계정' : '회원'}
+            {isAdmin ? '운영자' : '게스트 계정'}
           </div>
         </div>
         <button type="button" className="bell" aria-label="알림" onClick={() => nav('/alerts')}>

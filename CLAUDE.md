@@ -16,6 +16,7 @@
 
 ## 연결된 서비스
 - Supabase `villain-era-app` (ref `pmbalwxxxpgjjdwuvmjv`, 서울) — 스키마 변경은 `supabase/migrations`에 파일을 추가하고 같은 SQL을 적용한다.
+  - Edge Function: `push-dispatch`, `device-link`(다른 기기에서 이어 쓰기, `verify_jwt` 끔). **Auth 이메일 제공자는 켜 둔다**(device-link가 이메일 방식 일회용 열쇠를 씀). 보안 알림 메일은 켜지 않는다(내부 주소 `@device.villain-era.invalid`로 발송·반송됨).
 - Netlify `villain-era-app` (site id `1914de5a-0b9d-481b-89ab-f9c0ba2a965a`) — GitHub `eidesis8504/villain-era-app` 연결됨.
 
 ## 확인
@@ -25,6 +26,7 @@
 - 게스트 계정은 환영 화면의 '시작하기'를 눌러야 만들어진다(봇은 방문 집계에서도 빠짐).
   E2E 테스트는 일반 User-Agent와 `--disable-blink-features=AutomationControlled`로 실행하고, 만든 계정은 앱의 '계정과 기록 삭제'로 지운다.
   세션을 잃은 계정은 기록해 둔 ID로만 `delete from auth.users` 한다(Storage 파일은 SQL로 못 지움 — 먼저 앱/대시보드로).
+  브라우저 시험 주소에는 `?src=e2e-test`를 붙이고, 계정이 생기면 바로 `profiles.is_test = true`로 표시한다. 끝나면 기록한 ID로 정리하고 `delete from public.landing_views where src = 'e2e-test'`.
 - `src/lib/database.types.ts`는 손으로 줄인 형식이다. 새 테이블·함수는 같은 형식으로 추가한다(전체 재생성으로 덮어쓰지 않는다).
 - 마이그레이션은 추가형만: 운영 DB 하나를 미리보기·운영 화면이 함께 쓴다. 같은 DB의 `public.waguwagu_test_applications`(와구와구 랜딩)는 건드리지 않는다.
 

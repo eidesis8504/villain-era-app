@@ -1107,6 +1107,7 @@ export type Database = {
       delete_my_account: { Args: never; Returns: undefined }
       admin_metrics: { Args: never; Returns: Json }
       admin_set_config: { Args: { p_key: string; p_value: Json }; Returns: undefined }
+      my_account_is_empty: { Args: never; Returns: boolean }
     }
     Enums: {
       [_ in never]: never

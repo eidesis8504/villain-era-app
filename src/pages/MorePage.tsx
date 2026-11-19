@@ -13,6 +13,7 @@ import { isNative } from '../lib/native'
 import { APP_VERSION } from '../lib/version'
 import { Avatar, Seg, Sheet, Toggle } from '../ui/kit'
 import { DeleteAccountSheet } from './DeleteAccountSheet'
+import { DeviceLinkSheet } from './DeviceLinkSheets'
 import { FeedbackSheet } from './FeedbackSheet'
 
 function ProfileSheet({ profile, onClose }: { profile: Profile; onClose: () => void }) {
@@ -228,7 +229,7 @@ export default function MorePage() {
   const { isAdmin } = useAuth()
   const k = useKeeper()
   const posts = useMyPostCount().data ?? 0
-  const [sheet, setSheet] = useState<null | 'profile' | 'admin' | 'feedback' | 'delete'>(null)
+  const [sheet, setSheet] = useState<null | 'profile' | 'admin' | 'feedback' | 'delete' | 'link'>(null)
   const badge = badgeOf(profile)
 
   const update = async (patch: Partial<Pick<Profile, 'coi_limit' | 'todo_alarm'>>) => {
@@ -280,6 +281,7 @@ export default function MorePage() {
       '계정',
       [
         row('프로필 편집', '사진 · 닉네임 · 소개', () => setSheet('profile')),
+        row('다른 기기에서 이어 쓰기', '코드로 연결', () => setSheet('link')),
         row('차단 관리', '', () => nav('/blocked')),
         row('계정과 기록 삭제', '되돌릴 수 없어요', () => setSheet('delete')),
         ...(isAdmin ? [row('검증 현황', '운영자 전용', () => nav('/admin'))] : []),
@@ -384,6 +386,7 @@ export default function MorePage() {
       {sheet === 'admin' && <AdminCodeSheet onClose={() => setSheet(null)} />}
       {sheet === 'feedback' && <FeedbackSheet onClose={() => setSheet(null)} />}
       {sheet === 'delete' && <DeleteAccountSheet onClose={() => setSheet(null)} />}
+      {sheet === 'link' && <DeviceLinkSheet onClose={() => setSheet(null)} />}
     </Screen>
   )
 }

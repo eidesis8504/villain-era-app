@@ -2,12 +2,13 @@
 // 앱 안 브라우저·아이폰 사파리에서는 기록이 끊기지 않도록 먼저 안내한다.
 import { useEffect, useState, useSyncExternalStore } from 'react'
 import { Link } from 'react-router'
-import { DISCONNECTED_NOTICE, takeDisconnected } from '../lib/boot'
+import { clearDisconnected, DISCONNECTED_NOTICE, peekDisconnected } from '../lib/boot'
 import { currentEnv, type InApp } from '../lib/env'
 import { canInstall, onInstallChange, promptInstall } from '../lib/install'
 import { isNative } from '../lib/native'
 import { kakaoExternalUrl } from '../lib/source'
 import { logLandingOnce } from '../lib/track'
+import { EnterCodeSheet } from '../pages/DeviceLinkSheets'
 import { useAuth } from './auth'
 import { useUI } from './ui'
 
@@ -23,19 +24,22 @@ const HOW_TO_OPEN: Record<Exclude<InApp, null>, string> = {
 const FEATURES = ['개체·체중·급여 기록과 성장 그래프', '혈통·근친계수·산란·부화 관리', '사육자 커뮤니티와 기록 첨부 질문']
 
 export default function Welcome() {
-  const { start } = useAuth()
+  const { start, link } = useAuth()
   const ui = useUI()
   const env = currentEnv()
+  // 아이폰 홈 화면 앱은 사파리와 기록이 따로라, 사파리에서 쓰던 기록을 불러오는 길을 눈에 띄게 둔다
+  const fromSafari = env.platform === 'ios' && env.standalone && !isNative()
+  const [linkOpen, setLinkOpen] = useState(false)
   const installable = useSyncExternalStore(onInstallChange, canInstall)
   const [busy, setBusy] = useState(false)
   const [err, setErr] = useState('')
   const [steps, setSteps] = useState(false)
-  const [disconnected, setDisconnected] = useState(false)
+  // 계정 삭제·연결 끊김으로 돌아온 경우 한 번만 안내: 렌더에서는 읽기만 하고, 지우기는 effect에서
+  const [disconnected] = useState(peekDisconnected)
 
   useEffect(() => {
     logLandingOnce()
-    // 계정 삭제·연결 끊김으로 돌아온 경우 한 번만 안내 (effect에서 읽어 개발 모드 이중 렌더에도 안전)
-    if (takeDisconnected()) setDisconnected(true)
+    clearDisconnected()
   }, [])
 
   const go = async () => {
@@ -149,6 +153,19 @@ export default function Welcome() {
         <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
           {primary}
           {secondary}
+          {fromSafari && (
+            <div className="hint" style={{ textAlign: 'center', marginTop: 4 }}>
+              사파리에서 쓰던 기록이 있나요?
+            </div>
+          )}
+          <button
+            type="button"
+            data-test="welcome-link"
+            className={fromSafari ? 'btn btn-outline' : 'btn btn-plain'}
+            onClick={() => setLinkOpen(true)}
+          >
+            이미 쓰던 기록이 있어요
+          </button>
           {err && <div className="err" style={{ textAlign: 'center' }}>{err}</div>}
         </div>
         <div className="welcome-fine">
@@ -157,6 +174,7 @@ export default function Welcome() {
           시작하면 <Link to="/terms">이용약관</Link>과 <Link to="/privacy">개인정보 처리방침</Link>에 동의하게 돼요 · 만 14세 이상
         </div>
       </div>
+      {linkOpen && <EnterCodeSheet title="이미 쓰던 기록 불러오기" onClose={() => setLinkOpen(false)} onSubmit={link} />}
     </div>
   )
 }

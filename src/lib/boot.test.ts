@@ -2,11 +2,12 @@ import { AuthApiError, AuthRetryableFetchError, AuthSessionMissingError } from '
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import {
   bootErrorAction,
+  clearDisconnected,
   consumeExpectedSignOut,
   expectSignOut,
   markDisconnected,
   missingProfileAction,
-  takeDisconnected,
+  peekDisconnected,
 } from './boot'
 
 // vitest 환경은 node(브라우저 저장소 없음)라 sessionStorage를 흉내 낸다
@@ -46,21 +47,25 @@ describe('bootErrorAction (시작할 때 getSession 오류)', () => {
 })
 
 describe('연결 끊김 안내 표시', () => {
-  it('한 번만 읽힌다', () => {
+  it('peek는 지우지 않고 읽기만, clear로 지운다 (화면 첫 렌더에서 안전하게 읽기)', () => {
     vi.stubGlobal('sessionStorage', memory())
+    expect(peekDisconnected()).toBe(false)
     markDisconnected()
-    expect(takeDisconnected()).toBe(true)
-    expect(takeDisconnected()).toBe(false)
+    expect(peekDisconnected()).toBe(true)
+    expect(peekDisconnected()).toBe(true)
+    clearDisconnected()
+    expect(peekDisconnected()).toBe(false)
   })
   it('저장소가 없거나 예외를 던져도 멈추지 않는다', () => {
     expect(() => markDisconnected()).not.toThrow()
-    expect(takeDisconnected()).toBe(false)
+    expect(peekDisconnected()).toBe(false)
     const boom = () => {
       throw new Error('blocked')
     }
     vi.stubGlobal('sessionStorage', { getItem: boom, setItem: boom, removeItem: boom })
     expect(() => markDisconnected()).not.toThrow()
-    expect(takeDisconnected()).toBe(false)
+    expect(peekDisconnected()).toBe(false)
+    expect(() => clearDisconnected()).not.toThrow()
   })
 })
 

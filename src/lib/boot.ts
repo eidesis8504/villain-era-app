@@ -39,13 +39,20 @@ export function markDisconnected(): void {
   }
 }
 
-export function takeDisconnected(): boolean {
+// 읽기만 한다 (화면 첫 렌더에서 써도 안전 — 개발 모드 이중 렌더에도 같은 값)
+export function peekDisconnected(): boolean {
   try {
-    const on = globalThis.sessionStorage?.getItem(KEY) === '1'
-    if (on) globalThis.sessionStorage.removeItem(KEY)
-    return on
+    return globalThis.sessionStorage?.getItem(KEY) === '1'
   } catch {
     return false
+  }
+}
+
+export function clearDisconnected(): void {
+  try {
+    globalThis.sessionStorage?.removeItem(KEY)
+  } catch {
+    /* 저장소를 쓸 수 없는 브라우저 */
   }
 }
 

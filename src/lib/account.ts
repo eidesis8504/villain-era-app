@@ -1,5 +1,6 @@
 // 계정과 기록 삭제: 사용자 세션으로 본인 폴더 파일을 모두 지운 뒤, 서버 함수로 계정을 지운다.
 // (서버 함수는 파일이 하나라도 남아 있으면 거부한다 → 공개 주소로 열리는 파일이 남지 않음)
+import { expectSignOut } from './boot'
 import { supabase } from './supabase'
 
 const BUCKETS = ['avatars', 'animal-photos', 'post-media', 'health-photos'] as const
@@ -37,6 +38,7 @@ export async function deleteMyAccount(uid: string) {
   await removeAllMyFiles(uid)
   const { error } = await supabase.rpc('delete_my_account')
   if (error) throw error
-  // 서버 계정은 이미 지워졌으므로 이 기기의 세션만 정리한다 → 환영 화면으로 돌아감
+  // 서버 계정은 이미 지워졌으므로 이 기기의 세션만 정리한다 → 환영 화면으로 돌아감 ('연결이 끊어졌어요' 안내 없이)
+  expectSignOut()
   await supabase.auth.signOut({ scope: 'local' })
 }

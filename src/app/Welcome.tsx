@@ -2,6 +2,7 @@
 // 앱 안 브라우저·아이폰 사파리에서는 기록이 끊기지 않도록 먼저 안내한다.
 import { useEffect, useState, useSyncExternalStore } from 'react'
 import { Link } from 'react-router'
+import { DISCONNECTED_NOTICE, takeDisconnected } from '../lib/boot'
 import { currentEnv, type InApp } from '../lib/env'
 import { canInstall, onInstallChange, promptInstall } from '../lib/install'
 import { isNative } from '../lib/native'
@@ -29,9 +30,12 @@ export default function Welcome() {
   const [busy, setBusy] = useState(false)
   const [err, setErr] = useState('')
   const [steps, setSteps] = useState(false)
+  const [disconnected, setDisconnected] = useState(false)
 
   useEffect(() => {
     logLandingOnce()
+    // 계정 삭제·연결 끊김으로 돌아온 경우 한 번만 안내 (effect에서 읽어 개발 모드 이중 렌더에도 안전)
+    if (takeDisconnected()) setDisconnected(true)
   }, [])
 
   const go = async () => {
@@ -124,6 +128,11 @@ export default function Welcome() {
   return (
     <div className="welcome">
       <div className="welcome-in">
+        {disconnected && (
+          <div className="welcome-card warn" data-test="disconnected-notice">
+            {DISCONNECTED_NOTICE}
+          </div>
+        )}
         <div className="welcome-brand">
           VILLAIN ERA <span className="beta">BETA</span>
         </div>

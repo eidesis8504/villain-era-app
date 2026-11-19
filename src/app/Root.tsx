@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, type ReactNode } from 'react'
-import { Outlet } from 'react-router'
+import { Link, Outlet } from 'react-router'
 import { useViewport } from './layout'
 import { AuthProvider, useAuth } from './auth'
 import { UIProvider } from './ui'
@@ -42,8 +42,8 @@ function FullCenter({ children }: { children: ReactNode }) {
 
 // 기기 계정이 없으면 환영 화면, 있으면 프로필 준비가 끝난 뒤 앱 화면을 연다
 function Gate({ children }: { children: ReactNode }) {
-  const { ready, bootError, session, profile, profileLoading, profileError, refreshProfile, retry } = useAuth()
-  if (!ready || (session && profileLoading)) {
+  const { ready, bootError, session, profile, profileLoading, profileError, profileGap, refreshProfile, retry } = useAuth()
+  if (!ready || (session && (profileLoading || profileGap === 'checking'))) {
     return (
       <FullCenter>
         <div className="spinner" />
@@ -57,7 +57,16 @@ function Gate({ children }: { children: ReactNode }) {
         <div style={{ width: '100%', maxWidth: 400, display: 'flex', flexDirection: 'column', gap: 14, textAlign: 'center' }}>
           <div style={{ font: '700 28px var(--sans)', letterSpacing: '.04em', color: 'var(--blue)' }}>VILLAIN ERA</div>
           <div style={{ fontSize: 15, fontWeight: 700 }}>앱을 시작하지 못했어요</div>
-          <div className="hint">{bootError || '프로필을 불러오지 못했어요 — 네트워크 연결을 확인해 주세요'}</div>
+          <div className="hint">
+            {bootError ||
+              (profileGap === 'broken' ? (
+                <>
+                  계정 정보를 불러오지 못했어요 — 계속되면 <Link to="/support">도움말·문의</Link>로 알려 주세요
+                </>
+              ) : (
+                '프로필을 불러오지 못했어요 — 네트워크 연결을 확인해 주세요'
+              ))}
+          </div>
           <button
             type="button"
             className="btn btn-primary"

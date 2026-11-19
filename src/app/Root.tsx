@@ -42,8 +42,10 @@ function FullCenter({ children }: { children: ReactNode }) {
 
 // 기기 계정이 없으면 환영 화면, 있으면 프로필 준비가 끝난 뒤 앱 화면을 연다
 function Gate({ children }: { children: ReactNode }) {
-  const { ready, bootError, session, profile, profileLoading, profileError, profileGap, refreshProfile, retry } = useAuth()
-  if (!ready || (session && (profileLoading || profileGap === 'checking'))) {
+  const { ready, bootError, session, profile, profileLoading, profileError, profileGap, switching, refreshProfile, retry } =
+    useAuth()
+  // 계정 전환 중에는 처음 화면이 잠깐 보이지 않도록 스피너
+  if (!ready || switching || (session && (profileLoading || profileGap === 'checking'))) {
     return (
       <FullCenter>
         <div className="spinner" />

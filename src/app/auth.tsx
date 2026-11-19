@@ -3,11 +3,13 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import type { Session } from '@supabase/supabase-js'
 import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from 'react'
-import { bootErrorAction, consumeExpectedSignOut, markDisconnected, missingProfileAction } from '../lib/boot'
+import { deleteMyAccount } from '../lib/account'
+import { bootErrorAction, consumeExpectedSignOut, expectSignOut, markDisconnected, missingProfileAction } from '../lib/boot'
 import type { Tables } from '../lib/database.types'
+import { redeemLinkCode, verifyLinkToken } from '../lib/deviceLink'
 import { currentEnv } from '../lib/env'
 import { supabase } from '../lib/supabase'
-import { landingSource, trackOpen } from '../lib/track'
+import { landingSource, trackDeviceLink, trackOpen } from '../lib/track'
 
 export type Profile = Tables<'profiles'>
 
@@ -26,6 +28,11 @@ type Auth = {
   refreshProfile: () => Promise<unknown>
   retry: () => void
   start: () => Promise<void>
+  // 다른 기기에서 이어 쓰기: 처음 화면에서 코드로 같은 계정에 들어가기
+  link: (code: string) => Promise<void>
+  // 빈 계정이 있는 기기에서 코드로 다른 계정으로 바꾸기 (빈 계정은 지운다)
+  switchAccount: (code: string) => Promise<void>
+  switching: boolean
 }
 
 const Ctx = createContext<Auth | null>(null)
@@ -76,6 +83,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [bootError, setBootError] = useState<string | null>(null)
   const [session, setSession] = useState<Session | null>(null)
   const [attempt, setAttempt] = useState(0)
+  const [switching, setSwitching] = useState(false)
 
   useEffect(() => {
     let alive = true
@@ -176,8 +184,34 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setSession(s)
         trackOpen()
       },
+      link: async (code: string) => {
+        const s = await verifyLinkToken(await redeemLinkCode(code))
+        setSession(s)
+        trackOpen()
+        trackDeviceLink()
+      },
+      switchAccount: async (code: string) => {
+        // 코드를 먼저 확인해 열쇠를 받는다 — 틀린 코드면 여기서 멈추고 아무것도 지우지 않는다
+        const tokenHash = await redeemLinkCode(code)
+        setSwitching(true)
+        try {
+          expectSignOut()
+          try {
+            await deleteMyAccount(uid!)
+          } catch {
+            // 빈 계정을 지우지 못해도 전환은 계속한다 (빈 계정만 서버에 남는다)
+            await supabase.auth.signOut({ scope: 'local' }).catch(() => undefined)
+          }
+          setSession(await verifyLinkToken(tokenHash))
+          trackOpen()
+          trackDeviceLink()
+        } finally {
+          setSwitching(false)
+        }
+      },
+      switching,
     }),
-    [ready, bootError, session, uid, profile, profileQ, profileGap],
+    [ready, bootError, session, uid, profile, profileQ, profileGap, switching],
   )
 
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>

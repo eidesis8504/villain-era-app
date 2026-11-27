@@ -1,7 +1,8 @@
-// 커뮤니티 운영정책 (분양·홍보 글·채팅·신고·차단·금칙어·제재 단계)
+// 커뮤니티 운영정책 (분양·홍보 글·채팅·신고·차단·금칙어·제재 단계·등급)
 import { LAW_NOTES, NOT_A_PARTY, TRADE_MIN_HOURS, WIMS_URL } from '../../lib/adopt'
 import { CHAT_DAILY_NEW, CHAT_MAX } from '../../lib/chat'
 import { OPERATOR } from '../../lib/operator'
+import { TIER_NOTE, TIERS } from '../../lib/tier'
 import { Draft, LegalLayout } from './LegalLayout'
 
 export default function PolicyPage() {
@@ -113,7 +114,23 @@ export default function PolicyPage() {
       </ol>
       <p>불법 거래·학대처럼 심각한 위반은 단계를 건너뛰고 바로 제한할 수 있어요.</p>
 
-      <h2>8. 이의 제기</h2>
+      <h2>8. 등급</h2>
+      <p>
+        등급은 앱 안 활동으로 매긴 점수(Hz)에 따라 닉네임 옆에 붙는 표시예요({TIERS.map((t) => t.name).join(' → ')}).{' '}
+        <b>{TIER_NOTE}</b>
+      </p>
+      <ul>
+        <li>
+          점수는 세 가지로 세요. 홍보·인지도(쓴 글, 받은 좋아요, 채택된 답변), 활동 기간(앱을 연 날과 달), 신뢰도(분양 이전을
+          받은 회원 수, 체중·급여 기록이 있는 개체 수). 항목별 점수와 상한, 등급 기준은 앱의 전체 › 내 등급에서 볼 수 있어요.
+        </li>
+        <li>점수는 하루에 한 번 다시 계산해요. 내 등급 화면을 열면 내 점수는 바로 다시 계산해요.</li>
+        <li>운영정책을 어겨 운영자가 조치한 신고가 있으면 점수가 깎여요.</li>
+        <li>다른 회원에게는 등급만 보이고, 항목별 내역은 본인만 볼 수 있어요.</li>
+        <li>여러 계정을 만들어 좋아요를 누르거나 분양 이전을 꾸미는 등 부정한 방법으로 점수를 올리면 제재 대상이에요.</li>
+      </ul>
+
+      <h2>9. 이의 제기</h2>
       <p>
         조치에 동의하지 않으면 <a href={`mailto:${O.email}`}>{O.email}</a>로 닉네임과 내용을 보내 주세요. 다시 확인하고 답해
         드려요.

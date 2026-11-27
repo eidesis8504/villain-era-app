@@ -71,18 +71,24 @@ export default function HomePage() {
         {!desk && (
           <div className="span-all" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingTop: 6 }}>
             <span style={{ font: '700 20px var(--sans)', letterSpacing: '.02em', color: 'var(--blue)' }}>VILLAIN ERA</span>
-            <button
-              type="button"
-              aria-label="알림"
-              onClick={() => nav('/alerts')}
-              style={{ position: 'relative', width: 28, height: 28, border: '1.6px solid var(--ink)', borderRadius: '9px 9px 6px 6px' }}
-            >
-              {unread > 0 && (
-                <span className="dot-badge" style={{ top: -8, right: -9 }}>
-                  {unread}
-                </span>
-              )}
-            </button>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+              <button type="button" data-test="home-scan" className="home-scan" onClick={() => nav('/scan')}>
+                <span style={{ width: 13, height: 13, border: '1.6px dashed currentColor', borderRadius: 3 }} />
+                QR 스캔
+              </button>
+              <button
+                type="button"
+                aria-label="알림"
+                onClick={() => nav('/alerts')}
+                style={{ position: 'relative', width: 28, height: 28, border: '1.6px solid var(--ink)', borderRadius: '9px 9px 6px 6px' }}
+              >
+                {unread > 0 && (
+                  <span className="dot-badge" style={{ top: -8, right: -9 }}>
+                    {unread}
+                  </span>
+                )}
+              </button>
+            </div>
           </div>
         )}
 

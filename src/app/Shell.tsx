@@ -1,8 +1,10 @@
 import { useEffect, useMemo, useRef } from 'react'
 import { Link, NavLink, Outlet, useLocation, useNavigate } from 'react-router'
+import { useChatUnread } from '../data/chat'
 import { useNotifications } from '../data/community'
-import { useChecks, useKeeper, useTodos } from '../data/keeper'
+import { useChecks, useKeeper, useRefresh, useTodos } from '../data/keeper'
 import { gap, today } from '../lib/date'
+import { supabase } from '../lib/supabase'
 import { todosOn } from '../lib/todo'
 import { trackOpen, trackView } from '../lib/track'
 import { Avatar } from '../ui/kit'
@@ -13,11 +15,14 @@ import { useUI } from './ui'
 function navRoot(path: string) {
   if (path === '/') return 'home'
   if (path.startsWith('/animals') || path.startsWith('/a/')) return 'animals'
-  if (path.startsWith('/scan')) return 'scan'
   if (path.startsWith('/community')) return 'community'
-  if (['/todo', '/weights', '/clutch', '/lineage', '/feedings'].some((p) => path.startsWith(p))) return 'home'
+  if (path.startsWith('/chat')) return 'chat'
+  if (['/todo', '/weights', '/clutch', '/lineage', '/feedings', '/scan'].some((p) => path.startsWith(p))) return 'home'
   return 'more'
 }
+
+// 대화 화면에서는 하단 탭을 숨겨 입력 칸에 자리를 준다
+const isThread = (path: string) => /^\/(chat\/[^/]+|inquiry|admin\/(inquiry|chat)\/[^/]+)\/?$/.test(path)
 
 const NONE: never[] = []
 
@@ -49,6 +54,7 @@ function useSideCounts() {
 function Sidebar() {
   const { profile, isAdmin } = useAuth()
   const c = useSideCounts()
+  const chatUnread = useChatUnread()
   const nav = useNavigate()
   const loc = useLocation()
   const item = (to: string, label: string, badge?: number, badgeBg = 'var(--blue)', test?: string) => {
@@ -83,6 +89,7 @@ function Sidebar() {
       <div className="side-group">
         <div className="side-group-title">커뮤니티</div>
         {item('/community', '커뮤니티')}
+        {item('/chat', '채팅', chatUnread, 'var(--warn)', 'nav-chat')}
         {item('/notices', '공지사항')}
       </div>
       <div className="side-group">
@@ -118,9 +125,17 @@ function Sidebar() {
 function BottomNav() {
   const loc = useLocation()
   const root = navRoot(loc.pathname)
-  const it = (key: string, to: string, label: string, glyph: React.CSSProperties) => (
+  const chatUnread = useChatUnread()
+  const it = (key: string, to: string, label: string, glyph: React.CSSProperties, badge = 0) => (
     <NavLink to={to} className={`nav-item${root === key ? ' on' : ''}`} data-test={`nav-${key}`} replace={root === key}>
-      <span style={{ border: '1.8px solid currentColor', ...glyph }} />
+      <span className="nav-glyph">
+        {badge > 0 && (
+          <span className="dot-badge" data-test={`nav-${key}-badge`}>
+            {badge}
+          </span>
+        )}
+        <span style={{ border: '1.8px solid currentColor', ...glyph }} />
+      </span>
       <span>{label}</span>
     </NavLink>
   )
@@ -128,13 +143,8 @@ function BottomNav() {
     <nav className="bottom-nav" data-test="nav">
       {it('home', '/', '홈', { width: 20, height: 18, borderRadius: '4px 4px 3px 3px' })}
       {it('animals', '/animals', '개체', { width: 18, height: 20, borderRadius: 4 })}
-      <NavLink to="/scan" className={`nav-item nav-scan${root === 'scan' ? ' on' : ''}`} data-test="nav-scan">
-        <span className="nav-scan-btn">
-          <span style={{ width: 20, height: 20, border: '2px dashed var(--cream)', borderRadius: 4 }} />
-        </span>
-        <span>스캔</span>
-      </NavLink>
       {it('community', '/community', '커뮤니티', { width: 20, height: 16, borderRadius: '4px 4px 4px 0' })}
+      {it('chat', '/chat', '채팅', { width: 20, height: 16, borderRadius: '9px 9px 9px 2px' }, chatUnread)}
       {it('more', '/more', '전체', { width: 18, height: 18, borderRadius: 4, borderStyle: 'dotted' })}
     </nav>
   )
@@ -144,23 +154,38 @@ function BottomNav() {
 function NotificationWatcher() {
   const { data } = useNotifications()
   const ui = useUI()
+  const refresh = useRefresh()
+  const { pathname } = useLocation()
   const seen = useRef<number | null>(null)
   useEffect(() => {
     if (!data) return
+    // 지금 보고 있는 대화의 채팅 알림은 배너를 띄우지 않고 읽은 것으로 한다
+    const here = document.visibilityState === 'visible' ? data.filter((n) => n.kind === 'chat' && !n.read_at && n.link === pathname) : []
+    if (here.length) {
+      supabase
+        .from('notifications')
+        .update({ read_at: new Date().toISOString() })
+        .in('id', here.map((n) => n.id))
+        .then(() => refresh('notifications'))
+    }
     const maxId = data[0]?.id ?? 0
     if (seen.current === null) {
       seen.current = maxId
       return
     }
     const fresh = data.filter(
-      (n) => n.id > seen.current! && !n.read_at && ['todo', 'comment', 'notice', 'transfer', 'feeding', 'hatch', 'health'].includes(n.kind),
+      (n) =>
+        n.id > seen.current! &&
+        !n.read_at &&
+        !here.includes(n) &&
+        ['todo', 'comment', 'notice', 'transfer', 'feeding', 'hatch', 'health', 'chat'].includes(n.kind),
     )
     if (fresh.length) {
       const n = fresh[0]
       ui.banner({ title: n.title.replace(/^할 일 알림 · /, ''), body: n.body, link: n.link, kind: n.kind })
     }
     seen.current = Math.max(seen.current, maxId)
-  }, [data, ui])
+  }, [data, ui, pathname, refresh])
   return null
 }
 
@@ -200,7 +225,7 @@ export function AppShell() {
       {desk && <Sidebar />}
       <div className="frame-main">
         <Outlet />
-        {!desk && <BottomNav />}
+        {!desk && !isThread(loc.pathname) && <BottomNav />}
       </div>
       <NotificationWatcher />
     </div>

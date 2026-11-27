@@ -5,6 +5,7 @@ import { Screen } from '../app/Screen'
 import { useUI } from '../app/ui'
 import { useToggleLike } from '../data/actions'
 import { setAdoptStatus, shareAnimal } from '../data/adopt'
+import { openDm } from '../data/chat'
 import { badgeColor, CATS, useComments, useLiked, usePost, usePosts, type MediaItem, type RecordAttach } from '../data/community'
 import { useHealthLogs, useVetVisits } from '../data/health'
 import { useKeeper, useRefresh, type Keeper } from '../data/keeper'
@@ -144,7 +145,7 @@ export function PostPage() {
   const [comment, setComment] = useState('')
   const [busy, setBusy] = useState(false)
   const [confirm, setConfirm] = useState(false)
-  const [menu, setMenu] = useState<null | { kind: 'post' | 'comment'; id: string; authorId: string; authorName: string }>(null)
+  const [menu, setMenu] = useState<null | { kind: 'post' | 'comment'; id: string; authorId: string; authorName: string; postId: string }>(null)
 
   if (q.isLoading) return <Screen title="게시글" back="/community"><Spinner center /></Screen>
   if (q.error) return <Screen title="게시글" back="/community"><ErrorBox error={q.error} onRetry={() => q.refetch()} /></Screen>
@@ -173,6 +174,19 @@ export function PostPage() {
     if (error) return ui.toast(errMsg(error, '채택하지 못했어요'), 'warn')
     await refresh('comments', 'post', 'posts')
     ui.toast('답변을 채택했어요 · 채택은 변경할 수 없어요')
+  }
+
+  // 글쓴이와 1:1 대화를 연다 (대화 위에 이 글이 붙는다)
+  const startChat = async () => {
+    if (busy) return
+    setBusy(true)
+    try {
+      nav(`/chat/${await openDm(p.author_id, p.id)}`)
+    } catch (e) {
+      ui.toast(errMsg(e, '대화를 시작하지 못했어요'), 'warn')
+    } finally {
+      setBusy(false)
+    }
   }
 
   const changeStatus = async (s: AdoptStatus) => {
@@ -217,7 +231,7 @@ export function PostPage() {
               type="button"
               aria-label="글 메뉴"
               data-test="post-menu"
-              onClick={() => setMenu({ kind: 'post', id: p.id, authorId: p.author_id, authorName: displayName(p.author) })}
+              onClick={() => setMenu({ kind: 'post', id: p.id, authorId: p.author_id, authorName: displayName(p.author), postId: p.id })}
               style={{ marginLeft: 'auto', padding: '0 4px', fontSize: 18, color: 'var(--muted)' }}
             >
               ⋯
@@ -269,6 +283,11 @@ export function PostPage() {
                   onChange={changeStatus}
                 />
               </div>
+            )}
+            {!mine && (
+              <button type="button" data-test="adopt-chat" className="btn btn-primary btn-sm" onClick={startChat} disabled={busy}>
+                {ad.mode === 'sale' ? '채팅으로 문의' : '채팅 보내기'}
+              </button>
             )}
           </AdoptCard>
         ) : (
@@ -344,7 +363,7 @@ export function PostPage() {
                     type="button"
                     aria-label="댓글 메뉴"
                     data-test="comment-menu"
-                    onClick={() => setMenu({ kind: 'comment', id: c.id, authorId: c.author_id, authorName: displayName(c.author) })}
+                    onClick={() => setMenu({ kind: 'comment', id: c.id, authorId: c.author_id, authorName: displayName(c.author), postId: p.id })}
                     style={{ marginLeft: c.adopted ? 4 : 'auto', padding: '0 4px', fontSize: 16, color: 'var(--muted)' }}
                   >
                     ⋯

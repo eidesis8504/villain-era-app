@@ -1,13 +1,15 @@
-// 글·댓글·대화의 메뉴: 신고, 작성자 신고, 차단 (내 글이면 삭제)
+// 글·댓글·대화의 메뉴: 채팅 보내기, 신고, 작성자 신고, 차단 (내 글이면 삭제)
 import { useState } from 'react'
+import { useNavigate } from 'react-router'
 import { useUI } from '../app/ui'
-import { reportChat } from '../data/chat'
+import { openDm, reportChat } from '../data/chat'
 import { useRefresh } from '../data/keeper'
 import { blockUser, REPORT_REASONS, reportContent, type ReportKind, type ReportReason } from '../data/safety'
 import { errMsg } from '../lib/supabase'
 import { Chips, Sheet } from '../ui/kit'
 
-type Target = { kind: 'post' | 'comment' | 'chat'; id: string; authorId: string; authorName: string }
+// postId: 글·댓글 메뉴에서 대화를 시작할 때 대화 위에 붙일 글
+type Target = { kind: 'post' | 'comment' | 'chat'; id: string; authorId: string; authorName: string; postId?: string }
 
 export function ContentMenu({
   target,
@@ -25,6 +27,7 @@ export function ContentMenu({
   onClose: () => void
 }) {
   const ui = useUI()
+  const nav = useNavigate()
   const refresh = useRefresh()
   const [step, setStep] = useState<'menu' | 'report' | 'report-user' | 'block'>('menu')
   const [reason, setReason] = useState<ReportReason | null>(null)
@@ -44,6 +47,19 @@ export function ContentMenu({
     } catch (e) {
       setBusy(false)
       ui.toast(errMsg(e, '신고하지 못했어요'), 'warn')
+    }
+  }
+
+  const startChat = async () => {
+    if (busy) return
+    setBusy(true)
+    try {
+      const roomId = await openDm(target.authorId, target.postId)
+      onClose()
+      nav(`/chat/${roomId}`)
+    } catch (e) {
+      setBusy(false)
+      ui.toast(errMsg(e, '대화를 시작하지 못했어요'), 'warn')
     }
   }
 
@@ -138,6 +154,7 @@ export function ContentMenu({
   return (
     <Sheet title={`${what} 메뉴`} onClose={onClose}>
       <div className="list-card" style={{ padding: '0 16px' }}>
+        {!mine && !chat && item('채팅 보내기', startChat, 'menu-chat')}
         {!mine && item(`${what} 신고`, () => setStep('report'), 'menu-report')}
         {!mine && !chat && item('작성자 신고', () => setStep('report-user'), 'menu-report-user')}
         {!mine && item(chat ? '상대 차단' : '작성자 차단', () => setStep('block'), 'menu-block', true)}

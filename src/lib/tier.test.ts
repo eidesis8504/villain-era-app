@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { groupParts, HZ_MAX, nextTier, parseTier, PART_INFO, partLine, tierOf, tierProgress, TIERS, type TierPart } from './tier'
+import { groupParts, HZ_MAX, hzText, nextTier, parseTier, PART_INFO, partLine, tierOf, tierProgress, TIERS, type TierPart } from './tier'
 
 describe('tierOf', () => {
   const name = (hz: number) => tierOf(hz).name
@@ -93,6 +93,14 @@ describe('parseTier', () => {
 describe('PART_INFO', () => {
   it('서버가 내려 주는 항목 8개를 모두 안다', () => {
     expect(Object.keys(PART_INFO)).toEqual(['posts', 'likes', 'adopted', 'days', 'months', 'transfers', 'animals', 'penalty'])
+  })
+})
+
+describe('hzText', () => {
+  it('점수에 단위를 붙이고 음수는 빼기 표시로 쓴다', () => {
+    expect(hzText(15)).toBe('15 Hz')
+    expect(hzText(0)).toBe('0 Hz')
+    expect(hzText(-5)).toBe('−5 Hz')
   })
 })
 

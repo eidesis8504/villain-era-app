@@ -410,6 +410,7 @@ export type Database = {
           todo_alarm: boolean
           tz: string
           first_platform: string | null
+          hz: number
           is_test: boolean
           source: string | null
         }
@@ -427,6 +428,7 @@ export type Database = {
           todo_alarm?: boolean
           tz?: string
           first_platform?: string | null
+          hz?: number
           is_test?: boolean
           source?: string | null
         }
@@ -444,6 +446,7 @@ export type Database = {
           todo_alarm?: boolean
           tz?: string
           first_platform?: string | null
+          hz?: number
           is_test?: boolean
           source?: string | null
         }
@@ -1213,6 +1216,7 @@ export type Database = {
       }
       mark_room_read: { Args: { p_room: string }; Returns: undefined }
       report_chat: { Args: { p_room: string; p_reason: string; p_note?: string }; Returns: undefined }
+      my_tier: { Args: never; Returns: Json }
     }
     Enums: {
       [_ in never]: never

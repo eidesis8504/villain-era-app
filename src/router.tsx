@@ -38,6 +38,7 @@ const InquiryPage = named(() => import('./pages/ChatPages'), 'InquiryPage')
 const AdminInquiryPage = named(() => import('./pages/ChatPages'), 'AdminInquiryPage')
 const AdminChatPage = named(() => import('./pages/ChatPages'), 'AdminChatPage')
 const ProductPage = lazy(() => import('./pages/ProductPage'))
+const TierPage = named(() => import('./pages/TierPage'), 'TierPage')
 // 카메라 QR 인식 라이브러리는 스캔 화면에서만 불러온다
 const ScanPage = lazy(() => import('./pages/ScanPage'))
 // 약관·정책·지원 페이지는 계정 없이 열린다 (앱 화면 밖 라우트)
@@ -88,6 +89,7 @@ export const router = createBrowserRouter([
           { path: 'inquiry', element: wait(<InquiryPage />) },
           { path: 'more', element: <MorePage /> },
           { path: 'blocked', element: wait(<BlockedPage />) },
+          { path: 'tier', element: wait(<TierPage />) },
           { path: 'admin', element: wait(<AdminPage />) },
           { path: 'admin/inquiry/:id', element: wait(<AdminInquiryPage />) },
           { path: 'admin/chat/:id', element: wait(<AdminChatPage />) },

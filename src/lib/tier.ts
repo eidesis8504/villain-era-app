@@ -77,7 +77,7 @@ export function parseTier(v: unknown): { hz: number; parts: TierPart[] } {
   return { hz: clean(x.hz), parts: Array.isArray(x.parts) ? x.parts.filter(isPart) : [] }
 }
 
-const hzText = (n: number) => `${n < 0 ? `−${Math.abs(n)}` : n} Hz`
+export const hzText = (n: number) => `${n < 0 ? `−${Math.abs(n)}` : n} Hz`
 
 // '2개 × 5 Hz = 10 Hz · 최대 100 Hz' (감점은 상한이 없다)
 export function partLine(p: TierPart): string {

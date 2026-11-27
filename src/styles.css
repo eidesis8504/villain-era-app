@@ -1030,7 +1030,6 @@ select.input {
 /* ── 분양 이력서 (공개 화면 /r/<토큰>) ─────── */
 .resume-hdr {
   justify-content: space-between;
-  padding-left: 20px;
   padding-right: 20px;
 }
 .resume-kicker {

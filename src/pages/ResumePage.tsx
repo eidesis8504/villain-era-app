@@ -1,6 +1,6 @@
 // 분양 이력서 공개 화면 (/r/<토큰>): 계정 없이 열린다 (앱 화면 밖 라우트).
 // 분양자가 링크를 끄면 더 이상 보이지 않는다.
-import { Link, useParams } from 'react-router'
+import { Link, useNavigate, useParams } from 'react-router'
 import { useResume } from '../data/adopt'
 import { today } from '../lib/date'
 import { cleanToken } from '../lib/resume'
@@ -12,12 +12,20 @@ export default function ResumePage() {
   const token = cleanToken(useParams().token)
   const q = useResume(token)
   const gone = !token || (q.isSuccess && !q.data)
+  // 앱 안의 글에서 들어온 사람이 돌아갈 수 있게 (홈 화면 앱에는 브라우저의 뒤로 버튼이 없다)
+  const nav = useNavigate()
+  const back = () => (window.history.length > 1 ? nav(-1) : nav('/', { replace: true }))
   return (
     <div className="legal-wrap">
       <header className="legal-hdr resume-hdr">
-        <Link to="/" className="legal-brand">
-          VILLAIN ERA
-        </Link>
+        <span style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          <button type="button" className="hdr-back" aria-label="뒤로" data-test="resume-back" onClick={back}>
+            ‹
+          </button>
+          <Link to="/" className="legal-brand">
+            VILLAIN ERA
+          </Link>
+        </span>
         <span className="resume-kicker">분양 이력서</span>
       </header>
       <main className="resume-main">

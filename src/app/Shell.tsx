@@ -157,16 +157,21 @@ function NotificationWatcher() {
   const refresh = useRefresh()
   const { pathname } = useLocation()
   const seen = useRef<number | null>(null)
+  const cleared = useRef(new Set<number>())
   useEffect(() => {
     if (!data) return
-    // 지금 보고 있는 대화의 채팅 알림은 배너를 띄우지 않고 읽은 것으로 한다
+    // 지금 보고 있는 대화의 채팅 알림은 배너를 띄우지 않고 읽은 것으로 한다 (같은 알림은 한 번만 시도한다)
     const here = document.visibilityState === 'visible' ? data.filter((n) => n.kind === 'chat' && !n.read_at && n.link === pathname) : []
-    if (here.length) {
+    const todo = here.filter((n) => !cleared.current.has(n.id))
+    if (todo.length) {
+      todo.forEach((n) => cleared.current.add(n.id))
       supabase
         .from('notifications')
         .update({ read_at: new Date().toISOString() })
-        .in('id', here.map((n) => n.id))
-        .then(() => refresh('notifications'))
+        .in('id', todo.map((n) => n.id))
+        .then(({ error }) => {
+          if (!error) void refresh('notifications')
+        })
     }
     const maxId = data[0]?.id ?? 0
     if (seen.current === null) {

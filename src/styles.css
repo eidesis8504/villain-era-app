@@ -1001,6 +1001,32 @@ select.input {
   gap: 4px;
 }
 
+/* ── 분양 카드 (분양·홍보 글) ─────────────── */
+.adopt-card {
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.adopt-animal {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+.adopt-rows {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 6px 14px;
+  font-size: 14px;
+  align-items: baseline;
+}
+.adopt-key {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--muted);
+  white-space: nowrap;
+}
+
 /* ── 분양 이력서 (공개 화면 /r/<토큰>) ─────── */
 .resume-hdr {
   justify-content: space-between;

@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router'
 import type { Check, Todo } from '../data/keeper'
 import { badgeColor, type Post } from '../data/community'
 import { badgeOf, displayName } from '../app/auth'
+import { ADOPT_MODE_LABEL, ADOPT_STATUS_LABEL, ADOPT_STATUS_TAG } from '../lib/adopt'
 import { md, isoDay } from '../lib/date'
 import { fmtDur } from '../lib/media'
 import { publicUrl } from '../lib/supabase'
@@ -32,6 +33,9 @@ export function PostCard({ p, compact }: { p: Post; compact?: boolean }) {
   const badge = badgeOf(p.author)
   const qaOpen = p.cat === 'Q&A' && !p.has_adopted
   const media = p.media ?? []
+  // 분양·홍보 글: 글 종류와 분양 상태, 개체·분양가·지역 한 줄
+  const ad = p.attach?.kind === 'adopt' ? p.attach : null
+  const adLine = ad ? [ad.animal && `${ad.animal.name || '이름 없음'} · ${ad.animal.morph || '모프 미정'}`, ad.mode === 'sale' && (ad.price || '분양가 문의'), ad.region].filter(Boolean).join(' · ') : ''
   if (compact) {
     return (
       <div
@@ -65,10 +69,17 @@ export function PostCard({ p, compact }: { p: Post; compact?: boolean }) {
         <span className="tag">{p.cat}</span>
         {p.has_adopted && <span className="tag solid">채택 완료</span>}
         {qaOpen && <span className="tag warn">답변 대기</span>}
-        {p.attach && <span className="tag gray">기록 첨부</span>}
+        {ad && <span className="tag gray">{ADOPT_MODE_LABEL[ad.mode]}</span>}
+        {ad?.mode === 'sale' && ad.status && <span className={`tag ${ADOPT_STATUS_TAG[ad.status]}`}>{ADOPT_STATUS_LABEL[ad.status]}</span>}
+        {p.attach && !ad && <span className="tag gray">기록 첨부</span>}
         {p.hidden && <span className="tag warn">숨김</span>}
       </div>
       <div style={{ fontSize: 15, fontWeight: 700, lineHeight: 1.4 }}>{p.title}</div>
+      {adLine && (
+        <div className="ellipsis" style={{ fontSize: 13, fontWeight: 600, color: 'var(--sub)' }}>
+          {adLine}
+        </div>
+      )}
       {p.body && <div className="ellipsis" style={{ fontSize: 13, color: 'var(--muted)' }}>{p.body}</div>}
       {media.length > 0 && (
         <div style={{ display: 'flex', gap: 6, marginTop: 2 }}>

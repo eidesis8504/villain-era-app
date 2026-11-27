@@ -21,6 +21,8 @@ export type AdoptStatus = 'open' | 'hold' | 'done'
 export const ADOPT_MODE_LABEL: Record<AdoptMode, string> = { sale: '분양', show: '홍보' }
 export const ADOPT_STATUS_LABEL: Record<AdoptStatus, string> = { open: '분양 중', hold: '예약 중', done: '분양 완료' }
 export const ADOPT_STATUSES: readonly AdoptStatus[] = ['open', 'hold', 'done']
+// 분양 상태 표시의 색 (styles.css의 .tag.solid / .warn / .gray)
+export const ADOPT_STATUS_TAG: Record<AdoptStatus, string> = { open: 'solid', hold: 'warn', done: 'gray' }
 
 export type Seller = { type: 'person' } | { type: 'biz'; name: string; rep: string; brn: string; tel: string; permit: string }
 export type AdoptAnimal = {

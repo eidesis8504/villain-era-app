@@ -363,7 +363,7 @@ export default function AnimalDetailPage() {
               + 체중
             </button>
             <button type="button" data-test="resume-open" className="btn btn-outline btn-sm" onClick={() => setSheet('resume')}>
-              {shares?.has(a.id) ? '분양 이력서 · 공유 중' : '분양 이력서'}
+              {shares?.has(a.id) ? '이력서 공유 중' : '분양 이력서'}
             </button>
             <button
               type="button"

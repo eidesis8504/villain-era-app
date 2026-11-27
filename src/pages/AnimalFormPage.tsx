@@ -7,6 +7,7 @@ import { newAnimalCode, useKeeper, useRefresh, type Animal, type Keeper } from '
 import { today } from '../lib/date'
 import { nm, STATUS_LABEL, type AnimalStatus } from '../lib/format'
 import { removeFiles, resizeImage, upload } from '../lib/media'
+import { firstFeedPath, getFoodPreset } from '../lib/products'
 import { DEFAULT_SPECIES, SPECIES, SPECIES_NAMES, spOf } from '../lib/species'
 import { errMsg, publicUrl, supabase } from '../lib/supabase'
 import { Chips, ErrorBox, Seg, Spinner } from '../ui/kit'
@@ -182,9 +183,11 @@ function AnimalForm({ k, editing }: { k: Keeper; editing: Animal | null }) {
         } catch {
           /* ignore */
         }
+        // 제품 QR로 시작한 사람의 첫 개체면 급여 기록을 바로 연다
+        const next = firstFeedPath(data.id, k.owned.length, getFoodPreset())
         await refresh('animals')
         ui.toast(`${f.code} 등록 완료`)
-        nav(`/animals/${data.id}`, { replace: true })
+        nav(next, { replace: true })
       }
     } catch (e) {
       if (f.photo && newPath && newPath !== f.photoPath) await removeFiles('animal-photos', [newPath])

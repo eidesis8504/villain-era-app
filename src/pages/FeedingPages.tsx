@@ -7,6 +7,7 @@ import { useKeeper, useRefresh } from '../data/keeper'
 import { today, yd } from '../lib/date'
 import { FEED_RESULT_LABEL, FEED_RESULTS, REFUSE_ALERT, type Feeding, type FeedResult } from '../lib/feeding'
 import { nm } from '../lib/format'
+import { bulkFoodChoices, getFoodPreset } from '../lib/products'
 import { SPECIES } from '../lib/species'
 import { errMsg, supabase } from '../lib/supabase'
 import { Chips, ErrorBox, Seg, Spinner } from '../ui/kit'
@@ -100,7 +101,9 @@ export function FeedingBulkPage() {
   const refresh = useRefresh()
   const [sel, setSel] = useState<Set<string>>(new Set())
   const [result, setResult] = useState<FeedResult>('ate')
-  const [food, setFood] = useState('')
+  // 내 사료(제품 QR로 기억한 먹이)가 있으면 먼저 골라 둔다
+  const [preset] = useState(() => getFoodPreset())
+  const [food, setFood] = useState(preset)
   const [busy, setBusy] = useState(false)
   const owned = useMemo(() => {
     // 확인이 필요한 개체(주기 초과·연속 거부)를 위로
@@ -144,7 +147,13 @@ export function FeedingBulkPage() {
             오늘 결과
           </div>
           <Seg height={44} items={FEED_RESULTS.map((r) => [r, FEED_RESULT_LABEL[r]] as const)} value={result} onChange={setResult} />
-          <Chips wrap small items={ALL_FOODS.map((x) => [x, x] as const)} value={food} onChange={(x) => setFood(food === x ? '' : x)} />
+          <Chips
+            wrap
+            small
+            items={bulkFoodChoices(ALL_FOODS, preset).map((x) => [x, x] as const)}
+            value={food}
+            onChange={(x) => setFood(food === x ? '' : x)}
+          />
           <button type="button" data-test="bulk-save" className="btn btn-primary" onClick={save} disabled={!sel.size || busy}>
             {busy ? '저장 중…' : sel.size ? `선택한 ${sel.size}마리 기록` : '기록할 개체를 골라 주세요'}
           </button>

@@ -1,6 +1,8 @@
 import { describe, expect, it } from 'vitest'
 import {
+  bulkFoodChoices,
   defaultFood,
+  firstFeedPath,
   foodChoices,
   getFoodPreset,
   PRODUCT_FOODS,
@@ -129,5 +131,26 @@ describe('foodChoices', () => {
   })
   it('직접 입력했던 먹이는 맨 뒤에 남는다', () => {
     expect(foodChoices('테구', ['육류'], '', '닭가슴살')).toEqual(['육류', '닭가슴살'])
+  })
+})
+
+describe('bulkFoodChoices (한꺼번에 기록)', () => {
+  it('내 사료 → 기본 먹이 → 모든 제품 순서, 중복 없이', () => {
+    expect(bulkFoodChoices(['슈퍼푸드(CGD)', '육류'], SIG)).toEqual([SIG, '슈퍼푸드(CGD)', '육류', STD])
+  })
+  it('내 사료가 없으면 기본 먹이 뒤에 제품', () => {
+    expect(bulkFoodChoices(['육류'], '')).toEqual(['육류', SIG, STD])
+  })
+})
+
+describe('firstFeedPath (새 개체를 등록한 뒤 갈 곳)', () => {
+  it('첫 개체이고 내 사료가 있으면 급여 기록을 바로 연다', () => {
+    expect(firstFeedPath('abc', 0, SIG)).toBe('/animals/abc?feed=1')
+  })
+  it('이미 개체가 있었으면 개체 상세만', () => {
+    expect(firstFeedPath('abc', 2, SIG)).toBe('/animals/abc')
+  })
+  it('내 사료가 없으면 개체 상세만', () => {
+    expect(firstFeedPath('abc', 0, '')).toBe('/animals/abc')
   })
 })

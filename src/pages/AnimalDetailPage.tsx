@@ -1,5 +1,5 @@
-import { useState } from 'react'
-import { useNavigate, useParams } from 'react-router'
+import { useEffect, useState } from 'react'
+import { useNavigate, useParams, useSearchParams } from 'react-router'
 import { Screen } from '../app/Screen'
 import { useUI } from '../app/ui'
 import { useKeeper, useRefresh, useTransfers, type Animal, type Keeper, type Origin, type Transfer } from '../data/keeper'
@@ -163,7 +163,14 @@ export default function AnimalDetailPage() {
   const refresh = useRefresh()
   const k = useKeeper()
   const transfers = useTransfers().data ?? []
-  const [sheet, setSheet] = useState<null | 'weight' | 'transfer' | 'feeding' | 'symptom' | 'vet'>(null)
+  // ?feed=1 (제품 QR로 시작해 첫 개체를 등록한 직후): 급여 기록을 한 번 열고 주소에서 표시를 지운다
+  const [params, setParams] = useSearchParams()
+  const [sheet, setSheet] = useState<null | 'weight' | 'transfer' | 'feeding' | 'symptom' | 'vet'>(() =>
+    params.get('feed') === '1' ? 'feeding' : null,
+  )
+  useEffect(() => {
+    if (params.has('feed')) setParams({}, { replace: true })
+  }, [params, setParams])
   const healthLogs = useHealthLogs().data
   const vetVisits = useVetVisits().data
   const matings = useMatings().data ?? []

@@ -102,3 +102,13 @@ export function foodChoices(species: string, base: string[], preset: string, las
     .map((p) => p.food)
   return Array.from(new Set([preset, ...base, ...fits, last].filter(Boolean)))
 }
+
+// 한꺼번에 기록의 먹이 칩 (여러 종을 함께 기록하므로 모든 제품을 넣는다)
+export function bulkFoodChoices(base: string[], preset: string): string[] {
+  return Array.from(new Set([preset, ...base, ...PRODUCT_FOODS].filter(Boolean)))
+}
+
+// 새 개체를 등록한 뒤 갈 곳: 첫 개체이고 내 사료가 있으면 급여 기록을 바로 연다
+export function firstFeedPath(animalId: string, ownedBefore: number, preset: string): string {
+  return `/animals/${animalId}${ownedBefore === 0 && preset ? '?feed=1' : ''}`
+}

@@ -19,6 +19,8 @@ export type ChatRoom = {
 export type ChatMessage = { id: number; room_id: string; sender_id: string; body: string; created_at: string }
 
 export const CHAT_MAX = 1000
+// 하루에 새로 시작할 수 있는 대화 수 — 서버(open_dm)의 값과 같게 둔다. 안내 문구에 쓴다
+export const CHAT_DAILY_NEW = 10
 export const CHAT_SAFETY = '선입금을 요구하면 사기일 수 있어요. 전화번호·계좌를 주고받을 때 조심하세요.'
 
 export function otherId(r: ChatRoom, me: string): string | null {

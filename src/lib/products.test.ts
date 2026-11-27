@@ -1,10 +1,12 @@
 import { describe, expect, it } from 'vitest'
 import {
+  bulkDefaultFood,
   bulkFoodChoices,
   defaultFood,
   firstFeedPath,
   foodChoices,
   getFoodPreset,
+  presetFor,
   PRODUCT_FOODS,
   PRODUCTS,
   productOf,
@@ -131,6 +133,34 @@ describe('foodChoices', () => {
   })
   it('직접 입력했던 먹이는 맨 뒤에 남는다', () => {
     expect(foodChoices('테구', ['육류'], '', '닭가슴살')).toEqual(['육류', '닭가슴살'])
+  })
+})
+
+describe('presetFor (그 종에 쓸 수 있는 내 사료)', () => {
+  it('제품 대상 종이면 내 사료를 그대로 쓴다', () => {
+    expect(presetFor('크레스티드게코', SIG)).toBe(SIG)
+    expect(presetFor('리키에너스', STD)).toBe(STD)
+  })
+  it('제품 대상이 아닌 종에는 내 사료를 쓰지 않는다', () => {
+    expect(presetFor('테구', SIG)).toBe('')
+  })
+  it('제품 표에 없는 이름(예전 제품)은 쓰지 않는다', () => {
+    expect(presetFor('크레스티드게코', '없어진 제품')).toBe('')
+  })
+  it('내 사료가 없으면 빈 값', () => {
+    expect(presetFor('크레스티드게코', '')).toBe('')
+  })
+})
+
+describe('bulkDefaultFood (한꺼번에 기록의 기본 먹이)', () => {
+  it('사육 중인 개체가 모두 제품 대상 종이면 내 사료를 골라 둔다', () => {
+    expect(bulkDefaultFood(['크레스티드게코', '리키에너스'], SIG)).toBe(SIG)
+  })
+  it('대상이 아닌 종이 섞여 있으면 골라 두지 않는다', () => {
+    expect(bulkDefaultFood(['크레스티드게코', '테구'], SIG)).toBe('')
+  })
+  it('개체가 없으면 골라 두지 않는다', () => {
+    expect(bulkDefaultFood([], SIG)).toBe('')
   })
 })
 

@@ -5,7 +5,7 @@ import { useRefresh, type Animal, type Keeper } from '../data/keeper'
 import { addD, today, yd } from '../lib/date'
 import { FEED_RESULT_LABEL, FEED_RESULTS, REFUSE_ALERT, type Feeding, type FeedResult } from '../lib/feeding'
 import { nm } from '../lib/format'
-import { defaultFood, foodChoices, getFoodPreset } from '../lib/products'
+import { defaultFood, foodChoices, getFoodPreset, presetFor } from '../lib/products'
 import { spInfo, spOf } from '../lib/species'
 import { errMsg, supabase } from '../lib/supabase'
 import { Chips, Seg, Sheet } from '../ui/kit'
@@ -23,8 +23,8 @@ export function FeedingSheet({ k, animal, edit, onClose }: { k: Keeper; animal: 
   const sp = spInfo(animal)
   const history = k.fs(animal.id)
   const lastFood = [...history].reverse().find((x) => x.food)?.food ?? ''
-  // 내 사료: 제품 QR로 시작한 기기가 기억하는 먹이 (그 개체가 먹던 먹이가 없을 때의 기본값)
-  const preset = getFoodPreset()
+  // 내 사료: 제품 QR로 시작한 기기가 기억하는 먹이 (급여 대상 종이고, 그 개체가 먹던 먹이가 없을 때의 기본값)
+  const preset = presetFor(spOf(animal), getFoodPreset())
   const [date, setDate] = useState(edit?.fed_on ?? today())
   const [result, setResult] = useState<FeedResult>(edit?.result ?? sp.feed.defaultResult)
   const [food, setFood] = useState(edit?.food ?? defaultFood(lastFood, preset))

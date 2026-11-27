@@ -92,6 +92,11 @@ export function setFoodPreset(food: string, store: Pick<Storage, 'setItem'> | nu
   }
 }
 
+// 그 종에 쓸 수 있는 내 사료: 제품 표에 있고 그 종이 급여 대상일 때만 (다른 종의 기본 먹이로 들어가지 않게)
+export function presetFor(species: string, preset: string): string {
+  return Object.values(PRODUCTS).some((p) => p.food === preset && p.forSpecies.includes(species)) ? preset : ''
+}
+
 // 급여 기록의 기본 먹이: 그 개체가 먹던 먹이가 먼저, 없으면 내 사료
 export const defaultFood = (last: string, preset: string) => last || preset
 
@@ -101,6 +106,11 @@ export function foodChoices(species: string, base: string[], preset: string, las
     .filter((p) => p.forSpecies.includes(species))
     .map((p) => p.food)
   return Array.from(new Set([preset, ...base, ...fits, last].filter(Boolean)))
+}
+
+// 한꺼번에 기록의 기본 먹이: 사육 중인 개체가 모두 급여 대상 종일 때만 내 사료를 골라 둔다
+export function bulkDefaultFood(ownedSpecies: string[], preset: string): string {
+  return ownedSpecies.length > 0 && ownedSpecies.every((s) => presetFor(s, preset)) ? preset : ''
 }
 
 // 한꺼번에 기록의 먹이 칩 (여러 종을 함께 기록하므로 모든 제품을 넣는다)

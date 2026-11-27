@@ -7,8 +7,8 @@ import { useKeeper, useRefresh } from '../data/keeper'
 import { today, yd } from '../lib/date'
 import { FEED_RESULT_LABEL, FEED_RESULTS, REFUSE_ALERT, type Feeding, type FeedResult } from '../lib/feeding'
 import { nm } from '../lib/format'
-import { bulkFoodChoices, getFoodPreset } from '../lib/products'
-import { SPECIES } from '../lib/species'
+import { bulkDefaultFood, bulkFoodChoices, getFoodPreset } from '../lib/products'
+import { SPECIES, spOf } from '../lib/species'
 import { errMsg, supabase } from '../lib/supabase'
 import { Chips, ErrorBox, Seg, Spinner } from '../ui/kit'
 import { FeedingSheet, FeedStrip, RESULT_COLOR } from './FeedingSheet'
@@ -101,9 +101,10 @@ export function FeedingBulkPage() {
   const refresh = useRefresh()
   const [sel, setSel] = useState<Set<string>>(new Set())
   const [result, setResult] = useState<FeedResult>('ate')
-  // 내 사료(제품 QR로 기억한 먹이)가 있으면 먼저 골라 둔다
+  // 내 사료(제품 QR로 기억한 먹이): 사육 중인 개체가 모두 급여 대상 종이면 먼저 골라 둔다. 직접 고르면 그 값을 쓴다
   const [preset] = useState(() => getFoodPreset())
-  const [food, setFood] = useState(preset)
+  const [picked, setFood] = useState<string | null>(null)
+  const food = picked ?? bulkDefaultFood(k.owned.map(spOf), preset)
   const [busy, setBusy] = useState(false)
   const owned = useMemo(() => {
     // 확인이 필요한 개체(주기 초과·연속 거부)를 위로

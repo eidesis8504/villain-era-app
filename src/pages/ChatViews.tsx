@@ -135,9 +135,7 @@ export function RoomItem({
         </div>
       </div>
       <div style={{ flex: 'none', display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 6 }}>
-        <span className="mono" style={{ fontSize: 11, color: 'var(--muted-2)' }}>
-          {time}
-        </span>
+        <span style={{ fontSize: 11, color: 'var(--muted-2)' }}>{time}</span>
         {unread && <span className="chat-dot" role="img" aria-label="안 읽음" />}
       </div>
     </button>

@@ -1027,6 +1027,137 @@ select.input {
   white-space: nowrap;
 }
 
+/* ── 채팅 ─────────────────────────────────── */
+.screen-foot {
+  flex: none;
+}
+.chat-room {
+  width: 100%;
+  text-align: left;
+}
+.chat-dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--warn);
+}
+.chat-page {
+  padding: 4px 14px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.chat-post {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 12px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: #fff;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ink);
+  text-decoration: none;
+}
+.chat-safety {
+  background: var(--seg);
+  border-radius: 12px;
+  padding: 9px 12px;
+}
+.chat-list {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+.chat-day {
+  align-self: center;
+  margin: 10px 0 4px;
+  padding: 3px 10px;
+  border-radius: 999px;
+  background: var(--seg);
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--muted);
+}
+.chat-msg {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+.chat-msg.first {
+  margin-top: 8px;
+}
+.chat-msg.mine {
+  align-items: flex-end;
+}
+.chat-who {
+  margin: 0 4px 3px;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--sub);
+}
+.chat-line {
+  display: flex;
+  align-items: flex-end;
+  gap: 6px;
+  max-width: 86%;
+}
+.chat-msg.mine .chat-line {
+  flex-direction: row-reverse;
+}
+.chat-bubble {
+  min-width: 0;
+  padding: 9px 12px;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  background: #fff;
+  font-size: 15px;
+  line-height: 1.5;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+.chat-msg.mine .chat-bubble {
+  border-color: var(--blue);
+  background: var(--blue);
+  color: var(--cream);
+}
+.chat-bubble a {
+  color: inherit;
+  text-decoration: underline;
+}
+.chat-time {
+  flex: none;
+  padding-bottom: 2px;
+  font-size: 10px;
+  color: var(--muted-2);
+}
+.chat-empty {
+  padding: 40px 0;
+  text-align: center;
+  font-size: 13px;
+  color: var(--muted);
+}
+.chat-compose {
+  display: flex;
+  align-items: flex-end;
+  gap: 8px;
+  padding: 8px 12px calc(8px + var(--safe-bottom));
+  border-top: 1px solid var(--line);
+  background: var(--cream);
+}
+.frame.desk .chat-compose {
+  padding: 12px 18px 16px;
+}
+textarea.chat-input {
+  flex: 1;
+  min-width: 0;
+  height: 46px;
+  max-height: 120px;
+  padding: 11px 14px;
+  line-height: 22px;
+}
+
 /* ── 분양 이력서 (공개 화면 /r/<토큰>) ─────── */
 .resume-hdr {
   justify-content: space-between;

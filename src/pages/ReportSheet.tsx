@@ -1,12 +1,13 @@
-// 글·댓글 '⋯' 메뉴: 신고, 작성자 신고, 작성자 차단 (내 글이면 삭제)
+// 글·댓글·대화의 메뉴: 신고, 작성자 신고, 차단 (내 글이면 삭제)
 import { useState } from 'react'
 import { useUI } from '../app/ui'
+import { reportChat } from '../data/chat'
 import { useRefresh } from '../data/keeper'
 import { blockUser, REPORT_REASONS, reportContent, type ReportKind, type ReportReason } from '../data/safety'
 import { errMsg } from '../lib/supabase'
 import { Chips, Sheet } from '../ui/kit'
 
-type Target = { kind: 'post' | 'comment'; id: string; authorId: string; authorName: string }
+type Target = { kind: 'post' | 'comment' | 'chat'; id: string; authorId: string; authorName: string }
 
 export function ContentMenu({
   target,
@@ -29,13 +30,15 @@ export function ContentMenu({
   const [reason, setReason] = useState<ReportReason | null>(null)
   const [note, setNote] = useState('')
   const [busy, setBusy] = useState(false)
-  const what = target.kind === 'post' ? '글' : '댓글'
+  const chat = target.kind === 'chat'
+  const what = target.kind === 'post' ? '글' : chat ? '대화' : '댓글'
 
-  const report = async (kind: ReportKind, id: string) => {
+  const report = async (kind: ReportKind | 'chat', id: string) => {
     if (!reason || busy) return
     setBusy(true)
     try {
-      await reportContent(kind, id, reason, note.trim())
+      if (kind === 'chat') await reportChat(id, reason, note.trim())
+      else await reportContent(kind, id, reason, note.trim())
       ui.toast('신고했어요 · 운영자가 24시간 안에 확인해요')
       onClose()
     } catch (e) {
@@ -49,7 +52,7 @@ export function ContentMenu({
     setBusy(true)
     try {
       await blockUser(target.authorId)
-      await refresh('posts', 'post', 'comments', 'blocks')
+      await refresh('posts', 'post', 'comments', 'blocks', 'chat-rooms')
       ui.toast(`${target.authorName}님을 차단했어요`)
       onClose()
       onBlocked?.()
@@ -74,7 +77,11 @@ export function ContentMenu({
             onChange={(e) => setNote(e.target.value.slice(0, 300))}
             placeholder="자세한 내용 (선택)"
           />
-          <div className="hint">가입한 지 하루가 지난 서로 다른 회원 3명이 신고한 글·댓글은 운영자가 확인하기 전까지 자동으로 숨겨져요.</div>
+          <div className="hint" data-test="report-hint">
+            {chat && !isUser
+              ? '신고하면 운영자가 이 대화의 내용을 확인해요. 신고가 처리된 뒤에는 운영자가 다시 볼 수 없어요.'
+              : '가입한 지 하루가 지난 서로 다른 회원 3명이 신고한 글·댓글은 운영자가 확인하기 전까지 자동으로 숨겨져요.'}
+          </div>
           <button
             type="button"
             data-test="report-send"
@@ -94,7 +101,7 @@ export function ContentMenu({
       <Sheet title={`${target.authorName}님 차단`} onClose={onClose}>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
           <div style={{ fontSize: 14, lineHeight: 1.6, color: 'var(--sub)' }}>
-            차단하면 이 회원의 글과 댓글이 보이지 않고 알림도 오지 않아요. 전체 › 차단 관리에서 풀 수 있어요.
+            차단하면 이 회원의 글·댓글·대화가 보이지 않고 서로 메시지를 보낼 수 없어요. 알림도 오지 않아요. 전체 › 차단 관리에서 풀 수 있어요.
           </div>
           <div style={{ display: 'flex', gap: 8 }}>
             <button type="button" className="btn btn-plain" style={{ flex: 1 }} onClick={onClose}>
@@ -132,8 +139,8 @@ export function ContentMenu({
     <Sheet title={`${what} 메뉴`} onClose={onClose}>
       <div className="list-card" style={{ padding: '0 16px' }}>
         {!mine && item(`${what} 신고`, () => setStep('report'), 'menu-report')}
-        {!mine && item('작성자 신고', () => setStep('report-user'), 'menu-report-user')}
-        {!mine && item('작성자 차단', () => setStep('block'), 'menu-block', true)}
+        {!mine && !chat && item('작성자 신고', () => setStep('report-user'), 'menu-report-user')}
+        {!mine && item(chat ? '상대 차단' : '작성자 차단', () => setStep('block'), 'menu-block', true)}
         {canDelete && onDelete && item(`${what} 삭제`, () => (onClose(), onDelete()), 'menu-delete', true)}
       </div>
     </Sheet>

@@ -32,6 +32,8 @@ const FeedingBulkPage = named(() => import('./pages/FeedingPages'), 'FeedingBulk
 const HealthPage = named(() => import('./pages/HealthPages'), 'HealthPage')
 const ConsultPage = named(() => import('./pages/HealthPages'), 'ConsultPage')
 const AdminPage = lazy(() => import('./pages/AdminPage'))
+const ChatListPage = named(() => import('./pages/ChatPages'), 'ChatListPage')
+const ChatRoomPage = named(() => import('./pages/ChatPages'), 'ChatRoomPage')
 const ProductPage = lazy(() => import('./pages/ProductPage'))
 // 카메라 QR 인식 라이브러리는 스캔 화면에서만 불러온다
 const ScanPage = lazy(() => import('./pages/ScanPage'))
@@ -78,6 +80,8 @@ export const router = createBrowserRouter([
           { path: 'community', element: wait(<CommunityPage />) },
           { path: 'community/new', element: wait(<WritePage />) },
           { path: 'community/:id', element: wait(<PostPage />) },
+          { path: 'chat', element: wait(<ChatListPage />) },
+          { path: 'chat/:id', element: wait(<ChatRoomPage />) },
           { path: 'more', element: <MorePage /> },
           { path: 'blocked', element: wait(<BlockedPage />) },
           { path: 'admin', element: wait(<AdminPage />) },

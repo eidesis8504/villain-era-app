@@ -12,6 +12,7 @@ const VIEWS: [RegExp, string][] = [
   [/^\/community(\/(?!new\/?$)[^/]+)?\/?$/, 'view:community'],
   [/^\/animals\/[^/]+\/consult\/?$/, 'view:consult'],
   [/^\/feedings\/?$/, 'view:feeding_bulk'],
+  [/^\/chat(\/[^/]+)?\/?$/, 'view:chat'],
 ]
 
 export function viewName(pathname: string): string | null {

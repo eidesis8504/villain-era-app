@@ -1,21 +1,40 @@
 import { useState } from 'react'
-import { useLocation, useNavigate, useParams } from 'react-router'
+import { Link, useLocation, useNavigate, useParams } from 'react-router'
 import { badgeOf, displayName, useAuth, useMe } from '../app/auth'
 import { Screen } from '../app/Screen'
 import { useUI } from '../app/ui'
 import { useToggleLike } from '../data/actions'
-import { badgeColor, CATS, useComments, useLiked, usePost, usePosts, type Attach, type MediaItem } from '../data/community'
+import { setAdoptStatus, shareAnimal } from '../data/adopt'
+import { openDm } from '../data/chat'
+import { badgeColor, CATS, useComments, useLiked, usePost, usePosts, type MediaItem, type RecordAttach } from '../data/community'
 import { useHealthLogs, useVetVisits } from '../data/health'
 import { useKeeper, useRefresh, type Keeper } from '../data/keeper'
+import {
+  ADOPT_CAT,
+  ADOPT_STATUS_LABEL,
+  ADOPT_STATUSES,
+  adoptErrors,
+  adoptPayload,
+  EMPTY_ADOPT_FORM,
+  NOT_A_PARTY,
+  tradeGate,
+  tradeGateText,
+  type AdoptForm,
+  type AdoptStatus,
+} from '../lib/adopt'
 import { isoDay, today, yd } from '../lib/date'
 import { fd, fw, nm } from '../lib/format'
 import { fmtDur, prepareImage, prepareVideo, removeFiles, upload, videoExt, type MediaDraft } from '../lib/media'
 import { buildConsult } from '../lib/health'
+import { resumePath } from '../lib/resume'
 import { errMsg, publicUrl, signedUrls, supabase } from '../lib/supabase'
 import { Chips, ErrorBox, Seg, Sheet, Sparkline, Spinner, Toggle } from '../ui/kit'
+import { AdoptCard } from './AdoptCard'
+import { AdoptFields } from './AdoptFields'
 import { HealthCardView } from './ConsultCard'
 import { ContentMenu } from './ReportSheet'
 import { PostCard } from './shared'
+import { TierBadge } from './TierViews'
 
 export function CommunityPage() {
   const nav = useNavigate()
@@ -25,6 +44,13 @@ export function CommunityPage() {
     <Screen title="커뮤니티" right={{ label: '글쓰기', onClick: () => nav('/community/new'), test: 'write' }} wide>
       <div className="page-grid" style={{ gridTemplateColumns: 'repeat(auto-fill,minmax(min(100%,340px),1fr))' }}>
         <Chips style={{ gridColumn: '1 / -1' }} items={['전체', ...CATS].map((c) => [c, c] as const)} value={cat} onChange={setCat} />
+        {cat === ADOPT_CAT && (
+          <div className="welcome-card span-all" data-test="adopt-notice" style={{ fontSize: 12 }}>
+            <div>
+              {NOT_A_PARTY} 글을 쓰기 전에 <Link to="/policy">운영정책</Link>의 분양·홍보 규칙을 확인해 주세요.
+            </div>
+          </div>
+        )}
         {q.isLoading && (
           <div className="span-all">
             <Spinner center />
@@ -52,7 +78,7 @@ export function CommunityPage() {
   )
 }
 
-function AttachView({ at }: { at: Attach }) {
+function AttachView({ at }: { at: RecordAttach }) {
   if (at.kind === 'health') return <HealthCardView data={at} photoUrls={(at.photos ?? []).map((p) => publicUrl('post-media', p))} />
   const kindLbl = { weight: '체중 기록', clutch: '산란 기록', line: '혈통 정보' }[at.kind]
   return (
@@ -120,7 +146,7 @@ export function PostPage() {
   const [comment, setComment] = useState('')
   const [busy, setBusy] = useState(false)
   const [confirm, setConfirm] = useState(false)
-  const [menu, setMenu] = useState<null | { kind: 'post' | 'comment'; id: string; authorId: string; authorName: string }>(null)
+  const [menu, setMenu] = useState<null | { kind: 'post' | 'comment'; id: string; authorId: string; authorName: string; postId: string }>(null)
 
   if (q.isLoading) return <Screen title="게시글" back="/community"><Spinner center /></Screen>
   if (q.error) return <Screen title="게시글" back="/community"><ErrorBox error={q.error} onRetry={() => q.refetch()} /></Screen>
@@ -129,6 +155,7 @@ export function PostPage() {
 
   const mine = p.author_id === uid
   const qa = p.cat === 'Q&A'
+  const ad = p.attach?.kind === 'adopt' ? p.attach : null
   const list = comments.data ?? []
   const badge = badgeOf(p.author)
 
@@ -148,6 +175,29 @@ export function PostPage() {
     if (error) return ui.toast(errMsg(error, '채택하지 못했어요'), 'warn')
     await refresh('comments', 'post', 'posts')
     ui.toast('답변을 채택했어요 · 채택은 변경할 수 없어요')
+  }
+
+  // 글쓴이와 1:1 대화를 연다 (대화 위에 이 글이 붙는다)
+  const startChat = async () => {
+    if (busy) return
+    setBusy(true)
+    try {
+      nav(`/chat/${await openDm(p.author_id, p.id)}`)
+    } catch (e) {
+      ui.toast(errMsg(e, '대화를 시작하지 못했어요'), 'warn')
+    } finally {
+      setBusy(false)
+    }
+  }
+
+  const changeStatus = async (s: AdoptStatus) => {
+    try {
+      await setAdoptStatus(p.id, s)
+      await refresh('post', 'posts')
+      ui.toast(`분양 상태 · ${ADOPT_STATUS_LABEL[s]}`)
+    } catch (e) {
+      ui.toast(errMsg(e, '분양 상태를 바꾸지 못했어요'), 'warn')
+    }
   }
 
   const del = async () => {
@@ -176,13 +226,14 @@ export function PostPage() {
               {badge}
             </span>
           )}
+          {p.author && p.author.role !== 'admin' && <TierBadge hz={p.author.hz} />}
           <span className="mono">· {yd(isoDay(p.created_at))}</span>
           {!mine && (
             <button
               type="button"
               aria-label="글 메뉴"
               data-test="post-menu"
-              onClick={() => setMenu({ kind: 'post', id: p.id, authorId: p.author_id, authorName: displayName(p.author) })}
+              onClick={() => setMenu({ kind: 'post', id: p.id, authorId: p.author_id, authorName: displayName(p.author), postId: p.id })}
               style={{ marginLeft: 'auto', padding: '0 4px', fontSize: 18, color: 'var(--muted)' }}
             >
               ⋯
@@ -217,7 +268,33 @@ export function PostPage() {
           </div>
         )}
 
-        {p.attach && <AttachView at={p.attach} />}
+        {ad ? (
+          <AdoptCard
+            at={ad}
+            photoUrl={publicUrl('animal-photos', ad.animal?.photo_path)}
+            onResume={ad.resume ? () => nav(resumePath(ad.resume!)) : undefined}
+          >
+            {mine && ad.mode === 'sale' && ad.status && (
+              <div>
+                <div className="label">분양 상태 바꾸기</div>
+                <Seg
+                  testId="adopt-status"
+                  height={34}
+                  items={ADOPT_STATUSES.map((s) => [s, ADOPT_STATUS_LABEL[s]] as const)}
+                  value={ad.status}
+                  onChange={changeStatus}
+                />
+              </div>
+            )}
+            {!mine && (
+              <button type="button" data-test="adopt-chat" className="btn btn-primary btn-sm" onClick={startChat} disabled={busy}>
+                {ad.mode === 'sale' ? '채팅으로 문의' : '채팅 보내기'}
+              </button>
+            )}
+          </AdoptCard>
+        ) : (
+          p.attach && p.attach.kind !== 'adopt' && <AttachView at={p.attach} />
+        )}
 
         <div style={{ display: 'flex', gap: 8 }}>
           <button
@@ -281,6 +358,7 @@ export function PostPage() {
                     {cb}
                   </span>
                 )}
+                {c.author && c.author.role !== 'admin' && <TierBadge hz={c.author.hz} />}
                 {c.hidden && <span className="tag warn">숨김</span>}
                 {c.adopted && <span style={{ marginLeft: 'auto', fontSize: 11, fontWeight: 700, color: 'var(--blue)' }}>✓ 채택된 답변</span>}
                 {c.author_id !== uid && (
@@ -288,7 +366,7 @@ export function PostPage() {
                     type="button"
                     aria-label="댓글 메뉴"
                     data-test="comment-menu"
-                    onClick={() => setMenu({ kind: 'comment', id: c.id, authorId: c.author_id, authorName: displayName(c.author) })}
+                    onClick={() => setMenu({ kind: 'comment', id: c.id, authorId: c.author_id, authorName: displayName(c.author), postId: p.id })}
                     style={{ marginLeft: c.adopted ? 4 : 'auto', padding: '0 4px', fontSize: 16, color: 'var(--muted)' }}
                   >
                     ⋯
@@ -361,7 +439,7 @@ export function PostPage() {
   )
 }
 
-function snap(k: Keeper, aid: string, type: 'weight' | 'clutch' | 'line'): Attach | null {
+function snap(k: Keeper, aid: string, type: 'weight' | 'clutch' | 'line'): RecordAttach | null {
   const a = k.A(aid)
   if (!a) return null
   const label = `${nm(a)} ${a.code}`
@@ -399,7 +477,8 @@ export function WritePage() {
   const nav = useNavigate()
   const ui = useUI()
   const refresh = useRefresh()
-  const { uid } = useMe()
+  const { uid, profile } = useMe()
+  const { isAdmin } = useAuth()
   const k = useKeeper()
   const loc = useLocation()
   const init = loc.state as { attach?: 'health'; animal?: string; photos?: string[] } | null
@@ -415,10 +494,16 @@ export function WritePage() {
   const [attType, setAttType] = useState<'weight' | 'clutch' | 'line' | 'health'>(init?.attach === 'health' ? 'health' : 'weight')
   const [tried, setTried] = useState(false)
   const [busy, setBusy] = useState<string>('')
+  // 분양·홍보 글: 분양 카드 칸과 새 계정 제한 (서버도 같은 규칙으로 확인한다)
+  const isAdopt = cat === ADOPT_CAT
+  const [adopt, setAdopt] = useState<AdoptForm>(EMPTY_ADOPT_FORM)
+  const [openedAt] = useState(() => Date.now())
+  const gate = tradeGate(profile.created_at, k.animals.length, isAdmin, openedAt)
+  const adoptErrs = isAdopt ? adoptErrors(adopt) : {}
 
   const nImg = media.filter((m) => m.t === 'img').length
   const nVid = media.filter((m) => m.t === 'vid').length
-  const healthSnap = (): Attach | null => {
+  const healthSnap = (): RecordAttach | null => {
     const a = k.A(aid)
     if (!a) return null
     return {
@@ -469,7 +554,12 @@ export function WritePage() {
       setTried(true)
       return ui.toast('제목과 내용을 확인해 주세요', 'warn')
     }
-    if (att && !sn) return ui.toast('첨부할 기록이 없어요 — 다른 항목을 선택하세요', 'warn')
+    if (isAdopt && !gate.ok) return ui.toast(tradeGateText(gate), 'warn')
+    if (isAdopt && Object.keys(adoptErrs).length) {
+      setTried(true)
+      return ui.toast('분양·홍보 글의 칸을 확인해 주세요', 'warn')
+    }
+    if (!isAdopt && att && !sn) return ui.toast('첨부할 기록이 없어요 — 다른 항목을 선택하세요', 'warn')
     const uploaded: string[] = []
     const folder = crypto.randomUUID()
     try {
@@ -486,8 +576,8 @@ export function WritePage() {
         }
         items.push({ t: m.t, path, thumb, dur: m.dur })
       }
-      let attach = sn
-      if (sn?.kind === 'health' && healthPhotos.length) {
+      let attach: RecordAttach | ReturnType<typeof adoptPayload> | null = isAdopt ? null : sn
+      if (!isAdopt && sn?.kind === 'health' && healthPhotos.length) {
         setBusy('사진 올리는 중…')
         const signed = await signedUrls('health-photos', healthPhotos, 600)
         const copied: string[] = []
@@ -500,6 +590,12 @@ export function WritePage() {
         }
         attach = { ...sn, photos: copied }
       }
+      if (isAdopt) {
+        // 개체를 골랐으면 이력서 링크를 만들어 붙인다 (개체 카드는 서버가 이 링크로 채운다)
+        setBusy('이력서 링크 준비 중…')
+        const token = adopt.animalId ? await shareAnimal(adopt.animalId) : null
+        attach = adoptPayload(adopt, token)
+      }
       setBusy('등록 중…')
       const { data, error } = await supabase
         .from('posts')
@@ -508,7 +604,7 @@ export function WritePage() {
         .single()
       if (error) throw error
       media.forEach((m) => m.preview && URL.revokeObjectURL(m.preview))
-      await refresh('posts')
+      await refresh('posts', 'shares')
       ui.toast('게시글을 등록했어요')
       nav(`/community/${data.id}`, { replace: true })
     } catch (e) {
@@ -545,7 +641,7 @@ export function WritePage() {
             value={body}
             maxLength={5000}
             onChange={(e) => setBody(e.target.value)}
-            placeholder="사육 경험이나 궁금한 점을 적어주세요"
+            placeholder={isAdopt ? '개체 소개, 분양 조건, 전달 방법 등을 적어 주세요' : '사육 경험이나 궁금한 점을 적어주세요'}
           />
           {bodyErr && (
             <div className="err" style={{ marginTop: 6 }}>
@@ -600,7 +696,16 @@ export function WritePage() {
           </div>
         </div>
 
-        <div className="card" style={{ padding: 14, display: 'flex', flexDirection: 'column', gap: 10 }}>
+        {isAdopt && !gate.ok && (
+          <div className="welcome-card warn" data-test="adopt-gate">
+            {tradeGateText(gate)}
+          </div>
+        )}
+        {isAdopt && gate.ok && (
+          <AdoptFields f={adopt} set={(patch) => setAdopt((s) => ({ ...s, ...patch }))} animals={k.owned} errors={tried ? adoptErrs : {}} />
+        )}
+
+        <div className="card" style={{ padding: 14, display: isAdopt ? 'none' : 'flex', flexDirection: 'column', gap: 10 }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <span style={{ fontSize: 14, fontWeight: 700 }}>내 개체 기록 첨부</span>
             <Toggle
@@ -640,7 +745,7 @@ export function WritePage() {
           )}
         </div>
 
-        <button type="button" data-test="write-submit" className={`btn btn-primary${busy || mBusy ? ' off' : ''}`} onClick={submit}>
+        <button type="button" data-test="write-submit" className={`btn btn-primary${busy || mBusy || (isAdopt && !gate.ok) ? ' off' : ''}`} onClick={submit}>
           {busy || (mBusy ? '파일 처리 중…' : '등록')}
         </button>
       </div>

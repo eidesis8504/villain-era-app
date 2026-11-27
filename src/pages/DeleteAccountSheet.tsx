@@ -36,6 +36,7 @@ export function DeleteAccountSheet({ onClose }: { onClose: () => void }) {
             <li>개체·체중·급여·건강·번식·할 일 기록</li>
             <li>올린 사진과 동영상</li>
             <li>내가 쓴 글·댓글(다른 사람 글에 단 댓글 포함)과 좋아요</li>
+            <li>채팅 대화와 운영자 문의 (상대방 화면에서도 사라져요)</li>
             <li>분양 코드·알림·의견</li>
           </ul>
         </div>

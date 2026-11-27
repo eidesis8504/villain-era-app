@@ -1,8 +1,8 @@
-// 운영자 전용 '검증 현황': 반응 숫자, 의견·설문·오류, 신고 처리
+// 운영자 전용 '검증 현황': 반응 숫자, 의견·설문·오류, 신고 처리, 문의함
 import { useQueryClient } from '@tanstack/react-query'
 import { useState } from 'react'
-import { useSearchParams } from 'react-router'
-import { useAuth } from '../app/auth'
+import { useNavigate, useSearchParams } from 'react-router'
+import { displayName, useAuth } from '../app/auth'
 import { Screen } from '../app/Screen'
 import { useUI } from '../app/ui'
 import {
@@ -15,11 +15,14 @@ import {
   type AdminMetrics,
   type ModerateAction,
 } from '../data/admin'
+import { useSupportRooms, type RoomRow } from '../data/chat'
 import { REPORT_REASONS } from '../data/safety'
-import { gap, isoDay, md, yd } from '../lib/date'
+import { isUnread, previewText } from '../lib/chat'
+import { gap, isoDay, md, relTime, yd } from '../lib/date'
 import { judge, type Verdict } from '../lib/metrics'
 import { errMsg, supabase } from '../lib/supabase'
 import { ErrorBox, Seg, Spinner } from '../ui/kit'
+import { RoomItem } from './ChatViews'
 import { NotFound } from './InfoPages'
 
 const TABS = [
@@ -28,6 +31,7 @@ const TABS = [
   ['survey', '설문'],
   ['errors', '오류'],
   ['reports', '신고'],
+  ['inquiry', '문의'],
 ] as const
 type Tab = (typeof TABS)[number][0]
 
@@ -324,12 +328,13 @@ function ErrorsTab() {
 }
 
 const REASON = new Map(REPORT_REASONS)
-const KIND_TXT = { post: '글', comment: '댓글', user: '회원' } as const
+const KIND_TXT = { post: '글', comment: '댓글', user: '회원', chat: '대화' } as const
 
 function ReportsTab() {
   const q = useAdminReports()
   const qc = useQueryClient()
   const ui = useUI()
+  const nav = useNavigate()
   const [busy, setBusy] = useState<number | null>(null)
   if (q.isLoading) return <Spinner center />
   if (q.error) return <ErrorBox error={q.error} onRetry={() => q.refetch()} />
@@ -363,7 +368,9 @@ function ReportsTab() {
           <div style={{ display: 'flex', gap: 6, alignItems: 'center', fontSize: 12 }}>
             <span className="tag">{KIND_TXT[r.target_kind]}</span>
             <span className="tag warn">{REASON.get(r.reason as never) ?? r.reason}</span>
-            <span style={{ color: 'var(--muted)' }}>작성자 {r.who}</span>
+            <span style={{ color: 'var(--muted)' }}>
+              {r.target_kind === 'chat' ? '신고된 회원' : '작성자'} {r.who}
+            </span>
             <span className="mono" style={{ marginLeft: 'auto', color: 'var(--muted-2)' }}>
               {yd(isoDay(r.created_at))}
             </span>
@@ -371,9 +378,20 @@ function ReportsTab() {
           <div style={{ fontSize: 14, fontWeight: 600, overflowWrap: 'anywhere' }}>{r.preview}</div>
           {r.note && <div style={{ fontSize: 13, color: 'var(--sub)' }}>신고 내용: {r.note}</div>}
           <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
-            {r.target_kind !== 'user' && btn(r.id, 'hide', '숨김')}
-            {r.target_kind !== 'user' && btn(r.id, 'unhide', '숨김 해제')}
-            {r.target_kind !== 'user' && btn(r.id, 'delete', '삭제', true)}
+            {(r.target_kind === 'post' || r.target_kind === 'comment') && btn(r.id, 'hide', '숨김')}
+            {(r.target_kind === 'post' || r.target_kind === 'comment') && btn(r.id, 'unhide', '숨김 해제')}
+            {(r.target_kind === 'post' || r.target_kind === 'comment') && btn(r.id, 'delete', '삭제', true)}
+            {r.target_kind === 'chat' && (
+              <button
+                type="button"
+                data-test="report-chat-open"
+                className="btn btn-outline btn-xs"
+                style={{ padding: '0 10px', fontSize: 12 }}
+                onClick={() => nav(`/admin/chat/${r.target_id}${r.target_user ? `?user=${r.target_user}` : ''}`)}
+              >
+                대화 보기
+              </button>
+            )}
             {btn(r.id, 'dismiss', '기각')}
             {btn(r.id, 'block_user', '회원 이용 제한', true)}
           </div>
@@ -384,18 +402,54 @@ function ReportsTab() {
   )
 }
 
+// 문의함: 회원이 보낸 문의. 답하지 않은 문의에 표시가 붙는다
+function InquiryTab({ rooms, uid }: { rooms: ReturnType<typeof useSupportRooms>; uid: string }) {
+  const nav = useNavigate()
+  if (rooms.isLoading) return <Spinner center />
+  if (rooms.error) return <ErrorBox error={rooms.error} onRetry={() => rooms.refetch()} />
+  const list = rooms.data ?? []
+  return (
+    <div className="page">
+      <div className="hint">전체 › 도움말·문의에서 회원이 보낸 문의예요 · 답하면 회원에게 알림이 가요</div>
+      {list.length > 0 && (
+        <div className="list-card" data-test="inquiry-rooms">
+          {list.map((r) => (
+            <RoomItem
+              key={r.id}
+              name={displayName(r.a)}
+              avatarUrl={r.a?.avatar_url}
+              preview={previewText(r)}
+              time={r.last_message_at ? relTime(r.last_message_at) : ''}
+              unread={isUnread(r, uid, true)}
+              onClick={() => nav(`/admin/inquiry/${r.id}`)}
+            />
+          ))}
+        </div>
+      )}
+      {!list.length && <div className="empty">아직 문의가 없어요</div>}
+    </div>
+  )
+}
+
+const NO_ROOMS: RoomRow[] = []
+
 export default function AdminPage() {
-  const { isAdmin } = useAuth()
+  const { isAdmin, uid } = useAuth()
   const [params, setParams] = useSearchParams()
   const tab = (TABS.some(([k]) => k === params.get('tab')) ? params.get('tab') : 'stats') as Tab
   const m = useAdminMetrics()
-  if (!isAdmin) return <NotFound />
+  const inquiries = useSupportRooms(isAdmin)
+  if (!isAdmin || !uid) return <NotFound />
+  const waiting = (inquiries.data ?? NO_ROOMS).filter((r) => isUnread(r, uid, true)).length
   return (
     <Screen title="검증 현황" back="/more" wide>
       <div style={{ padding: '4px 18px 0' }}>
         <Seg
           height={36}
-          items={TABS.map(([k, l]) => [k, k === 'reports' && m.data?.reports.open ? `${l} ${m.data.reports.open}` : l] as const)}
+          items={TABS.map(([k, l]) => {
+            const n = k === 'reports' ? m.data?.reports.open : k === 'inquiry' ? waiting : 0
+            return [k, n ? `${l} ${n}` : l] as const
+          })}
           value={tab}
           onChange={(k) => setParams({ tab: k }, { replace: true })}
         />
@@ -405,6 +459,7 @@ export default function AdminPage() {
       {tab === 'survey' && <SurveyTab m={m.data} />}
       {tab === 'errors' && <ErrorsTab />}
       {tab === 'reports' && <ReportsTab />}
+      {tab === 'inquiry' && <InquiryTab rooms={inquiries} uid={uid} />}
     </Screen>
   )
 }

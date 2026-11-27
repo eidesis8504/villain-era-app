@@ -97,7 +97,7 @@ export function useAdminErrors() {
 
 export type ReportRow = {
   id: number
-  target_kind: 'post' | 'comment' | 'user'
+  target_kind: 'post' | 'comment' | 'user' | 'chat'
   target_id: string
   target_user: string | null
   reason: string
@@ -107,7 +107,7 @@ export type ReportRow = {
   who: string
 }
 
-// 열린 신고 + 대상 미리보기(글 제목·댓글 내용·회원 닉네임)
+// 열린 신고 + 대상 미리보기(글 제목·댓글 내용·회원 닉네임). 대화 신고는 내용을 목록에 싣지 않는다
 export function useAdminReports() {
   const { isAdmin } = useAuth()
   return useQuery({
@@ -140,7 +140,9 @@ export function useAdminReports() {
             ? (title.get(r.target_id) ?? '(삭제된 글)')
             : r.target_kind === 'comment'
               ? (body.get(r.target_id) ?? '(삭제된 댓글)')
-              : `회원 ${(r.target_user && nick.get(r.target_user)) || ''}`,
+              : r.target_kind === 'chat'
+                ? '1:1 대화 신고 · ‘대화 보기’로 내용을 확인해 주세요'
+                : `회원 ${(r.target_user && nick.get(r.target_user)) || ''}`,
       })) as ReportRow[]
     },
   })

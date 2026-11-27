@@ -5,7 +5,7 @@ import { useKeeper, type Animal, type Weight } from '../data/keeper'
 import { gap, today, yd } from '../lib/date'
 import { fd, fw, nm } from '../lib/format'
 import { ErrorBox, Spinner } from '../ui/kit'
-import { FeedStrip } from './FeedingSheet'
+import { FeedStrip } from './FeedStrip'
 import { WeightSheet } from './sheets'
 
 export function WeightPage() {

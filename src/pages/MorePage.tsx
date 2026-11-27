@@ -9,12 +9,14 @@ import { useKeeper } from '../data/keeper'
 import { squareImage, upload } from '../lib/media'
 import { currentSubscription, disablePush, enablePush, isIOS, isStandalone, pushSupport } from '../lib/push'
 import { errMsg, publicUrl, supabase } from '../lib/supabase'
+import { tierOf } from '../lib/tier'
 import { isNative } from '../lib/native'
 import { APP_VERSION } from '../lib/version'
 import { Avatar, Seg, Sheet, Toggle } from '../ui/kit'
 import { DeleteAccountSheet } from './DeleteAccountSheet'
 import { DeviceLinkSheet } from './DeviceLinkSheets'
 import { FeedbackSheet } from './FeedbackSheet'
+import { TierBadge } from './TierViews'
 
 function ProfileSheet({ profile, onClose }: { profile: Profile; onClose: () => void }) {
   const ui = useUI()
@@ -271,7 +273,7 @@ export default function MorePage() {
     [
       '안내',
       [
-        row('도움말·문의', '', () => nav('/support')),
+        row('도움말·문의', '운영자에게 문의', () => nav('/inquiry')),
         row('개인정보 처리방침', '', () => nav('/privacy')),
         row('이용약관', '', () => nav('/terms')),
         row('커뮤니티 운영정책', '', () => nav('/policy')),
@@ -281,6 +283,7 @@ export default function MorePage() {
       '계정',
       [
         row('프로필 편집', '사진 · 닉네임 · 소개', () => setSheet('profile')),
+        row('내 등급', `${tierOf(profile.hz).name} · ${profile.hz} Hz`, () => nav('/tier')),
         row('다른 기기에서 이어 쓰기', '코드로 연결', () => setSheet('link')),
         row('차단 관리', '', () => nav('/blocked')),
         row('계정과 기록 삭제', '되돌릴 수 없어요', () => setSheet('delete')),
@@ -319,6 +322,7 @@ export default function MorePage() {
             <div style={{ display: 'flex', gap: 6, alignItems: 'center', flexWrap: 'wrap' }}>
               <span style={{ fontSize: 17, fontWeight: 700 }}>{displayName(profile)}</span>
               {badge && <span className="tag dark">{badge}</span>}
+              {!isAdmin && <TierBadge hz={profile.hz} />}
             </div>
             {profile.bio && <div style={{ fontSize: 13, color: 'var(--sub)', marginTop: 3, overflowWrap: 'anywhere' }}>{profile.bio}</div>}
             <div style={{ fontSize: 12, color: 'var(--muted)', marginTop: 3 }}>

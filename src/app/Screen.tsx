@@ -22,6 +22,7 @@ export function Screen({
   wide,
   children,
   hideHeader,
+  footer,
 }: {
   title?: string
   back?: string
@@ -29,15 +30,14 @@ export function Screen({
   wide?: boolean
   children: ReactNode
   hideHeader?: boolean
+  // 스크롤되지 않고 화면 아래에 붙는 영역 (채팅 입력 칸)
+  footer?: ReactNode
 }) {
   const { desk, tablet } = useViewport()
   const goBack = useBack(back ?? '/')
   const width = wide ? 1120 : 720
-  const pad = desk
-    ? `20px max(32px, calc((100% - ${width}px) / 2)) 40px`
-    : tablet
-      ? '0 max(0px, calc((100% - 760px) / 2))'
-      : '0px'
+  const side = desk ? `max(32px, calc((100% - ${width}px) / 2))` : tablet ? 'max(0px, calc((100% - 760px) / 2))' : '0px'
+  const pad = desk ? `20px ${side} 40px` : `0 ${side}`
   const showHeader = !hideHeader && !!(title || right)
   return (
     <>
@@ -72,6 +72,11 @@ export function Screen({
       <div className="scroller" style={{ padding: pad }}>
         {children}
       </div>
+      {footer && (
+        <div className="screen-foot" style={{ padding: `0 ${side}` }}>
+          {footer}
+        </div>
+      )}
     </>
   )
 }

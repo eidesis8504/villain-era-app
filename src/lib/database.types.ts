@@ -410,6 +410,7 @@ export type Database = {
           todo_alarm: boolean
           tz: string
           first_platform: string | null
+          hz: number
           is_test: boolean
           source: string | null
         }
@@ -427,6 +428,7 @@ export type Database = {
           todo_alarm?: boolean
           tz?: string
           first_platform?: string | null
+          hz?: number
           is_test?: boolean
           source?: string | null
         }
@@ -444,6 +446,7 @@ export type Database = {
           todo_alarm?: boolean
           tz?: string
           first_platform?: string | null
+          hz?: number
           is_test?: boolean
           source?: string | null
         }
@@ -808,6 +811,99 @@ export type Database = {
         }
         Relationships: []
       }
+      animal_shares: {
+        Row: {
+          animal_id: string
+          created_at: string
+          owner_id: string
+          revoked_at: string | null
+          token: string
+        }
+        Insert: {
+          animal_id: string
+          created_at?: string
+          owner_id: string
+          revoked_at?: string | null
+          token: string
+        }
+        Update: {
+          animal_id?: string
+          created_at?: string
+          owner_id?: string
+          revoked_at?: string | null
+          token?: string
+        }
+        Relationships: []
+      }
+      chat_rooms: {
+        Row: {
+          a_read_at: string
+          b_read_at: string
+          created_at: string
+          created_by: string
+          id: string
+          kind: string
+          last_message: string
+          last_message_at: string | null
+          last_sender: string | null
+          post_id: string | null
+          user_a: string
+          user_b: string | null
+        }
+        Insert: {
+          a_read_at?: string
+          b_read_at?: string
+          created_at?: string
+          created_by: string
+          id?: string
+          kind: string
+          last_message?: string
+          last_message_at?: string | null
+          last_sender?: string | null
+          post_id?: string | null
+          user_a: string
+          user_b?: string | null
+        }
+        Update: {
+          a_read_at?: string
+          b_read_at?: string
+          created_at?: string
+          created_by?: string
+          id?: string
+          kind?: string
+          last_message?: string
+          last_message_at?: string | null
+          last_sender?: string | null
+          post_id?: string | null
+          user_a?: string
+          user_b?: string | null
+        }
+        Relationships: []
+      }
+      chat_messages: {
+        Row: {
+          body: string
+          created_at: string
+          id: number
+          room_id: string
+          sender_id: string
+        }
+        Insert: {
+          body: string
+          created_at?: string
+          id?: never
+          room_id: string
+          sender_id: string
+        }
+        Update: {
+          body?: string
+          created_at?: string
+          id?: never
+          room_id?: string
+          sender_id?: string
+        }
+        Relationships: []
+      }
       reports: {
         Row: {
           created_at: string
@@ -1108,6 +1204,19 @@ export type Database = {
       admin_metrics: { Args: never; Returns: Json }
       admin_set_config: { Args: { p_key: string; p_value: Json }; Returns: undefined }
       my_account_is_empty: { Args: never; Returns: boolean }
+      share_animal: { Args: { p_animal: string }; Returns: string }
+      unshare_animal: { Args: { p_animal: string }; Returns: undefined }
+      get_resume: { Args: { p_token: string }; Returns: Json }
+      set_adopt_status: { Args: { p_post: string; p_status: string }; Returns: undefined }
+      open_dm: { Args: { p_user: string; p_post?: string | null }; Returns: string }
+      open_support: { Args: never; Returns: string }
+      send_message: {
+        Args: { p_room: string; p_body: string }
+        Returns: Database["public"]["Tables"]["chat_messages"]["Row"]
+      }
+      mark_room_read: { Args: { p_room: string }; Returns: undefined }
+      report_chat: { Args: { p_room: string; p_reason: string; p_note?: string }; Returns: undefined }
+      my_tier: { Args: never; Returns: Json }
     }
     Enums: {
       [_ in never]: never

@@ -32,6 +32,13 @@ const FeedingBulkPage = named(() => import('./pages/FeedingPages'), 'FeedingBulk
 const HealthPage = named(() => import('./pages/HealthPages'), 'HealthPage')
 const ConsultPage = named(() => import('./pages/HealthPages'), 'ConsultPage')
 const AdminPage = lazy(() => import('./pages/AdminPage'))
+const ChatListPage = named(() => import('./pages/ChatPages'), 'ChatListPage')
+const ChatRoomPage = named(() => import('./pages/ChatPages'), 'ChatRoomPage')
+const InquiryPage = named(() => import('./pages/ChatPages'), 'InquiryPage')
+const AdminInquiryPage = named(() => import('./pages/ChatPages'), 'AdminInquiryPage')
+const AdminChatPage = named(() => import('./pages/ChatPages'), 'AdminChatPage')
+const ProductPage = lazy(() => import('./pages/ProductPage'))
+const TierPage = named(() => import('./pages/TierPage'), 'TierPage')
 // 카메라 QR 인식 라이브러리는 스캔 화면에서만 불러온다
 const ScanPage = lazy(() => import('./pages/ScanPage'))
 // 약관·정책·지원 페이지는 계정 없이 열린다 (앱 화면 밖 라우트)
@@ -39,6 +46,8 @@ const PrivacyPage = lazy(() => import('./pages/legal/PrivacyPage'))
 const TermsPage = lazy(() => import('./pages/legal/TermsPage'))
 const PolicyPage = lazy(() => import('./pages/legal/PolicyPage'))
 const SupportPage = lazy(() => import('./pages/legal/SupportPage'))
+// 분양 이력서: 링크를 받은 사람이 계정 없이 본다
+const ResumePage = lazy(() => import('./pages/ResumePage'))
 const wait = (el: ReactNode) => <Suspense fallback={<Spinner center />}>{el}</Suspense>
 
 export const router = createBrowserRouter([
@@ -46,6 +55,7 @@ export const router = createBrowserRouter([
   { path: 'terms', element: wait(<TermsPage />) },
   { path: 'policy', element: wait(<PolicyPage />) },
   { path: 'support', element: wait(<SupportPage />) },
+  { path: 'r/:token', element: wait(<ResumePage />) },
   {
     element: <Root />,
     children: [
@@ -74,12 +84,19 @@ export const router = createBrowserRouter([
           { path: 'community', element: wait(<CommunityPage />) },
           { path: 'community/new', element: wait(<WritePage />) },
           { path: 'community/:id', element: wait(<PostPage />) },
+          { path: 'chat', element: wait(<ChatListPage />) },
+          { path: 'chat/:id', element: wait(<ChatRoomPage />) },
+          { path: 'inquiry', element: wait(<InquiryPage />) },
           { path: 'more', element: <MorePage /> },
           { path: 'blocked', element: wait(<BlockedPage />) },
+          { path: 'tier', element: wait(<TierPage />) },
           { path: 'admin', element: wait(<AdminPage />) },
+          { path: 'admin/inquiry/:id', element: wait(<AdminInquiryPage />) },
+          { path: 'admin/chat/:id', element: wait(<AdminChatPage />) },
           { path: 'notices', element: <NoticesPage /> },
           { path: 'alerts', element: <AlertsPage /> },
           { path: 'transfer', element: wait(<TransferClaimPage />) },
+          { path: 'p/:slug', element: wait(<ProductPage />) },
           { path: '*', element: <NotFound /> },
         ],
       },

@@ -1,14 +1,17 @@
 // 환영 화면: 계정이 없는 기기에서 보인다. '시작하기'를 눌러야 게스트 계정을 만든다.
 // 앱 안 브라우저·아이폰 사파리에서는 기록이 끊기지 않도록 먼저 안내한다.
 import { useEffect, useState, useSyncExternalStore } from 'react'
-import { Link } from 'react-router'
+import { Link, useLocation, useNavigate } from 'react-router'
 import { clearDisconnected, DISCONNECTED_NOTICE, peekDisconnected } from '../lib/boot'
 import { currentEnv, type InApp } from '../lib/env'
 import { canInstall, onInstallChange, promptInstall } from '../lib/install'
 import { isNative } from '../lib/native'
+import { productOf, productSlugFromPath, setFoodPreset } from '../lib/products'
+import { isTransferLink } from '../lib/qr'
 import { kakaoExternalUrl } from '../lib/source'
 import { logLandingOnce } from '../lib/track'
 import { EnterCodeSheet } from '../pages/DeviceLinkSheets'
+import { ProductInfo } from '../pages/ProductInfo'
 import { useAuth } from './auth'
 import { useUI } from './ui'
 
@@ -26,6 +29,12 @@ const FEATURES = ['개체·체중·급여 기록과 성장 그래프', '혈통·
 export default function Welcome() {
   const { start, link } = useAuth()
   const ui = useUI()
+  const nav = useNavigate()
+  const loc = useLocation()
+  // 제품 QR(/p/<slug>)로 들어왔으면 그 제품을 보여 주고, 시작하면 그 사료로 급여 기록까지 이어 준다
+  const product = productOf(productSlugFromPath(loc.pathname))
+  // 분양 코드가 붙은 링크로 들어왔으면, 시작한 뒤 분양 받기 화면이 그대로 열린다는 것을 알려 준다
+  const transferLink = isTransferLink(loc.pathname, loc.search)
   const env = currentEnv()
   // 아이폰 홈 화면 앱은 사파리와 기록이 따로라, 사파리에서 쓰던 기록을 불러오는 길을 눈에 띄게 둔다
   const fromSafari = env.platform === 'ios' && env.standalone && !isNative()
@@ -48,6 +57,11 @@ export default function Welcome() {
     setErr('')
     try {
       await start()
+      if (product) {
+        setFoodPreset(product.food)
+        nav('/animals/new', { replace: true })
+        ui.toast(`내 사료: ${product.name} · 먼저 개체를 등록해 주세요`)
+      }
     } catch (e) {
       setErr((e as Error).message)
       setBusy(false)
@@ -66,7 +80,7 @@ export default function Welcome() {
   let card = null
   let primary = (
     <button type="button" className="btn btn-primary" data-test="welcome-start" onClick={go} disabled={busy}>
-      {busy ? '시작하는 중…' : '시작하기'}
+      {busy ? '시작하는 중…' : product ? '시작하고 급여 기록하기' : '시작하기'}
     </button>
   )
   let secondary = null
@@ -140,15 +154,33 @@ export default function Welcome() {
         <div className="welcome-brand">
           VILLAIN ERA <span className="beta">BETA</span>
         </div>
-        <div>
-          <div className="welcome-title">파충류 종합 사육 플랫폼</div>
-          <div className="welcome-sub">개체 기록부터 번식·분양까지 한 앱에서</div>
-        </div>
-        <ul className="welcome-feat">
-          {FEATURES.map((f) => (
-            <li key={f}>{f}</li>
-          ))}
-        </ul>
+        {product ? (
+          <>
+            <div>
+              <div className="welcome-title">와구와구를 받으셨나요?</div>
+              <div className="welcome-sub">시작하면 이 사료로 급여 기록을 바로 남길 수 있어요</div>
+            </div>
+            <ProductInfo p={product} compact />
+          </>
+        ) : (
+          <>
+            <div>
+              <div className="welcome-title">파충류 종합 사육 플랫폼</div>
+              <div className="welcome-sub">개체 기록부터 번식·분양까지 한 앱에서</div>
+            </div>
+            <ul className="welcome-feat">
+              {FEATURES.map((f) => (
+                <li key={f}>{f}</li>
+              ))}
+            </ul>
+          </>
+        )}
+        {transferLink && (
+          <div className="welcome-card" data-test="welcome-transfer">
+            <div className="welcome-card-title">분양 기록을 받으러 오셨나요?</div>
+            <div>시작하면 분양 받기 화면이 바로 열려요. 받은 분양 코드는 이미 들어가 있어요.</div>
+          </div>
+        )}
         {card}
         <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
           {primary}

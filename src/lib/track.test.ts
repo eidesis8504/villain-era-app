@@ -11,6 +11,11 @@ describe('viewName', () => {
     expect(viewName('/animals/abc/consult')).toBe('view:consult')
     expect(viewName('/feedings')).toBe('view:feeding_bulk')
   })
+  it('채팅 목록과 대화 화면은 채팅 보기로 센다', () => {
+    expect(viewName('/chat')).toBe('view:chat')
+    expect(viewName('/chat/0b0e7b1c-1111-4222-8333-444455556666')).toBe('view:chat')
+    expect(viewName('/chat/a/b')).toBeNull()
+  })
   it('글쓰기·기타 화면은 기록하지 않는다', () => {
     expect(viewName('/')).toBeNull()
     expect(viewName('/community/new')).toBeNull()

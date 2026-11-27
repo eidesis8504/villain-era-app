@@ -32,6 +32,7 @@ const FeedingBulkPage = named(() => import('./pages/FeedingPages'), 'FeedingBulk
 const HealthPage = named(() => import('./pages/HealthPages'), 'HealthPage')
 const ConsultPage = named(() => import('./pages/HealthPages'), 'ConsultPage')
 const AdminPage = lazy(() => import('./pages/AdminPage'))
+const ProductPage = lazy(() => import('./pages/ProductPage'))
 // 카메라 QR 인식 라이브러리는 스캔 화면에서만 불러온다
 const ScanPage = lazy(() => import('./pages/ScanPage'))
 // 약관·정책·지원 페이지는 계정 없이 열린다 (앱 화면 밖 라우트)
@@ -80,6 +81,7 @@ export const router = createBrowserRouter([
           { path: 'notices', element: <NoticesPage /> },
           { path: 'alerts', element: <AlertsPage /> },
           { path: 'transfer', element: wait(<TransferClaimPage />) },
+          { path: 'p/:slug', element: wait(<ProductPage />) },
           { path: '*', element: <NotFound /> },
         ],
       },

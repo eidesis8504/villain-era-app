@@ -962,6 +962,45 @@ select.input {
   text-align: center;
 }
 
+/* ── 제품 정보 카드 (제품 QR 시작 화면) ─────── */
+.product-card {
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  font-size: 14px;
+  line-height: 1.6;
+}
+.product-name {
+  font-size: 20px;
+  font-weight: 700;
+}
+.product-form {
+  font-size: 13px;
+  color: var(--muted);
+}
+.product-card .label {
+  margin-bottom: 2px;
+}
+.product-card summary {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--sub);
+  cursor: pointer;
+}
+.product-list {
+  margin: 6px 0 0;
+  padding-left: 18px;
+  font-size: 13px;
+  color: var(--sub);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
 /* ── 약관·정책·지원 페이지 ─────────────────── */
 .legal-wrap {
   min-height: 100dvh;

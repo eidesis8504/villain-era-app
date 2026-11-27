@@ -11,7 +11,8 @@ import { bulkDefaultFood, bulkFoodChoices, getFoodPreset } from '../lib/products
 import { SPECIES, spOf } from '../lib/species'
 import { errMsg, supabase } from '../lib/supabase'
 import { Chips, ErrorBox, Seg, Spinner } from '../ui/kit'
-import { FeedingSheet, FeedStrip, RESULT_COLOR } from './FeedingSheet'
+import { FeedingSheet } from './FeedingSheet'
+import { FeedStrip, RESULT_COLOR } from './FeedStrip'
 import { AnimalThumb } from './shared'
 
 export function feedLine(s: { daysSince: number | null; refuseStreak: number; last: Feeding | null }) {

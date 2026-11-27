@@ -2,6 +2,7 @@
 import type { AdoptAnimal } from './adopt'
 import { gap } from './date'
 import type { FeedResult } from './feeding'
+import { round1 } from './format'
 
 export type ResumeNode = { code: string; name: string; morph: string; species: string }
 export type Resume = {
@@ -22,8 +23,6 @@ export function cleanToken(input: string | undefined): string | null {
 }
 
 export const resumePath = (token: string) => `/r/${token}`
-
-const round1 = (n: number) => Math.round(n * 10) / 10
 
 // 체중 요약: 최근 값, 첫 측정 대비 변화, 그래프 점(최근 12개)
 export function resumeWeight(ws: Resume['weights']) {

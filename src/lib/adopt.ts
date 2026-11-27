@@ -5,6 +5,17 @@ export const ADOPT_CAT = '분양·홍보'
 // 새 계정 제한 (서버의 private.can_trade와 같은 값)
 export const TRADE_MIN_HOURS = 24
 
+// 고지와 법 안내 (분양·홍보 목록, 글, 글쓰기, 분양 이력서가 함께 쓴다)
+// 출처: 원주시 공지(2026-03-06), 고양시 보도자료(2026-01-07). 기준이 바뀌면 여기만 고친다.
+export const NOT_A_PARTY = 'VILLAIN ERA는 분양 거래의 당사자가 아니에요. 거래와 신고는 당사자가 직접 해요.'
+export const WIMS_URL = 'https://wims.mcee.go.kr'
+export const LAW_NOTES: readonly string[] = [
+  '백색목록에 없는 종은 분양할 수 없어요.',
+  '분양한 사람은 양도 신고, 분양받은 사람은 양수 신고를 해야 해요. 한 달 동안의 양도·양수를 다음 달 10일까지 야생동물종합관리시스템(wims.mcee.go.kr)이나 관할 시·군·구청에 신고해요.',
+  '파충류·양서류만 다루는 경우, 50마리 이상 보유하면서 1년에 100마리 이상 또는 월 평균 20마리 이상 판매하면 영업허가가 필요해요.',
+  '신고하지 않으면 과태료(최대 100만 원)가 부과될 수 있어요.',
+]
+
 export type AdoptMode = 'sale' | 'show'
 export type AdoptStatus = 'open' | 'hold' | 'done'
 export const ADOPT_MODE_LABEL: Record<AdoptMode, string> = { sale: '분양', show: '홍보' }

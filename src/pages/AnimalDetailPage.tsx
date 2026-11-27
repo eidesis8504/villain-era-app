@@ -8,6 +8,7 @@ import { fd, fw, nm, sexLbl } from '../lib/format'
 import { spInfo, spOf } from '../lib/species'
 import { errMsg, publicUrl, supabase } from '../lib/supabase'
 import { ErrorBox, Spinner } from '../ui/kit'
+import { useMyShares } from '../data/adopt'
 import { useMatings } from '../data/breeding'
 import { useHealthLogs, useVetVisits } from '../data/health'
 import type { Mating } from '../lib/breeding'
@@ -16,6 +17,7 @@ import { HEALTH_NOTICE, LEVEL_LABEL, type HealthLog, type VetVisit } from '../li
 import { SymptomSheet, VetSheet } from './HealthSheets'
 import { FeedingSheet } from './FeedingSheet'
 import { feedLine } from './FeedingPages'
+import { ResumeSheet } from './ResumeSheet'
 import { TransferSheet, WeightSheet } from './sheets'
 
 type Ev = { k: string; date: string; kind: string; col: string; title: string; sub: string }
@@ -165,9 +167,11 @@ export default function AnimalDetailPage() {
   const transfers = useTransfers().data ?? []
   // ?feed=1 (제품 QR로 시작해 첫 개체를 등록한 직후): 급여 기록을 한 번 열고 주소에서 표시를 지운다
   const [params, setParams] = useSearchParams()
-  const [sheet, setSheet] = useState<null | 'weight' | 'transfer' | 'feeding' | 'symptom' | 'vet'>(() =>
+  const [sheet, setSheet] = useState<null | 'weight' | 'transfer' | 'feeding' | 'symptom' | 'vet' | 'resume'>(() =>
     params.get('feed') === '1' ? 'feeding' : null,
   )
+  // 분양 이력서 링크가 살아 있는 개체
+  const shares = useMyShares().data
   useEffect(() => {
     if (params.has('feed')) setParams({}, { replace: true })
   }, [params, setParams])
@@ -351,12 +355,15 @@ export default function AnimalDetailPage() {
             )}
           </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 8 }}>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
             <button type="button" data-test="feed-open" className="btn btn-primary btn-sm" onClick={() => setSheet('feeding')}>
               + 급여
             </button>
             <button type="button" className="btn btn-outline btn-sm" onClick={() => setSheet('weight')}>
               + 체중
+            </button>
+            <button type="button" data-test="resume-open" className="btn btn-outline btn-sm" onClick={() => setSheet('resume')}>
+              {shares?.has(a.id) ? '분양 이력서 · 공유 중' : '분양 이력서'}
             </button>
             <button
               type="button"
@@ -434,6 +441,7 @@ export default function AnimalDetailPage() {
       {sheet === 'symptom' && <SymptomSheet animal={a} onClose={() => setSheet(null)} />}
       {sheet === 'vet' && <VetSheet animal={a} onClose={() => setSheet(null)} />}
       {sheet === 'transfer' && <TransferSheet animal={a} onClose={() => setSheet(null)} />}
+      {sheet === 'resume' && <ResumeSheet animal={a} token={shares?.get(a.id) ?? null} onClose={() => setSheet(null)} />}
       {showCode && <TransferSheet animal={a} existing={showCode} onClose={() => setShowCode(null)} />}
     </Screen>
   )

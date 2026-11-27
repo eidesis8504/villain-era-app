@@ -7,6 +7,7 @@ import { currentEnv, type InApp } from '../lib/env'
 import { canInstall, onInstallChange, promptInstall } from '../lib/install'
 import { isNative } from '../lib/native'
 import { productOf, productSlugFromPath, setFoodPreset } from '../lib/products'
+import { isTransferLink } from '../lib/qr'
 import { kakaoExternalUrl } from '../lib/source'
 import { logLandingOnce } from '../lib/track'
 import { EnterCodeSheet } from '../pages/DeviceLinkSheets'
@@ -29,8 +30,11 @@ export default function Welcome() {
   const { start, link } = useAuth()
   const ui = useUI()
   const nav = useNavigate()
+  const loc = useLocation()
   // 제품 QR(/p/<slug>)로 들어왔으면 그 제품을 보여 주고, 시작하면 그 사료로 급여 기록까지 이어 준다
-  const product = productOf(productSlugFromPath(useLocation().pathname))
+  const product = productOf(productSlugFromPath(loc.pathname))
+  // 분양 코드가 붙은 링크로 들어왔으면, 시작한 뒤 분양 받기 화면이 그대로 열린다는 것을 알려 준다
+  const transferLink = isTransferLink(loc.pathname, loc.search)
   const env = currentEnv()
   // 아이폰 홈 화면 앱은 사파리와 기록이 따로라, 사파리에서 쓰던 기록을 불러오는 길을 눈에 띄게 둔다
   const fromSafari = env.platform === 'ios' && env.standalone && !isNative()
@@ -170,6 +174,12 @@ export default function Welcome() {
               ))}
             </ul>
           </>
+        )}
+        {transferLink && (
+          <div className="welcome-card" data-test="welcome-transfer">
+            <div className="welcome-card-title">분양 기록을 받으러 오셨나요?</div>
+            <div>시작하면 분양 받기 화면이 바로 열려요. 받은 분양 코드는 이미 들어가 있어요.</div>
+          </div>
         )}
         {card}
         <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>

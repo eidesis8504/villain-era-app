@@ -40,6 +40,8 @@ const PrivacyPage = lazy(() => import('./pages/legal/PrivacyPage'))
 const TermsPage = lazy(() => import('./pages/legal/TermsPage'))
 const PolicyPage = lazy(() => import('./pages/legal/PolicyPage'))
 const SupportPage = lazy(() => import('./pages/legal/SupportPage'))
+// 분양 이력서: 링크를 받은 사람이 계정 없이 본다
+const ResumePage = lazy(() => import('./pages/ResumePage'))
 const wait = (el: ReactNode) => <Suspense fallback={<Spinner center />}>{el}</Suspense>
 
 export const router = createBrowserRouter([
@@ -47,6 +49,7 @@ export const router = createBrowserRouter([
   { path: 'terms', element: wait(<TermsPage />) },
   { path: 'policy', element: wait(<PolicyPage />) },
   { path: 'support', element: wait(<SupportPage />) },
+  { path: 'r/:token', element: wait(<ResumePage />) },
   {
     element: <Root />,
     children: [

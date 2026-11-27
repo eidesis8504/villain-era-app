@@ -15,6 +15,12 @@ export function qrMatrix(text: string) {
 
 export const animalQrText = (code: string) => `${appOrigin()}/a/${encodeURIComponent(code)}`
 export const transferUrl = (code: string) => `${appOrigin()}/transfer?code=${code}`
+export const resumeUrl = (token: string) => `${appOrigin()}/r/${token}`
+
+// 분양 코드가 붙은 분양 받기 주소인지 (계정 없이 열었을 때 환영 화면이 안내를 보여 준다)
+export function isTransferLink(pathname: string, search: string): boolean {
+  return /^\/transfer\/?$/.test(pathname) && /[?&]code=[A-Za-z0-9]{8}(&|$)/.test(search)
+}
 
 // 스캔한 문자열 → 개체 ID 또는 분양 코드
 export function parseScan(text: string): { kind: 'animal'; code: string } | { kind: 'transfer'; code: string } | null {

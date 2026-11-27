@@ -4,5 +4,5 @@ export const OPERATOR = {
   officer: '홍성진',
   email: 'official_wagu@naver.com',
   service: 'VILLAIN ERA',
-  effective: '2026-11-19',
+  effective: '2026-12-05',
 } as const

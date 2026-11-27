@@ -38,6 +38,7 @@ export const KIND_LABEL: Record<string, string> = {
   comment: '커뮤니티',
   notice: '공지',
   transfer: '분양',
+  chat: '채팅',
   system: '운영',
 }
 

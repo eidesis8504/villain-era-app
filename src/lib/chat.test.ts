@@ -5,6 +5,7 @@ import {
   chatTime,
   dayGroups,
   isUnread,
+  mergeMessage,
   otherId,
   previewText,
   splitLinks,
@@ -139,6 +140,22 @@ describe('dayGroups', () => {
   })
   it('메시지가 없으면 빈 배열', () => {
     expect(dayGroups([])).toEqual([])
+  })
+})
+
+describe('mergeMessage', () => {
+  it('새 메시지를 끝에 더한다', () => {
+    expect(mergeMessage([msg(1, T10)], msg(2, T11)).map((m) => m.id)).toEqual([1, 2])
+  })
+  it('이미 있는 메시지는 다시 더하지 않는다 (보낸 뒤 실시간으로 한 번 더 올 때)', () => {
+    const list = [msg(1, T10), msg(2, T11)]
+    expect(mergeMessage(list, msg(2, T11))).toBe(list)
+  })
+  it('늦게 도착한 앞 번호 메시지는 번호 순서에 넣는다', () => {
+    expect(mergeMessage([msg(1, T10), msg(3, T12)], msg(2, T11)).map((m) => m.id)).toEqual([1, 2, 3])
+  })
+  it('목록이 아직 없으면 하나짜리 목록', () => {
+    expect(mergeMessage(undefined, msg(1, T10)).map((m) => m.id)).toEqual([1])
   })
 })
 

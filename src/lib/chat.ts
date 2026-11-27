@@ -91,6 +91,15 @@ export function dayGroups(ms: ChatMessage[]): { day: string; items: ChatMessage[
   return out
 }
 
+// 목록에 메시지 하나를 번호 순서로 더한다. 이미 있으면 목록을 그대로 돌려준다
+// (내가 보낸 메시지는 보내기 응답과 실시간으로 두 번 온다)
+export function mergeMessage(list: ChatMessage[] | undefined, m: ChatMessage): ChatMessage[] {
+  if (!list) return [m]
+  if (list.some((x) => x.id === m.id)) return list
+  const next = [...list, m]
+  return m.id > list[list.length - 1]?.id ? next : next.sort((a, b) => a.id - b.id)
+}
+
 export function chatTime(iso: string): string {
   const d = new Date(iso)
   return `${p2(d.getHours())}:${p2(d.getMinutes())}`

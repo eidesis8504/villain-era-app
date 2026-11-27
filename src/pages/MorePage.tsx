@@ -271,7 +271,7 @@ export default function MorePage() {
     [
       '안내',
       [
-        row('도움말·문의', '', () => nav('/support')),
+        row('도움말·문의', '운영자에게 문의', () => nav('/inquiry')),
         row('개인정보 처리방침', '', () => nav('/privacy')),
         row('이용약관', '', () => nav('/terms')),
         row('커뮤니티 운영정책', '', () => nav('/policy')),

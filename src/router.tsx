@@ -34,6 +34,9 @@ const ConsultPage = named(() => import('./pages/HealthPages'), 'ConsultPage')
 const AdminPage = lazy(() => import('./pages/AdminPage'))
 const ChatListPage = named(() => import('./pages/ChatPages'), 'ChatListPage')
 const ChatRoomPage = named(() => import('./pages/ChatPages'), 'ChatRoomPage')
+const InquiryPage = named(() => import('./pages/ChatPages'), 'InquiryPage')
+const AdminInquiryPage = named(() => import('./pages/ChatPages'), 'AdminInquiryPage')
+const AdminChatPage = named(() => import('./pages/ChatPages'), 'AdminChatPage')
 const ProductPage = lazy(() => import('./pages/ProductPage'))
 // 카메라 QR 인식 라이브러리는 스캔 화면에서만 불러온다
 const ScanPage = lazy(() => import('./pages/ScanPage'))
@@ -82,9 +85,12 @@ export const router = createBrowserRouter([
           { path: 'community/:id', element: wait(<PostPage />) },
           { path: 'chat', element: wait(<ChatListPage />) },
           { path: 'chat/:id', element: wait(<ChatRoomPage />) },
+          { path: 'inquiry', element: wait(<InquiryPage />) },
           { path: 'more', element: <MorePage /> },
           { path: 'blocked', element: wait(<BlockedPage />) },
           { path: 'admin', element: wait(<AdminPage />) },
+          { path: 'admin/inquiry/:id', element: wait(<AdminInquiryPage />) },
+          { path: 'admin/chat/:id', element: wait(<AdminChatPage />) },
           { path: 'notices', element: <NoticesPage /> },
           { path: 'alerts', element: <AlertsPage /> },
           { path: 'transfer', element: wait(<TransferClaimPage />) },

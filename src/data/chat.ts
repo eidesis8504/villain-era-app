@@ -66,7 +66,7 @@ export function useSupportRoomId() {
   return useQuery({ queryKey: ['chat-support-id', uid], enabled: !!uid, staleTime: Infinity, queryFn: openSupport })
 }
 
-// 운영자: 문의가 온 방 목록
+// 운영자: 문의가 온 방 목록 (운영자 자신이 남긴 문의는 다른 운영자의 문의함에만 보인다)
 export function useSupportRooms(enabled: boolean) {
   const { uid } = useAuth()
   return useQuery({
@@ -79,6 +79,7 @@ export function useSupportRooms(enabled: boolean) {
         .from('chat_rooms')
         .select(ROOM)
         .eq('kind', 'support')
+        .neq('user_a', uid!)
         .not('last_message_at', 'is', null)
         .order('last_message_at', { ascending: false })
         .limit(200)

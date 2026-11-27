@@ -66,6 +66,11 @@ describe('MessageList', () => {
     expect(h).toContain('영희')
     expect(h).toContain('철수')
   })
+  it('이름표가 빈 글자인 사람에게는 이름을 붙이지 않는다', () => {
+    const h = list([msg(1, YOU, 'a'), msg(2, ME, 'b')], (id) => (id === ME ? '' : '운영자'))
+    expect(count(h, /class="chat-who"/g)).toBe(1)
+    expect(h).toContain('운영자')
+  })
   it('이름표를 넘기지 않으면 이름이 없다', () => {
     expect(list([msg(1, YOU, 'a')])).not.toContain('chat-who')
   })

@@ -46,7 +46,7 @@ export function MessageList({
   isMine: (senderId: string) => boolean
   origin: string
   onPath?: (path: string) => void
-  // 보낸 사람의 이름표 (운영자 문의처럼 누가 말했는지 적어야 하는 화면에서만 넘긴다)
+  // 보낸 사람의 이름표 (운영자 문의처럼 누가 말했는지 적어야 하는 화면에서만 넘긴다. 빈 글자면 붙이지 않는다)
   label?: (senderId: string) => string
 }) {
   if (!messages.length) {
@@ -67,12 +67,13 @@ export function MessageList({
             const next = g.items[i + 1]
             // 같은 사람이 이어 보낸 묶음의 첫 메시지
             const first = !prev || prev.sender_id !== m.sender_id
+            const who = first && label ? label(m.sender_id) : ''
             const time = chatTime(m.created_at)
             // 같은 사람이 같은 분에 이어 보낸 메시지는 마지막에만 시간을 붙인다
             const showTime = !next || next.sender_id !== m.sender_id || chatTime(next.created_at) !== time
             return (
               <div key={m.id} className={`chat-msg${mine ? ' mine' : ''}${first ? ' first' : ''}`} data-test="chat-msg" data-mine={mine ? '1' : '0'}>
-                {label && first && <div className="chat-who">{label(m.sender_id)}</div>}
+                {who && <div className="chat-who">{who}</div>}
                 <div className="chat-line">
                   <div className="chat-bubble">
                     <Body body={m.body} origin={origin} onPath={onPath} />

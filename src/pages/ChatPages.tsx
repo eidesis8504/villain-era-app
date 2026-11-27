@@ -1,12 +1,13 @@
-// 채팅 화면: 대화 목록(/chat), 1:1 대화(/chat/:id)와 함께 쓰는 대화 틀(ChatThread)
+// 채팅 화면: 대화 목록(/chat), 1:1 대화(/chat/:id), 운영자 문의(/inquiry),
+// 운영자용 문의 답변(/admin/inquiry/:id)·신고된 대화 보기(/admin/chat/:id)와 함께 쓰는 대화 틀(ChatThread)
 import { useQueryClient } from '@tanstack/react-query'
 import { useEffect, useRef, useState, type ReactNode } from 'react'
-import { Link, useNavigate, useParams } from 'react-router'
-import { badgeOf, displayName, useMe } from '../app/auth'
+import { Link, useNavigate, useParams, useSearchParams } from 'react-router'
+import { badgeOf, displayName, useAuth, useMe } from '../app/auth'
 import { useViewport } from '../app/layout'
 import { Screen } from '../app/Screen'
 import { useUI } from '../app/ui'
-import { markRoomRead, peerOf, sendMessage, useMessages, useRoom, useRooms } from '../data/chat'
+import { markRoomRead, peerOf, sendMessage, useMessages, useRoom, useRooms, useSupportRoomId } from '../data/chat'
 import { badgeColor } from '../data/community'
 import { useRefresh } from '../data/keeper'
 import { NOT_A_PARTY } from '../lib/adopt'
@@ -15,6 +16,7 @@ import { relTime } from '../lib/date'
 import { errMsg } from '../lib/supabase'
 import { ErrorBox, Spinner } from '../ui/kit'
 import { MessageList, RoomItem } from './ChatViews'
+import { NotFound } from './InfoPages'
 import { ContentMenu } from './ReportSheet'
 
 const NONE: ChatMessage[] = []
@@ -258,5 +260,103 @@ export function ChatRoomPage() {
         />
       )}
     </>
+  )
+}
+
+// 운영자 문의: 전체 › 도움말·문의. 회원마다 운영자와의 대화가 하나 있다
+export function InquiryPage() {
+  const { uid } = useMe()
+  const q = useSupportRoomId()
+  if (q.isLoading) return <Screen title="도움말·문의" back="/more"><Spinner center /></Screen>
+  if (q.error || !q.data) return <Screen title="도움말·문의" back="/more"><ErrorBox error={q.error} onRetry={() => q.refetch()} /></Screen>
+  return (
+    <ChatThread
+      key={q.data}
+      roomId={q.data}
+      title="도움말·문의"
+      back="/more"
+      isMine={(s) => s === uid}
+      label={(s) => (s === uid ? '' : '운영자')}
+      placeholder="운영자에게 문의할 내용을 적어 주세요"
+      top={
+        <>
+          <Link to="/support" className="chat-post" data-test="inquiry-help">
+            <span className="tag">도움말</span>
+            <span style={{ flex: 1 }}>자주 묻는 질문 먼저 보기</span>
+            <span style={{ color: 'var(--muted-2)' }}>›</span>
+          </Link>
+          <div className="hint chat-safety" data-test="inquiry-note">
+            운영자에게 보내는 1:1 문의예요. 답변이 오면 알림으로 알려 드려요.
+          </div>
+        </>
+      }
+    />
+  )
+}
+
+// 운영자: 문의에 답하기
+export function AdminInquiryPage() {
+  const { id = '' } = useParams()
+  const { isAdmin } = useAuth()
+  const q = useRoom(isAdmin ? id : undefined)
+  const back = '/admin?tab=inquiry'
+  if (!isAdmin) return <NotFound />
+  if (q.isLoading) return <Screen title="문의" back={back}><Spinner center /></Screen>
+  if (q.error) return <Screen title="문의" back={back}><ErrorBox error={q.error} onRetry={() => q.refetch()} /></Screen>
+  const r = q.data
+  if (!r || r.kind !== 'support') return <Screen title="문의" back={back}><div className="empty">없는 문의예요</div></Screen>
+  const member = displayName(r.a)
+  return (
+    <ChatThread
+      key={r.id}
+      roomId={r.id}
+      title={`문의 · ${member}`}
+      back={back}
+      // 회원의 글은 왼쪽, 운영자(누구든)의 답은 오른쪽
+      isMine={(s) => s !== r.user_a}
+      label={(s) => (s === r.user_a ? member : '')}
+      placeholder="답변을 적어 주세요"
+    />
+  )
+}
+
+// 운영자: 신고된 1:1 대화 보기 (읽기만. 신고가 열려 있는 동안만 서버가 보여 준다)
+export function AdminChatPage() {
+  const { id = '' } = useParams()
+  const [params] = useSearchParams()
+  const { isAdmin } = useAuth()
+  const q = useRoom(isAdmin ? id : undefined)
+  const back = '/admin?tab=reports'
+  if (!isAdmin) return <NotFound />
+  if (q.isLoading) return <Screen title="신고된 대화" back={back}><Spinner center /></Screen>
+  if (q.error) return <Screen title="신고된 대화" back={back}><ErrorBox error={q.error} onRetry={() => q.refetch()} /></Screen>
+  const r = q.data
+  if (!r || r.kind !== 'dm') {
+    return (
+      <Screen title="신고된 대화" back={back}>
+        <div className="empty" style={{ padding: '30px 18px', lineHeight: 1.6 }}>
+          볼 수 없는 대화예요 · 신고가 이미 처리됐거나 없는 대화예요
+        </div>
+      </Screen>
+    )
+  }
+  // 신고된 회원의 글은 왼쪽, 신고한 회원의 글은 오른쪽
+  const reported = params.get('user')
+  const name = (s: string) => `${displayName(s === r.user_a ? r.a : r.b)}${s === reported ? ' · 신고된 회원' : ''}`
+  return (
+    <ChatThread
+      key={r.id}
+      roomId={r.id}
+      title="신고된 대화"
+      back={back}
+      readOnly
+      isMine={(s) => !!reported && s !== reported}
+      label={name}
+      top={
+        <div className="hint chat-safety" data-test="admin-chat-note">
+          신고가 열려 있는 동안만 볼 수 있어요. 검증 현황 › 신고에서 기각하거나 이용 제한으로 처리하면 다시 볼 수 없어요.
+        </div>
+      }
+    />
   )
 }

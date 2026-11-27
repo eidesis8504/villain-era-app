@@ -4,6 +4,7 @@ import { Fragment } from 'react'
 import { chatTime, dayGroups, splitLinks, type ChatMessage } from '../lib/chat'
 import { dateLbl } from '../lib/date'
 import { Avatar } from '../ui/kit'
+import { TierBadge } from './TierViews'
 
 // 메시지 글: 주소만 링크로 바꾸고 나머지는 글자 그대로 보여 준다 (React가 이스케이프한다)
 function Body({ body, origin, onPath }: { body: string; origin: string; onPath?: (path: string) => void }) {
@@ -93,6 +94,7 @@ export function RoomItem({
   name,
   badge,
   badgeBg,
+  hz,
   avatarUrl,
   note,
   preview,
@@ -103,6 +105,8 @@ export function RoomItem({
   name: string
   badge?: string | null
   badgeBg?: string
+  // 등급 점수 (넘기면 등급 배지를 붙인다)
+  hz?: number | null
   avatarUrl?: string | null
   // 대화를 시작한 글의 제목
   note?: string | null
@@ -124,6 +128,7 @@ export function RoomItem({
               {badge}
             </span>
           )}
+          {typeof hz === 'number' && <TierBadge hz={hz} />}
         </div>
         {note && (
           <div className="ellipsis" style={{ fontSize: 11, fontWeight: 600, color: 'var(--blue)' }}>

@@ -6,7 +6,7 @@ import type { Tables } from '../lib/database.types'
 import type { HealthAttach } from '../lib/health'
 import { supabase } from '../lib/supabase'
 
-export type Author = { id: string; nickname: string | null; role: string; badge: string | null; avatar_url: string | null }
+export type Author = { id: string; nickname: string | null; role: string; badge: string | null; avatar_url: string | null; hz: number }
 export type MediaItem = { t: 'img' | 'vid'; path: string; thumb?: string; dur?: number }
 export type Attach =
   | { kind: 'weight'; label: string; last: string; diff: string; pts: number[]; count: number }
@@ -25,7 +25,7 @@ export type Comment = Tables<'comments'> & { author: Author | null }
 export type Notice = Tables<'notices'>
 export type Notification = Tables<'notifications'>
 
-const AUTHOR = 'author:profiles!posts_author_id_fkey(id, nickname, role, badge, avatar_url)'
+const AUTHOR = 'author:profiles!posts_author_id_fkey(id, nickname, role, badge, avatar_url, hz)'
 export const CATS = ['자유', 'Q&A', '정보', '사육일지', '분양·홍보'] as const
 
 // 알림 종류 이름 (알림함·배너)
@@ -95,7 +95,7 @@ export function useComments(postId: string | undefined) {
     queryFn: async () => {
       const { data, error } = await supabase
         .from('comments')
-        .select('*, author:profiles!comments_author_id_fkey(id, nickname, role, badge, avatar_url)')
+        .select('*, author:profiles!comments_author_id_fkey(id, nickname, role, badge, avatar_url, hz)')
         .eq('post_id', postId!)
         .order('created_at')
       if (error) throw error

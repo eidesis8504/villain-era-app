@@ -34,6 +34,7 @@ import { AdoptFields } from './AdoptFields'
 import { HealthCardView } from './ConsultCard'
 import { ContentMenu } from './ReportSheet'
 import { PostCard } from './shared'
+import { TierBadge } from './TierViews'
 
 export function CommunityPage() {
   const nav = useNavigate()
@@ -225,6 +226,7 @@ export function PostPage() {
               {badge}
             </span>
           )}
+          {p.author && p.author.role !== 'admin' && <TierBadge hz={p.author.hz} />}
           <span className="mono">· {yd(isoDay(p.created_at))}</span>
           {!mine && (
             <button
@@ -356,6 +358,7 @@ export function PostPage() {
                     {cb}
                   </span>
                 )}
+                {c.author && c.author.role !== 'admin' && <TierBadge hz={c.author.hz} />}
                 {c.hidden && <span className="tag warn">숨김</span>}
                 {c.adopted && <span style={{ marginLeft: 'auto', fontSize: 11, fontWeight: 700, color: 'var(--blue)' }}>✓ 채택된 답변</span>}
                 {c.author_id !== uid && (

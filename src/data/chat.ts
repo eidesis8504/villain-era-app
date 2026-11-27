@@ -6,10 +6,10 @@ import { mergeMessage, unreadCount, type ChatMessage, type ChatRoom } from '../l
 import { errMsg, supabase } from '../lib/supabase'
 import type { ReportReason } from './safety'
 
-export type Peer = { id: string; nickname: string | null; role: string; badge: string | null; avatar_url: string | null }
+export type Peer = { id: string; nickname: string | null; role: string; badge: string | null; avatar_url: string | null; hz: number }
 export type RoomRow = ChatRoom & { a: Peer | null; b: Peer | null; post: { id: string; title: string } | null }
 
-const PEER = 'id, nickname, role, badge, avatar_url'
+const PEER = 'id, nickname, role, badge, avatar_url, hz'
 const ROOM =
   'id, kind, user_a, user_b, post_id, created_at, last_message_at, last_message, last_sender, a_read_at, b_read_at, ' +
   `a:profiles!chat_rooms_user_a_fkey(${PEER}), b:profiles!chat_rooms_user_b_fkey(${PEER}), post:posts!chat_rooms_post_id_fkey(id, title)`

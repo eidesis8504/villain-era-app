@@ -7,7 +7,8 @@ import { round1 } from './format'
 export type ResumeNode = { code: string; name: string; morph: string; species: string }
 export type Resume = {
   animal: AdoptAnimal & { status: string }
-  owner: { nickname: string | null; badge: string | null; since: string }
+  // hz: 등급 점수 (등급을 넣기 전에 만들어진 응답에는 없다)
+  owner: { nickname: string | null; badge: string | null; since: string; hz?: number }
   // 날짜순. 건강 기록·급여량·메모는 서버가 넣지 않는다
   weights: { d: string; g: number }[]
   feedings: { d: string; r: FeedResult; f: string }[]

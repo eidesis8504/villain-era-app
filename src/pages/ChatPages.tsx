@@ -183,6 +183,7 @@ export function ChatListPage() {
                   name={displayName(p)}
                   badge={badge}
                   badgeBg={badgeColor(badge)}
+                  hz={p && p.role !== 'admin' ? p.hz : null}
                   avatarUrl={p?.avatar_url}
                   note={r.post?.title}
                   preview={previewText(r)}

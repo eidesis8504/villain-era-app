@@ -8,6 +8,7 @@ import { md, isoDay } from '../lib/date'
 import { fmtDur } from '../lib/media'
 import { publicUrl } from '../lib/supabase'
 import { alarmLbl, hhmm, ruleLbl } from '../lib/todo'
+import { TierBadge } from './TierViews'
 
 export function todoRow(t: Todo, day: string, checks: Check[], T: string) {
   const on = checks.some((c) => c.todo_id === t.id && c.day === day)
@@ -114,6 +115,7 @@ export function PostCard({ p, compact }: { p: Post; compact?: boolean }) {
               {badge}
             </span>
           )}
+          {p.author && p.author.role !== 'admin' && <TierBadge hz={p.author.hz} />}
           · {md(isoDay(p.created_at))}
         </span>
         <span className="mono">

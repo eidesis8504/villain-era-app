@@ -5,6 +5,7 @@ import { fd, fw, nm, sexLbl, sexMark } from '../lib/format'
 import { resumeFeeding, resumeWeight, type Resume, type ResumeNode } from '../lib/resume'
 import { Sparkline } from '../ui/kit'
 import { FeedStrip } from './FeedStrip'
+import { TierBadge } from './TierViews'
 
 function Parent({ label, n }: { label: string; n: ResumeNode | null }) {
   return (
@@ -49,6 +50,7 @@ export function ResumeView({ r, today, photoUrl }: { r: Resume; today: string; p
           <span style={{ display: 'flex', gap: 6, alignItems: 'center', fontWeight: 600 }}>
             {r.owner.nickname || '사육자'}
             {r.owner.badge && <span className="tag dark">{r.owner.badge}</span>}
+            {r.owner.badge !== '운영자' && typeof r.owner.hz === 'number' && <TierBadge hz={r.owner.hz} />}
           </span>
           <span className="resume-sub">VILLAIN ERA 시작 {yd(r.owner.since)}</span>
         </div>

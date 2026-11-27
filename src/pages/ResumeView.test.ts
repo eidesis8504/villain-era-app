@@ -82,6 +82,15 @@ describe('ResumeView', () => {
   it('닉네임이 없는 분양자는 사육자로 보여 준다', () => {
     expect(html({ owner: { nickname: null, badge: null, since: '2026-10-08' } })).toContain('사육자')
   })
+  it('분양자의 등급 점수가 있으면 등급 배지를 보여 준다', () => {
+    const h = html({ owner: { nickname: '분양자', badge: null, since: '2026-10-08', hz: 210 } })
+    expect(h).toContain('tier-core')
+    expect(h).toContain('코어')
+  })
+  it('등급 점수가 없는 이력서(예전 응답)와 운영자에게는 등급 배지가 없다', () => {
+    expect(html({ owner: { nickname: '분양자', badge: null, since: '2026-10-08' } })).not.toContain('tier-badge')
+    expect(html({ owner: { nickname: '빌런', badge: '운영자', since: '2026-10-08', hz: 500 } })).not.toContain('tier-badge')
+  })
   it('사진 주소가 있으면 사진을 넣는다', () => {
     expect(html({}, 'https://example.test/photo.jpg')).toContain('src="https://example.test/photo.jpg"')
     expect(html()).not.toContain('<img')

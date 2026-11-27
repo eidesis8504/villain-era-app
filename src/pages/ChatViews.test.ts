@@ -93,6 +93,13 @@ describe('RoomItem', () => {
     expect(item({ badge: '운영자' })).toContain('운영자')
     expect(item()).not.toContain('tag dark')
   })
+  it('등급 점수를 넘기면 등급 배지를 보여 준다', () => {
+    expect(item({ hz: 60 })).toContain('tier-crew')
+    expect(item({ hz: 60 })).toContain('크루')
+    expect(item({ hz: 0 })).toContain('루키')
+    expect(item()).not.toContain('tier-badge')
+    expect(item({ hz: null })).not.toContain('tier-badge')
+  })
   it('글 제목을 넘기면 함께 보여 준다', () => {
     expect(item({ note: '릴리화이트 분양해요' })).toContain('릴리화이트 분양해요')
   })

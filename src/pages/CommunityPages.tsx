@@ -4,7 +4,7 @@ import { badgeOf, displayName, useAuth, useMe } from '../app/auth'
 import { Screen } from '../app/Screen'
 import { useUI } from '../app/ui'
 import { useToggleLike } from '../data/actions'
-import { badgeColor, CATS, useComments, useLiked, usePost, usePosts, type Attach, type MediaItem } from '../data/community'
+import { badgeColor, CATS, useComments, useLiked, usePost, usePosts, type Attach, type MediaItem, type RecordAttach } from '../data/community'
 import { useHealthLogs, useVetVisits } from '../data/health'
 import { useKeeper, useRefresh, type Keeper } from '../data/keeper'
 import { isoDay, today, yd } from '../lib/date'
@@ -53,6 +53,7 @@ export function CommunityPage() {
 }
 
 function AttachView({ at }: { at: Attach }) {
+  if (at.kind === 'adopt') return null
   if (at.kind === 'health') return <HealthCardView data={at} photoUrls={(at.photos ?? []).map((p) => publicUrl('post-media', p))} />
   const kindLbl = { weight: '체중 기록', clutch: '산란 기록', line: '혈통 정보' }[at.kind]
   return (
@@ -361,7 +362,7 @@ export function PostPage() {
   )
 }
 
-function snap(k: Keeper, aid: string, type: 'weight' | 'clutch' | 'line'): Attach | null {
+function snap(k: Keeper, aid: string, type: 'weight' | 'clutch' | 'line'): RecordAttach | null {
   const a = k.A(aid)
   if (!a) return null
   const label = `${nm(a)} ${a.code}`
@@ -418,7 +419,7 @@ export function WritePage() {
 
   const nImg = media.filter((m) => m.t === 'img').length
   const nVid = media.filter((m) => m.t === 'vid').length
-  const healthSnap = (): Attach | null => {
+  const healthSnap = (): RecordAttach | null => {
     const a = k.A(aid)
     if (!a) return null
     return {

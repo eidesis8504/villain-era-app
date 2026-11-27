@@ -808,6 +808,30 @@ export type Database = {
         }
         Relationships: []
       }
+      animal_shares: {
+        Row: {
+          animal_id: string
+          created_at: string
+          owner_id: string
+          revoked_at: string | null
+          token: string
+        }
+        Insert: {
+          animal_id: string
+          created_at?: string
+          owner_id: string
+          revoked_at?: string | null
+          token: string
+        }
+        Update: {
+          animal_id?: string
+          created_at?: string
+          owner_id?: string
+          revoked_at?: string | null
+          token?: string
+        }
+        Relationships: []
+      }
       reports: {
         Row: {
           created_at: string
@@ -1108,6 +1132,10 @@ export type Database = {
       admin_metrics: { Args: never; Returns: Json }
       admin_set_config: { Args: { p_key: string; p_value: Json }; Returns: undefined }
       my_account_is_empty: { Args: never; Returns: boolean }
+      share_animal: { Args: { p_animal: string }; Returns: string }
+      unshare_animal: { Args: { p_animal: string }; Returns: undefined }
+      get_resume: { Args: { p_token: string }; Returns: Json }
+      set_adopt_status: { Args: { p_post: string; p_status: string }; Returns: undefined }
     }
     Enums: {
       [_ in never]: never

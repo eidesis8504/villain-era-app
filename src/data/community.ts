@@ -1,6 +1,7 @@
 // 커뮤니티 · 공지 · 알림 조회
 import { useQuery } from '@tanstack/react-query'
 import { useAuth } from '../app/auth'
+import type { AdoptAttach } from '../lib/adopt'
 import type { Tables } from '../lib/database.types'
 import type { HealthAttach } from '../lib/health'
 import { supabase } from '../lib/supabase'
@@ -12,6 +13,9 @@ export type Attach =
   | { kind: 'clutch'; label: string; n: number; eggs: number; fert: number; hatched: number; dead: number }
   | { kind: 'line'; label: string; sire: string; dam: string; coi: string }
   | HealthAttach
+  | AdoptAttach
+// 내 개체 기록 첨부 (분양 카드 제외)
+export type RecordAttach = Exclude<Attach, AdoptAttach>
 export type Post = Omit<Tables<'posts'>, 'media' | 'attach'> & {
   media: MediaItem[]
   attach: Attach | null
@@ -22,7 +26,7 @@ export type Notice = Tables<'notices'>
 export type Notification = Tables<'notifications'>
 
 const AUTHOR = 'author:profiles!posts_author_id_fkey(id, nickname, role, badge, avatar_url)'
-export const CATS = ['자유', 'Q&A', '정보', '사육일지'] as const
+export const CATS = ['자유', 'Q&A', '정보', '사육일지', '분양·홍보'] as const
 
 // 알림 종류 이름 (알림함·배너)
 export const KIND_LABEL: Record<string, string> = {

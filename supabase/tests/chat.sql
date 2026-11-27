@@ -71,6 +71,25 @@ end $$;
 -- 읽음 시각을 과거로 돌려 두고(한 트랜잭션 안에서는 now()가 같다) 메시지 뒤의 변화를 본다
 update public.chat_rooms set a_read_at = now() - interval '1 hour', b_read_at = now() - interval '1 hour' where id = current_setting('t.r1')::uuid;
 
+-- ── 2-1. 글에서 연 대화는 그 글을 기억한다 (다른 글에서 다시 열면 그 글로 바뀐다) ──
+select set_config('request.jwt.claims', json_build_object('sub', current_setting('t.u2'), 'role', 'authenticated')::text, true);
+set local role authenticated;
+insert into public.posts (cat, title, body, attach, media) values ('자유', '채팅 시험 글', '본문', null, '[]');
+reset role;
+select set_config('t.p1', (select id::text from public.posts where author_id = current_setting('t.u2')::uuid and title = '채팅 시험 글'), true);
+select set_config('request.jwt.claims', json_build_object('sub', current_setting('t.u1'), 'role', 'authenticated')::text, true);
+set local role authenticated;
+do $$ begin
+  assert public.open_dm(current_setting('t.u2')::uuid, current_setting('t.p1')::uuid)::text = current_setting('t.r1'), '글에서 열어도 같은 방';
+  perform public.open_dm(current_setting('t.u2')::uuid);
+  perform public.open_dm(current_setting('t.u2')::uuid, gen_random_uuid());
+end $$;
+reset role;
+do $$ begin
+  assert (select post_id from public.chat_rooms where id = current_setting('t.r1')::uuid) = current_setting('t.p1')::uuid,
+         '글에서 다시 열면 그 글이 방에 붙고, 글 없이 열거나 없는 글로 열면 그대로예요';
+end $$;
+
 -- ── 3. 메시지 보내기 ───────────────────────────────────────────
 select set_config('request.jwt.claims', json_build_object('sub', current_setting('t.u1'), 'role', 'authenticated')::text, true);
 set local role authenticated;

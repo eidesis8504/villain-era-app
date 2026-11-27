@@ -119,7 +119,7 @@ create policy "chat_messages_select" on public.chat_messages for select to authe
   using (private.can_read_room(room_id));
 
 -- ─────────────────────────────────────────────────────────────
--- 1:1 대화 시작: 이미 있으면 그 방. 새로 만들 때는 새 계정 제한(분양·홍보 글과 같음)과 하루 10개 제한
+-- 1:1 대화 시작: 이미 있으면 그 방(글에서 열었으면 그 글을 방에 붙인다). 새로 만들 때는 새 계정 제한(분양·홍보 글과 같음)과 하루 10개 제한
 -- ─────────────────────────────────────────────────────────────
 create or replace function public.open_dm(p_user uuid, p_post uuid default null)
 returns uuid
@@ -149,6 +149,12 @@ begin
   b := greatest(me, p_user);
   select id into v_room from public.chat_rooms where kind = 'dm' and user_a = a and user_b = b;
   if v_room is not null then
+    -- 다른 글에서 다시 열면 그 글이 대화 위에 보이게 한다
+    if p_post is not null then
+      update public.chat_rooms set post_id = p_post
+       where id = v_room and post_id is distinct from p_post
+         and exists (select 1 from public.posts where id = p_post);
+    end if;
     return v_room;
   end if;
   if exists (select 1 from public.blocks where blocker_id = p_user and blocked_id = me) then

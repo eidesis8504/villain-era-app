@@ -1036,9 +1036,11 @@ select.input {
   color: var(--sub);
   background: var(--seg);
 }
+/* 연한 파란 배경(채택된 답변 카드) 위에서도 보이게 테두리로 그린다 */
 .tier-crew {
   color: var(--blue);
-  background: var(--blue-soft);
+  background: #fff;
+  box-shadow: inset 0 0 0 1px var(--blue);
 }
 .tier-core {
   color: var(--cream);

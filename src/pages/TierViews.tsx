@@ -53,7 +53,7 @@ export function TierParts({ parts }: { parts: TierPart[] }) {
           {g.items.map((p) => (
             <div key={p.k} className={`tier-part${p.hz < 0 ? ' minus' : ''}`} data-test="tier-part">
               <div className="tier-part-label">{PART_INFO[p.k].label}</div>
-              <div className="mono tier-part-line">{partLine(p)}</div>
+              <div className="tier-part-line">{partLine(p)}</div>
               <div className="hint">{PART_INFO[p.k].hint}</div>
             </div>
           ))}

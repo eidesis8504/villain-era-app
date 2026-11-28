@@ -290,8 +290,8 @@ export default function AnimalDetailPage() {
                 <b>
                   {l ? (
                     <>
-                      {l.g}
-                      <small>g</small>
+                      {fw(l.g).split(' ')[0]}
+                      <small>{fw(l.g).split(' ')[1]}</small>
                     </>
                   ) : (
                     '—'

@@ -19,14 +19,6 @@ export function todoRow(t: Todo, day: string, checks: Check[], T: string) {
     time: hhmm(t.time_of_day),
     rule: ruleLbl(t, T),
     alarm: alarmLbl(t.alarm_minutes),
-    box: on ? 'var(--blue)' : '#BDB8AD',
-    fill: on ? 'var(--blue)' : '#fff',
-    mark: on ? '✓' : '',
-    ink: on ? '#9A9DA3' : 'var(--ink)',
-    deco: on ? 'line-through' : 'none',
-    seg: on ? 'var(--cream)' : 'rgba(250,249,246,.3)',
-    dot: on ? 'var(--blue)' : 'var(--cream)',
-    op: on ? 0.55 : 1,
   }
 }
 

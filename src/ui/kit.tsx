@@ -1,6 +1,7 @@
 // 프로토타입의 반복 UI 조각 (세그먼트·칩·토글·스테퍼·시트·페어링 카드 등)
 import { useEffect, type CSSProperties, type ReactNode } from 'react'
 import { createPortal } from 'react-dom'
+import { Minus, Plus, X } from 'lucide-react'
 import { useViewport } from '../app/layout'
 import type { PairInfo } from '../lib/lineage'
 
@@ -9,14 +10,12 @@ export function Seg<T extends string | number>({
   value,
   onChange,
   height,
-  mono,
   testId,
 }: {
   items: readonly (readonly [T, string])[]
   value: T
   onChange: (v: T) => void
   height?: number
-  mono?: boolean
   testId?: string
 }) {
   return (
@@ -26,7 +25,7 @@ export function Seg<T extends string | number>({
           type="button"
           key={String(k)}
           className={`seg-item${value === k ? ' on' : ''}`}
-          style={{ height, fontFamily: mono ? 'var(--mono)' : undefined }}
+          style={{ height }}
           onClick={() => onChange(k)}
         >
           {label}
@@ -42,6 +41,7 @@ export function Chips<T extends string | number>({
   onChange,
   wrap,
   small,
+  tabs,
   style,
 }: {
   items: readonly (readonly [T, string])[]
@@ -49,11 +49,13 @@ export function Chips<T extends string | number>({
   onChange: (v: T) => void
   wrap?: boolean
   small?: boolean
+  // 목록을 거르는 글자 탭 모양 (밑줄)
+  tabs?: boolean
   style?: CSSProperties
 }) {
   const on = (k: T) => (Array.isArray(value) ? value.includes(k) : value === k)
   return (
-    <div className={`chips no-scrollbar${wrap ? ' wrap' : ''}`} style={style}>
+    <div className={`chips no-scrollbar${wrap ? ' wrap' : ''}${tabs ? ' tabs' : ''}`} style={style}>
       {items.map(([k, label]) => (
         <button
           type="button"
@@ -95,11 +97,11 @@ export function Stepper({
   return (
     <div className={`stepper${warn ? ' warn' : ''}`}>
       <button type="button" onClick={onDec} aria-label="줄이기">
-        −
+        <Minus size={18} />
       </button>
       <div className="val">{value}</div>
       <button type="button" onClick={onInc} aria-label="늘리기">
-        +
+        <Plus size={18} />
       </button>
     </div>
   )
@@ -128,9 +130,9 @@ export function PairCard({ pi, big, showCommon = true }: { pi: PairInfo; big?: b
         <span
           style={{
             fontSize: 12,
-            fontWeight: 700,
-            padding: '4px 10px',
-            borderRadius: 999,
+            fontWeight: 600,
+            padding: '3px 8px',
+            borderRadius: 'var(--r-xs)',
             background: pi.vBg,
             color: pi.vInk,
           }}
@@ -167,15 +169,10 @@ export function Sheet({ title, onClose, children }: { title: string; onClose: ()
       <div className="sheet-backdrop" onClick={onClose} />
       <div className={`sheet${desk ? ' desk' : ''}`} role="dialog" aria-label={title} data-test="sheet">
         <div className="sheet-handle" />
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <span style={{ fontSize: 17, fontWeight: 700 }}>{title}</span>
-          <button
-            type="button"
-            data-test="sheet-close"
-            onClick={onClose}
-            style={{ fontSize: 14, color: 'var(--muted)', padding: '10px 0 10px 16px' }}
-          >
-            닫기
+        <div className="sheet-head">
+          <span className="h-title">{title}</span>
+          <button type="button" className="icon-btn" aria-label="닫기" data-test="sheet-close" onClick={onClose}>
+            <X size={22} />
           </button>
         </div>
         {children}
@@ -198,7 +195,7 @@ export function Spinner({ center }: { center?: boolean }) {
 export function ErrorBox({ error, onRetry }: { error: unknown; onRetry?: () => void }) {
   return (
     <div className="empty-card" style={{ margin: 18 }}>
-      <div style={{ fontSize: 15, fontWeight: 700 }}>불러오지 못했어요</div>
+      <div style={{ fontSize: 15, fontWeight: 600 }}>불러오지 못했어요</div>
       <div className="hint">{(error as Error)?.message || '네트워크 연결을 확인해 주세요'}</div>
       {onRetry && (
         <button type="button" className="btn btn-outline btn-sm" style={{ padding: '0 18px' }} onClick={onRetry}>

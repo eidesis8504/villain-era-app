@@ -50,7 +50,7 @@ export function HealthPage() {
         {x.photos.length > 0 && (
           <span style={{ display: 'flex', gap: 6 }}>
             {x.photos.map((p) => (
-              <img key={p} src={urls[p]} alt="" style={{ width: 52, height: 52, borderRadius: 8, objectFit: 'cover', background: 'var(--seg)' }} />
+              <img key={p} src={urls[p]} alt="" style={{ width: 52, height: 52, borderRadius: 6, objectFit: 'cover', background: 'var(--seg)' }} />
             ))}
           </span>
         )}
@@ -177,7 +177,7 @@ export function ConsultPage() {
                     style={{ position: 'relative', width: 72, height: 72, borderRadius: 10, overflow: 'hidden', border: `3px solid ${on ? 'var(--blue)' : 'transparent'}` }}
                   >
                     <img src={urls[p]} alt="" className="cover" />
-                    {on && <span style={{ position: 'absolute', top: 2, right: 4, color: '#fff', fontWeight: 700, textShadow: '0 0 3px #000' }}>✓</span>}
+                    {on && <span style={{ position: 'absolute', top: 2, right: 4, color: '#fff', fontWeight: 600, textShadow: '0 0 3px #000' }}>✓</span>}
                   </button>
                 )
               })}

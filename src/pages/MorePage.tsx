@@ -117,7 +117,7 @@ function ProfileSheet({ profile, onClose }: { profile: Profile; onClose: () => v
             placeholder="예: 크레스티드게코 7마리 · 릴리화이트 라인 브리딩"
           />
         </div>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#F3F1EB', borderRadius: 12, padding: '12px 14px' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#F3F1EB', borderRadius: 10, padding: '12px 14px' }}>
           <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--sub)' }}>등급</span>
           {badge ? (
             <span className="tag dark" style={{ fontSize: 12, padding: '3px 9px', borderRadius: 6 }}>
@@ -313,14 +313,14 @@ export default function MorePage() {
             </div>
             <div style={{ fontSize: 12 }}>불편한 점·바라는 기능을 알려 주세요</div>
           </div>
-          <span style={{ color: 'var(--blue)', fontWeight: 700 }}>›</span>
+          <span style={{ color: 'var(--blue)', fontWeight: 600 }}>›</span>
         </div>
 
         <div data-test="profile-card" className="card card-pad" onClick={() => setSheet('profile')} style={{ display: 'flex', alignItems: 'center', gap: 14, cursor: 'pointer' }}>
           <Avatar name={displayName(profile)} url={profile.avatar_url} size={56} />
           <div style={{ flex: 1, minWidth: 0 }}>
             <div style={{ display: 'flex', gap: 6, alignItems: 'center', flexWrap: 'wrap' }}>
-              <span style={{ fontSize: 17, fontWeight: 700 }}>{displayName(profile)}</span>
+              <span style={{ fontSize: 17, fontWeight: 600 }}>{displayName(profile)}</span>
               {badge && <span className="tag dark">{badge}</span>}
               {!isAdmin && <TierBadge hz={profile.hz} />}
             </div>
@@ -347,7 +347,6 @@ export default function MorePage() {
             <div>
               <div style={{ fontSize: 14, fontWeight: 600, marginBottom: 8 }}>근친 페어링 차단 기준 (COI 초과)</div>
               <Seg
-                mono
                 items={[
                   [3.125, '3.125%'],
                   [6.25, '6.25%'],

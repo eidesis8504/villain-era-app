@@ -163,7 +163,7 @@ export function ChatListPage() {
         {q.error && <ErrorBox error={q.error} onRetry={() => q.refetch()} />}
         {q.data && !rooms.length && (
           <div className="empty-card" data-test="chat-none">
-            <div style={{ fontSize: 15, fontWeight: 700 }}>아직 대화가 없어요</div>
+            <div style={{ fontSize: 15, fontWeight: 600 }}>아직 대화가 없어요</div>
             <div style={{ fontSize: 13, color: 'var(--muted)', lineHeight: 1.6 }}>
               분양·홍보 글의 ‘채팅으로 문의’나 글·댓글의 ⋯ 메뉴에서 대화를 시작할 수 있어요
             </div>

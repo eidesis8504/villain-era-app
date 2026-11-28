@@ -24,7 +24,7 @@ export function FeedStrip({ list, days = 30, now }: { list: { fed_on: string; re
             <span
               key={d}
               title={r ? `${yd(d)} ${FEED_RESULT_LABEL[r]}` : yd(d)}
-              style={{ height: 14, borderRadius: 3, background: r ? RESULT_COLOR[r] : 'var(--seg)' }}
+              style={{ height: 14, borderRadius: 4, background: r ? RESULT_COLOR[r] : 'var(--seg)' }}
             />
           )
         })}

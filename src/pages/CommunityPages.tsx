@@ -63,7 +63,7 @@ export function CommunityPage() {
         )}
         {q.data && !q.data.length && (
           <div className="empty-card span-all">
-            <div style={{ fontSize: 15, fontWeight: 700 }}>아직 글이 없어요</div>
+            <div style={{ fontSize: 15, fontWeight: 600 }}>아직 글이 없어요</div>
             <div style={{ fontSize: 13, color: 'var(--muted)' }}>사육 경험이나 궁금한 점을 첫 글로 남겨보세요</div>
             <button type="button" className="btn btn-primary btn-sm" style={{ padding: '0 18px' }} onClick={() => nav('/community/new')}>
               글쓰기
@@ -82,9 +82,9 @@ function AttachView({ at }: { at: RecordAttach }) {
   if (at.kind === 'health') return <HealthCardView data={at} photoUrls={(at.photos ?? []).map((p) => publicUrl('post-media', p))} />
   const kindLbl = { weight: '체중 기록', clutch: '산란 기록', line: '혈통 정보' }[at.kind]
   return (
-    <div className="card" style={{ borderRadius: 14, padding: '12px 14px', display: 'flex', flexDirection: 'column', gap: 8 }}>
+    <div className="card" style={{ borderRadius: 10, padding: '12px 14px', display: 'flex', flexDirection: 'column', gap: 8 }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12 }}>
-        <span style={{ fontWeight: 700, color: 'var(--blue)' }}>{kindLbl}</span>
+        <span style={{ fontWeight: 600, color: 'var(--blue)' }}>{kindLbl}</span>
         <span className="mono" style={{ color: 'var(--muted)' }}>
           {at.label}
         </span>
@@ -218,7 +218,7 @@ export function PostPage() {
           <span className="tag">{p.cat}</span>
           {p.has_adopted && <span className="tag solid">채택 완료</span>}
         </div>
-        <div style={{ fontSize: 20, fontWeight: 700, lineHeight: 1.4, marginTop: -6 }}>{p.title}</div>
+        <div style={{ fontSize: 20, fontWeight: 600, lineHeight: 1.4, marginTop: -6 }}>{p.title}</div>
         <div style={{ display: 'flex', gap: 6, alignItems: 'center', fontSize: 13, color: 'var(--muted)' }}>
           <span style={{ fontWeight: 600, color: 'var(--ink)' }}>{displayName(p.author)}</span>
           {badge && (
@@ -250,7 +250,7 @@ export function PostPage() {
         {p.media.length > 0 && (
           <div data-test="post-media" style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
             {p.media.map((m, i) => (
-              <div key={i} style={{ borderRadius: 14, overflow: 'hidden', background: m.t === 'vid' ? 'var(--ink)' : 'var(--seg)' }}>
+              <div key={i} style={{ borderRadius: 10, overflow: 'hidden', background: m.t === 'vid' ? 'var(--ink)' : 'var(--seg)' }}>
                 {m.t === 'img' ? (
                   <img src={publicUrl('post-media', m.path)} alt="" loading="lazy" style={{ width: '100%', maxHeight: 560, objectFit: 'contain', display: 'block' }} />
                 ) : (
@@ -327,12 +327,12 @@ export function PostPage() {
         </div>
 
         {mine && qa && !p.has_adopted && list.length > 0 && (
-          <div style={{ background: 'var(--blue-soft)', borderRadius: 12, padding: '10px 12px', fontSize: 12, fontWeight: 600, color: 'var(--blue)' }}>
+          <div style={{ background: 'var(--blue-soft)', borderRadius: 10, padding: '10px 12px', fontSize: 12, fontWeight: 600, color: 'var(--blue)' }}>
             도움이 된 답변을 채택해 주세요 · 채택 후에는 바꿀 수 없어요
           </div>
         )}
 
-        <div style={{ fontSize: 15, fontWeight: 700, borderTop: '1px solid var(--line)', paddingTop: 14 }}>
+        <div style={{ fontSize: 15, fontWeight: 600, borderTop: '1px solid var(--line)', paddingTop: 14 }}>
           {qa ? '답변' : '댓글'} {p.comment_count}
         </div>
 
@@ -344,7 +344,7 @@ export function PostPage() {
               style={{
                 background: c.adopted ? 'var(--blue-soft)' : '#fff',
                 border: `1px solid ${c.adopted ? 'var(--blue)' : 'var(--line)'}`,
-                borderRadius: 14,
+                borderRadius: 10,
                 padding: '12px 14px',
                 display: 'flex',
                 flexDirection: 'column',
@@ -352,7 +352,7 @@ export function PostPage() {
               }}
             >
               <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
-                <span style={{ fontSize: 13, fontWeight: 700 }}>{displayName(c.author)}</span>
+                <span style={{ fontSize: 13, fontWeight: 600 }}>{displayName(c.author)}</span>
                 {cb && (
                   <span className="tag dark" style={{ background: badgeColor(cb) }}>
                     {cb}
@@ -360,7 +360,7 @@ export function PostPage() {
                 )}
                 {c.author && c.author.role !== 'admin' && <TierBadge hz={c.author.hz} />}
                 {c.hidden && <span className="tag warn">숨김</span>}
-                {c.adopted && <span style={{ marginLeft: 'auto', fontSize: 11, fontWeight: 700, color: 'var(--blue)' }}>✓ 채택된 답변</span>}
+                {c.adopted && <span style={{ marginLeft: 'auto', fontSize: 11, fontWeight: 600, color: 'var(--blue)' }}>✓ 채택된 답변</span>}
                 {c.author_id !== uid && (
                   <button
                     type="button"
@@ -378,7 +378,7 @@ export function PostPage() {
                 <button
                   type="button"
                   onClick={() => adopt(c.id)}
-                  style={{ alignSelf: 'flex-start', height: 32, padding: '0 12px', borderRadius: 8, border: '1px solid var(--blue)', color: 'var(--blue)', fontSize: 12, fontWeight: 700 }}
+                  style={{ alignSelf: 'flex-start', height: 32, padding: '0 12px', borderRadius: 6, border: '1px solid var(--blue)', color: 'var(--blue)', fontSize: 12, fontWeight: 600 }}
                 >
                   이 답변 채택
                 </button>
@@ -652,17 +652,17 @@ export function WritePage() {
 
         <div data-test="write-media" className="card" style={{ padding: 14, display: 'flex', flexDirection: 'column', gap: 10 }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: 8 }}>
-            <span style={{ fontSize: 14, fontWeight: 700 }}>사진 · 동영상</span>
+            <span style={{ fontSize: 14, fontWeight: 600 }}>사진 · 동영상</span>
             <span className="mono" style={{ fontWeight: 500, fontSize: 12, color: 'var(--muted)' }}>
               사진 {nImg}/10 · 동영상 {nVid}/1
             </span>
           </div>
           <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
             {media.map((m, i) => (
-              <div key={i} style={{ position: 'relative', width: 76, height: 76, borderRadius: 12, overflow: 'hidden', background: 'var(--seg)', flex: 'none' }}>
+              <div key={i} style={{ position: 'relative', width: 76, height: 76, borderRadius: 10, overflow: 'hidden', background: 'var(--seg)', flex: 'none' }}>
                 {m.preview && <img src={m.preview} alt="" className="cover" />}
                 {m.t === 'vid' && (
-                  <span className="mono" style={{ position: 'absolute', left: 5, bottom: 5, fontSize: 10, fontWeight: 600, color: '#fff', background: 'rgba(22,24,29,.75)', padding: '2px 5px', borderRadius: 5 }}>
+                  <span className="mono" style={{ position: 'absolute', left: 5, bottom: 5, fontSize: 10, fontWeight: 600, color: '#fff', background: 'rgba(22,24,29,.75)', padding: '2px 5px', borderRadius: 4 }}>
                     ▶ {fmtDur(m.dur)}
                   </span>
                 )}
@@ -670,7 +670,7 @@ export function WritePage() {
                   type="button"
                   aria-label="삭제"
                   onClick={() => setMedia((s) => s.filter((_, j) => j !== i))}
-                  style={{ position: 'absolute', top: 3, right: 3, width: 28, height: 28, borderRadius: 14, background: 'rgba(22,24,29,.75)', color: '#fff', fontSize: 16, lineHeight: '28px' }}
+                  style={{ position: 'absolute', top: 3, right: 3, width: 28, height: 28, borderRadius: 10, background: 'rgba(22,24,29,.75)', color: '#fff', fontSize: 16, lineHeight: '28px' }}
                 >
                   ×
                 </button>
@@ -707,7 +707,7 @@ export function WritePage() {
 
         <div className="card" style={{ padding: 14, display: isAdopt ? 'none' : 'flex', flexDirection: 'column', gap: 10 }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <span style={{ fontSize: 14, fontWeight: 700 }}>내 개체 기록 첨부</span>
+            <span style={{ fontSize: 14, fontWeight: 600 }}>내 개체 기록 첨부</span>
             <Toggle
               label="기록 첨부"
               on={att}
@@ -757,7 +757,7 @@ const pickBox = {
   position: 'relative',
   width: 76,
   height: 76,
-  borderRadius: 12,
+  borderRadius: 10,
   border: '1.5px dashed #9FB6D9',
   background: '#F5F8FC',
   color: 'var(--blue)',

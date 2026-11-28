@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef } from 'react'
 import { Link, NavLink, Outlet, useLocation, useNavigate } from 'react-router'
+import { Bell } from 'lucide-react'
 import { useChatUnread } from '../data/chat'
 import { useNotifications } from '../data/community'
 import { useChecks, useKeeper, useRefresh, useTodos } from '../data/keeper'
@@ -102,7 +103,7 @@ function Sidebar() {
       <div className="side-foot">
         <Avatar name={name} url={profile?.avatar_url} size={36} />
         <div style={{ flex: 1, minWidth: 0 }}>
-          <div className="ellipsis" style={{ fontSize: 14, fontWeight: 700 }}>
+          <div className="ellipsis" style={{ fontSize: 14, fontWeight: 600 }}>
             {name}
           </div>
           <div className="ellipsis" style={{ fontSize: 11, color: 'var(--muted)' }}>
@@ -110,7 +111,7 @@ function Sidebar() {
           </div>
         </div>
         <button type="button" className="bell" aria-label="알림" onClick={() => nav('/alerts')}>
-          <span className="bell-glyph" />
+          <Bell size={20} />
           {c.unread > 0 && (
             <span className="dot-badge" style={{ top: -6, right: -6 }}>
               {c.unread}

@@ -77,7 +77,7 @@ export default function AnimalsPage() {
                 <AnimalThumb path={a.photo_path} mark={sexMark(a.sex)} size={46} />
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <div style={{ display: 'flex', flexWrap: 'wrap', columnGap: 6, alignItems: 'baseline' }}>
-                    <span style={{ fontSize: 15, fontWeight: 700 }}>{nm(a)}</span>
+                    <span style={{ fontSize: 15, fontWeight: 600 }}>{nm(a)}</span>
                     <span className="mono" style={{ fontWeight: 500, fontSize: 12, color: 'var(--blue)' }}>
                       {a.code}
                     </span>

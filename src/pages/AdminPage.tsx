@@ -50,7 +50,7 @@ function Criterion({ title, rate, target, sample, note }: { title: string; rate:
       <div className="mono" style={{ fontSize: 24, fontWeight: 600, color: v.color }}>
         {pctTxt(rate)}
       </div>
-      <div style={{ fontSize: 11, fontWeight: 700, color: v.color }}>
+      <div style={{ fontSize: 11, fontWeight: 600, color: v.color }}>
         {v.label} · 기준 {target}%
       </div>
       <div style={{ fontSize: 11, color: 'var(--muted-2)' }}>{note}</div>

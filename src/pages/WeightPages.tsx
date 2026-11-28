@@ -59,8 +59,8 @@ export function WeightPage() {
         </div>
 
         {warn && (
-          <div style={{ display: 'flex', gap: 10, alignItems: 'center', background: 'var(--warn-soft)', borderRadius: 12, padding: '11px 14px' }}>
-            <span className="mono" style={{ fontWeight: 700, fontSize: 14, color: 'var(--warn)' }}>
+          <div style={{ display: 'flex', gap: 10, alignItems: 'center', background: 'var(--warn-soft)', borderRadius: 10, padding: '11px 14px' }}>
+            <span className="mono" style={{ fontWeight: 600, fontSize: 14, color: 'var(--warn)' }}>
               !
             </span>
             <span style={{ fontSize: 13, color: '#5A2A05', fontWeight: 500 }}>
@@ -111,7 +111,7 @@ export function WeightPage() {
             </div>
           </div>
         ) : (
-          <div style={{ background: '#fff', border: '1px dashed var(--off)', borderRadius: 16, padding: 28, textAlign: 'center', fontSize: 13, color: 'var(--muted)' }}>
+          <div style={{ background: '#fff', border: '1px dashed var(--off)', borderRadius: 10, padding: 28, textAlign: 'center', fontSize: 13, color: 'var(--muted)' }}>
             아직 체중 기록이 없어요
           </div>
         )}
@@ -185,11 +185,11 @@ export function WeightAllPage() {
               key={a.id}
               className="card"
               onClick={() => nav(`/animals/${a.id}/weight`)}
-              style={{ display: 'flex', alignItems: 'center', gap: 12, borderRadius: 14, padding: '12px 14px', cursor: 'pointer' }}
+              style={{ display: 'flex', alignItems: 'center', gap: 12, borderRadius: 10, padding: '12px 14px', cursor: 'pointer' }}
             >
               <div style={{ flex: 1, minWidth: 0 }}>
                 <div style={{ display: 'flex', flexWrap: 'wrap', columnGap: 6, alignItems: 'baseline' }}>
-                  <span style={{ fontSize: 15, fontWeight: 700 }}>{nm(a)}</span>
+                  <span style={{ fontSize: 15, fontWeight: 600 }}>{nm(a)}</span>
                   <span className="mono" style={{ fontWeight: 500, fontSize: 12, color: 'var(--blue)' }}>
                     {a.code}
                   </span>

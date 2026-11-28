@@ -107,7 +107,7 @@ export function WeightSheet({
         <div
           style={{
             background: neg ? 'var(--warn-soft)' : 'var(--blue-soft)',
-            borderRadius: 12,
+            borderRadius: 10,
             padding: '12px 14px',
             display: 'flex',
             justifyContent: 'space-between',
@@ -171,7 +171,7 @@ export function TransferCode({ t }: { t: Transfer }) {
       <div className="mono" data-test="transfer-code" style={{ fontWeight: 600, fontSize: 30, letterSpacing: '.08em', color: 'var(--blue)' }}>
         {fmtCode(t.code)}
       </div>
-      <div style={{ background: '#fff', padding: 12, borderRadius: 14, border: '1px solid var(--line)' }}>
+      <div style={{ background: '#fff', padding: 12, borderRadius: 10, border: '1px solid var(--line)' }}>
         <QrGrid n={n} cells={cells} size={168} />
       </div>
       <div className="hint" style={{ maxWidth: 360 }}>

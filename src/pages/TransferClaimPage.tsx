@@ -107,7 +107,7 @@ export default function TransferClaimPage() {
               {pv.from ?? '회원'}님이 보낸 개체
             </div>
             <div>
-              <span style={{ fontSize: 18, fontWeight: 700 }}>{nm(a)}</span>{' '}
+              <span style={{ fontSize: 18, fontWeight: 600 }}>{nm(a)}</span>{' '}
               <span className="mono" style={{ fontSize: 13, fontWeight: 600, color: 'var(--blue)' }}>
                 {a.code}
               </span>

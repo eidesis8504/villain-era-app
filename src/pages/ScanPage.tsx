@@ -131,7 +131,7 @@ export default function ScanPage() {
   return (
     <Screen title="스캔" back="/">
       <div className="page">
-        <div style={{ height: 290, borderRadius: 22, background: 'var(--ink)', position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}>
+        <div style={{ height: 290, borderRadius: 10, background: 'var(--ink)', position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}>
           <video ref={video} muted playsInline autoPlay style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', display: on ? 'block' : 'none' }} />
           <div style={{ width: 180, height: 180, position: 'relative' }}>
             {(

@@ -73,7 +73,7 @@ export default function HomePage() {
             <span style={{ font: '700 20px var(--sans)', letterSpacing: '.02em', color: 'var(--blue)' }}>VILLAIN ERA</span>
             <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
               <button type="button" data-test="home-scan" className="home-scan" onClick={() => nav('/scan')}>
-                <span style={{ width: 13, height: 13, border: '1.6px dashed currentColor', borderRadius: 3 }} />
+                <span style={{ width: 13, height: 13, border: '1.6px dashed currentColor', borderRadius: 4 }} />
                 QR 스캔
               </button>
               <button
@@ -100,7 +100,7 @@ export default function HomePage() {
           <div
             className="span-all"
             onClick={() => nav('/notices')}
-            style={{ display: 'flex', alignItems: 'center', gap: 8, background: 'var(--blue-soft)', borderRadius: 12, padding: '10px 12px', cursor: 'pointer' }}
+            style={{ display: 'flex', alignItems: 'center', gap: 8, background: 'var(--blue-soft)', borderRadius: 10, padding: '10px 12px', cursor: 'pointer' }}
           >
             <span style={{ background: 'var(--blue)', color: 'var(--cream)', fontSize: 11, fontWeight: 600, padding: '2px 8px', borderRadius: 999, flex: 'none' }}>
               공지
@@ -116,7 +116,7 @@ export default function HomePage() {
           <div className="mono" style={{ fontWeight: 500, fontSize: 12, color: 'var(--muted)' }}>
             {dateLbl(T)}
           </div>
-          <div style={{ fontSize: 22, fontWeight: 700, marginTop: 2 }}>안녕하세요, {displayName(profile)}님</div>
+          <div style={{ fontSize: 22, fontWeight: 600, marginTop: 2 }}>안녕하세요, {displayName(profile)}님</div>
         </div>
 
         <div className="span-all" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(150px,1fr))', gap: 10 }}>
@@ -127,14 +127,14 @@ export default function HomePage() {
         </div>
 
         {!k.loading && k.animals.length === 0 && (
-          <div className="span-all" style={{ background: 'var(--blue)', color: 'var(--cream)', borderRadius: 18, padding: 20, display: 'flex', flexDirection: 'column', gap: 10 }}>
-            <div style={{ fontSize: 18, fontWeight: 700 }}>첫 개체를 등록해 보세요</div>
+          <div className="span-all" style={{ background: 'var(--blue)', color: 'var(--cream)', borderRadius: 10, padding: 20, display: 'flex', flexDirection: 'column', gap: 10 }}>
+            <div style={{ fontSize: 18, fontWeight: 600 }}>첫 개체를 등록해 보세요</div>
             <div style={{ fontSize: 13, lineHeight: 1.6 }}>개체를 등록하면 체중·산란·혈통 기록이 한곳에 모이고, 서버에 자동으로 저장돼요.</div>
             <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginTop: 4 }}>
               <button
                 type="button"
                 onClick={() => nav('/animals/new')}
-                style={{ height: 44, padding: '0 18px', borderRadius: 12, background: 'var(--cream)', color: 'var(--blue)', fontSize: 14, fontWeight: 700 }}
+                style={{ height: 44, padding: '0 18px', borderRadius: 10, background: 'var(--cream)', color: 'var(--blue)', fontSize: 14, fontWeight: 600 }}
               >
                 + 개체 등록
               </button>
@@ -195,7 +195,7 @@ export default function HomePage() {
               전체 보기
             </button>
           </div>
-          <div style={{ height: 6, borderRadius: 3, background: 'var(--seg)', margin: '12px 0 4px', overflow: 'hidden' }}>
+          <div style={{ height: 6, borderRadius: 4, background: 'var(--seg)', margin: '12px 0 4px', overflow: 'hidden' }}>
             <div style={{ height: 6, background: 'var(--blue)', width: `${pct}%`, transition: 'width .3s' }} />
           </div>
           {rows.map((r) => (

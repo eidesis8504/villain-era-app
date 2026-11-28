@@ -243,7 +243,7 @@ export default function TodoPage() {
             <button type="button" aria-label="뒤로" onClick={goBack} style={{ fontSize: 28, lineHeight: 1, paddingRight: 12, color: 'inherit' }}>
               ‹
             </button>
-            <span style={{ fontSize: 16, fontWeight: 700 }}>오늘의 할 일</span>
+            <span style={{ fontSize: 16, fontWeight: 600 }}>오늘의 할 일</span>
             <button
               type="button"
               data-test="todo-add"
@@ -257,7 +257,7 @@ export default function TodoPage() {
             {dateLbl(T)}
           </div>
           <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', marginTop: 6 }}>
-            <span style={{ fontSize: 20, fontWeight: 700 }}>오늘 할 일</span>
+            <span style={{ fontSize: 20, fontWeight: 600 }}>오늘 할 일</span>
             <span className="mono" style={{ fontWeight: 600, fontSize: 30 }}>
               {done}
               <span style={{ fontSize: 16 }}> / {items.length}</span>
@@ -265,11 +265,11 @@ export default function TodoPage() {
           </div>
           <div style={{ display: 'flex', gap: 4, marginTop: 10 }}>
             {items.map((r) => (
-              <span key={r.t.id} style={{ flex: 1, height: 6, borderRadius: 3, background: r.seg }} />
+              <span key={r.t.id} style={{ flex: 1, height: 6, borderRadius: 4, background: r.seg }} />
             ))}
           </div>
           {!profile.todo_alarm && (
-            <div style={{ marginTop: 12, fontSize: 12, background: 'rgba(250,249,246,.16)', borderRadius: 8, padding: '6px 10px' }}>
+            <div style={{ marginTop: 12, fontSize: 12, background: 'rgba(250,249,246,.16)', borderRadius: 6, padding: '6px 10px' }}>
               할 일 알림이 꺼져 있어요 · 전체 › 설정에서 켤 수 있어요
             </div>
           )}
@@ -283,13 +283,13 @@ export default function TodoPage() {
               </span>
               <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
                 <span style={{ width: 2, height: 20, background: '#E0DCD2' }} />
-                <span style={{ width: 14, height: 14, borderRadius: 7, border: '2px solid var(--blue)', background: r.dot, flex: 'none' }} />
+                <span style={{ width: 14, height: 14, borderRadius: 6, border: '2px solid var(--blue)', background: r.dot, flex: 'none' }} />
                 <span style={{ width: 2, flex: 1, background: '#E0DCD2' }} />
               </div>
               <div
                 className="card"
                 onClick={() => toggle.mutate({ todoId: r.t.id, day: T, on: !r.on })}
-                style={{ borderRadius: 14, padding: '11px 13px', margin: '6px 0', opacity: r.op, cursor: 'pointer', display: 'flex', gap: 8, alignItems: 'flex-start' }}
+                style={{ borderRadius: 10, padding: '11px 13px', margin: '6px 0', opacity: r.op, cursor: 'pointer', display: 'flex', gap: 8, alignItems: 'flex-start' }}
               >
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <div style={{ fontSize: 14, fontWeight: 600, textDecoration: r.deco }}>{r.t.title}</div>

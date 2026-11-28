@@ -52,7 +52,7 @@ export function FeedingListPage() {
               {a.feed_every_days ? `급여 주기 ${a.feed_every_days}일` : '급여 주기 미설정'}
             </span>
           </div>
-          <div style={{ fontSize: 18, fontWeight: 700, color: warn || s.overdue ? 'var(--warn)' : 'var(--ink)' }}>{feedLine(s)}</div>
+          <div style={{ fontSize: 18, fontWeight: 600, color: warn || s.overdue ? 'var(--warn)' : 'var(--ink)' }}>{feedLine(s)}</div>
           <FeedStrip list={k.fs(a.id)} />
         </div>
         {warn && (

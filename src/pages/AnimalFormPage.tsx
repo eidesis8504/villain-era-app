@@ -253,7 +253,7 @@ function AnimalForm({ k, editing }: { k: Keeper; editing: Animal | null }) {
         <div style={{ display: 'flex', gap: 14, alignItems: 'center' }}>
           <label
             className="ph-stripes"
-            style={{ position: 'relative', width: 88, height: 88, borderRadius: 16, flex: 'none', cursor: 'pointer', fontSize: 12 }}
+            style={{ position: 'relative', width: 88, height: 88, borderRadius: 10, flex: 'none', cursor: 'pointer', fontSize: 12 }}
           >
             {photoUrl ? <img src={photoUrl} alt="" /> : <span>+ 사진</span>}
             <input

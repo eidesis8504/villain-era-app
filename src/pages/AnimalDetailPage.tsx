@@ -250,7 +250,7 @@ export default function AnimalDetailPage() {
     <Screen title="개체 상세" back="/animals" right={{ label: '편집', onClick: () => nav(`/animals/${a.id}/edit`) }} wide>
       <div className="page-grid" style={{ gridTemplateColumns: 'repeat(auto-fit,minmax(min(100%,380px),1fr))', gap: 20 }}>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 14, minWidth: 0 }}>
-          <div style={{ background: 'var(--blue)', color: 'var(--cream)', borderRadius: 22, padding: 18, display: 'flex', flexDirection: 'column', gap: 14 }}>
+          <div style={{ background: 'var(--blue)', color: 'var(--cream)', borderRadius: 10, padding: 18, display: 'flex', flexDirection: 'column', gap: 14 }}>
             <div className="mono" style={{ display: 'flex', justifyContent: 'space-between', fontWeight: 500, fontSize: 11, letterSpacing: '.12em', opacity: 0.8 }}>
               <span>VILLAIN ERA · ID</span>
               <span>{spInfo(a).en}</span>
@@ -261,7 +261,7 @@ export default function AnimalDetailPage() {
                 className="mono"
                 style={{
                   height: 116,
-                  borderRadius: 12,
+                  borderRadius: 10,
                   overflow: 'hidden',
                   cursor: 'pointer',
                   background: 'repeating-linear-gradient(135deg,rgba(250,249,246,.18) 0 8px,rgba(250,249,246,.08) 8px 16px)',
@@ -278,7 +278,7 @@ export default function AnimalDetailPage() {
                 <span className="mono" style={{ fontWeight: 600, fontSize: 20, letterSpacing: '.02em', overflowWrap: 'anywhere' }}>
                   {a.code}
                 </span>
-                <span style={{ fontSize: 22, fontWeight: 700 }}>{nm(a)}</span>
+                <span style={{ fontSize: 22, fontWeight: 600 }}>{nm(a)}</span>
                 <span style={{ fontSize: 12, opacity: 0.9 }}>
                   {spOf(a)} · {sexLbl(a.sex)} · {a.morph || '미정'}
                 </span>
@@ -298,7 +298,7 @@ export default function AnimalDetailPage() {
                 style={{
                   width: 64,
                   height: 64,
-                  borderRadius: 8,
+                  borderRadius: 6,
                   background: 'repeating-linear-gradient(90deg,#FAF9F6 0 4px,#E3E8F0 4px 8px)',
                   fontWeight: 600,
                   fontSize: 10,
@@ -311,7 +311,7 @@ export default function AnimalDetailPage() {
           </div>
 
           {statusTxt && (
-            <div style={{ background: 'var(--seg)', borderRadius: 12, padding: '10px 14px', fontSize: 13, fontWeight: 600, color: 'var(--sub)', display: 'flex', flexDirection: 'column', gap: 8 }}>
+            <div style={{ background: 'var(--seg)', borderRadius: 10, padding: '10px 14px', fontSize: 13, fontWeight: 600, color: 'var(--sub)', display: 'flex', flexDirection: 'column', gap: 8 }}>
               <span>{statusTxt}</span>
               {pending && (
                 <div style={{ display: 'flex', gap: 8 }}>

@@ -118,7 +118,7 @@ export function SymptomSheet({ animal, edit, onClose }: { animal: Animal; edit?:
                   type="button"
                   aria-label="사진 빼기"
                   onClick={() => setPhotos((s) => s.filter((_, j) => j !== i))}
-                  style={{ position: 'absolute', top: 2, right: 2, width: 22, height: 22, borderRadius: 11, background: 'rgba(22,24,29,.7)', color: '#fff', fontSize: 12 }}
+                  style={{ position: 'absolute', top: 2, right: 2, width: 22, height: 22, borderRadius: 10, background: 'rgba(22,24,29,.7)', color: '#fff', fontSize: 12 }}
                 >
                   ✕
                 </button>

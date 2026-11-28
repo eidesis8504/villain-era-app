@@ -66,7 +66,7 @@ export function LineagePage() {
             {node(a.dam_id, '모', true)}
           </div>
           <div style={{ background: 'var(--blue)', color: 'var(--cream)', borderRadius: 10, padding: '10px 12px', marginTop: 4 }}>
-            <div style={{ fontWeight: 700 }}>{nm(a)}</div>
+            <div style={{ fontWeight: 600 }}>{nm(a)}</div>
             <div className="mono" style={{ fontSize: 12 }}>
               {a.code} · 본인 · 근친계수 F {(k.lineage.F(a.id) * 100).toFixed(2)}%
             </div>
@@ -75,7 +75,7 @@ export function LineagePage() {
         </div>
 
         <div>
-          <div style={{ fontSize: 15, fontWeight: 700, marginBottom: 8 }}>후손</div>
+          <div style={{ fontSize: 15, fontWeight: 600, marginBottom: 8 }}>후손</div>
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
             {kids.map((x) => (
               <button
@@ -83,7 +83,7 @@ export function LineagePage() {
                 key={x.id}
                 className="mono"
                 onClick={() => nav(`/animals/${x.id}`)}
-                style={{ fontWeight: 600, fontSize: 12, color: 'var(--blue)', background: 'var(--blue-soft)', padding: '5px 9px', borderRadius: 8 }}
+                style={{ fontWeight: 600, fontSize: 12, color: 'var(--blue)', background: 'var(--blue-soft)', padding: '5px 9px', borderRadius: 6 }}
               >
                 {x.code} {nm(x)}
               </button>
@@ -93,7 +93,7 @@ export function LineagePage() {
         </div>
 
         <div>
-          <div style={{ fontSize: 15, fontWeight: 700, marginBottom: 8 }}>
+          <div style={{ fontSize: 15, fontWeight: 600, marginBottom: 8 }}>
             페어링 검사 <span style={{ fontSize: 12, fontWeight: 400, color: 'var(--muted)' }}>COI {k.coiLimit}% 초과 시 차단</span>
           </div>
           <select className="input" value={pid} onChange={(e) => setPartner(e.target.value)} disabled={a.sex === 'U'}>
@@ -129,7 +129,7 @@ export function LineageHubPage() {
       ) : (
         <div className="page">
           <div className="card card-pad" style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-            <div style={{ fontSize: 15, fontWeight: 700 }}>페어링 검사</div>
+            <div style={{ fontSize: 15, fontWeight: 600 }}>페어링 검사</div>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
               <select className="input" style={{ padding: '0 8px', fontSize: 13 }} value={m} onChange={(e) => setM(e.target.value)}>
                 <option value="">수컷 선택</option>
@@ -156,7 +156,7 @@ export function LineageHubPage() {
             <div className="hint">차단 기준 COI {k.coiLimit}% 초과 · 전체 › 설정에서 변경 · 산란 등록에도 같은 기준이 적용돼요</div>
           </div>
 
-          <div style={{ fontSize: 15, fontWeight: 700 }}>개체별 근친계수</div>
+          <div style={{ fontSize: 15, fontWeight: 600 }}>개체별 근친계수</div>
           {k.loading ? (
             <Spinner center />
           ) : (

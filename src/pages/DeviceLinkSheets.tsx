@@ -170,7 +170,7 @@ function CodeView() {
           className="mono"
           style={{
             fontSize: 30,
-            fontWeight: 700,
+            fontWeight: 600,
             letterSpacing: '.14em',
             color: issued && !expired ? undefined : 'var(--muted-2)',
             textDecoration: expired ? 'line-through' : undefined,

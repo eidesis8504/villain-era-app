@@ -73,7 +73,7 @@ export function NoticesPage() {
                 </button>
               )}
             </div>
-            <span style={{ fontSize: 15, fontWeight: 700, lineHeight: 1.4 }}>{n.title}</span>
+            <span style={{ fontSize: 15, fontWeight: 600, lineHeight: 1.4 }}>{n.title}</span>
             {n.body && <span style={{ fontSize: 14, lineHeight: 1.6, color: 'var(--sub)', whiteSpace: 'pre-wrap' }}>{n.body}</span>}
           </div>
         ))}
@@ -112,11 +112,11 @@ export function AlertsPage() {
             key={n.id}
             className="card"
             onClick={() => n.link && nav(n.link)}
-            style={{ borderRadius: 14, padding: '12px 14px', display: 'flex', gap: 10, alignItems: 'flex-start', cursor: n.link ? 'pointer' : 'default' }}
+            style={{ borderRadius: 10, padding: '12px 14px', display: 'flex', gap: 10, alignItems: 'flex-start', cursor: n.link ? 'pointer' : 'default' }}
           >
             <span style={{ width: 8, height: 8, borderRadius: 4, background: n.read_at ? '#D6D2C8' : 'var(--warn)', marginTop: 6, flex: 'none' }} />
             <div style={{ flex: 1, minWidth: 0 }}>
-              <div style={{ fontSize: 11, fontWeight: 700, color: n.kind === 'feeding' || n.kind === 'health' ? 'var(--warn)' : 'var(--blue)' }}>
+              <div style={{ fontSize: 11, fontWeight: 600, color: n.kind === 'feeding' || n.kind === 'health' ? 'var(--warn)' : 'var(--blue)' }}>
                 {KIND_LABEL[n.kind] ?? '알림'}
               </div>
               <div style={{ fontSize: 14, fontWeight: 600 }}>{n.title}</div>
@@ -137,7 +137,7 @@ export function NotFound() {
   return (
     <Screen title="페이지 없음" back="/">
       <div className="empty-card" style={{ margin: 18 }}>
-        <div style={{ fontSize: 15, fontWeight: 700 }}>없는 화면이에요</div>
+        <div style={{ fontSize: 15, fontWeight: 600 }}>없는 화면이에요</div>
         <button type="button" className="btn btn-primary btn-sm" style={{ padding: '0 18px' }} onClick={() => nav('/', { replace: true })}>
           홈으로
         </button>

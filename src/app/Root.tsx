@@ -61,7 +61,7 @@ function Gate({ children }: { children: ReactNode }) {
       <FullCenter>
         <div style={{ width: '100%', maxWidth: 400, display: 'flex', flexDirection: 'column', gap: 14, textAlign: 'center' }}>
           <div style={{ font: '700 28px var(--sans)', letterSpacing: '.04em', color: 'var(--blue)' }}>VILLAIN ERA</div>
-          <div style={{ fontSize: 15, fontWeight: 700 }}>앱을 시작하지 못했어요</div>
+          <div style={{ fontSize: 15, fontWeight: 600 }}>앱을 시작하지 못했어요</div>
           <div className="hint">
             {bootError ||
               (profileGap === 'broken' ? (
@@ -87,7 +87,7 @@ function Gate({ children }: { children: ReactNode }) {
     return (
       <FullCenter>
         <div style={{ textAlign: 'center' }}>
-          <div style={{ fontSize: 16, fontWeight: 700 }}>이용이 제한된 계정이에요</div>
+          <div style={{ fontSize: 16, fontWeight: 600 }}>이용이 제한된 계정이에요</div>
           <div className="hint" style={{ marginTop: 6 }}>
             문의가 필요하면 운영자에게 연락해 주세요
           </div>

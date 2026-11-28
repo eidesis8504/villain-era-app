@@ -37,11 +37,11 @@ export function AdoptCard({
       </div>
       {a && (
         <div className="adopt-animal">
-          <div className="ph-stripes" style={{ width: 64, height: 64, borderRadius: 12, flex: 'none' }}>
+          <div className="ph-stripes" style={{ width: 64, height: 64, borderRadius: 10, flex: 'none' }}>
             {photoUrl ? <img src={photoUrl} alt="" loading="lazy" /> : <span>{sexMark(a.sex)}</span>}
           </div>
           <div style={{ minWidth: 0, flex: 1 }}>
-            <div style={{ fontSize: 15, fontWeight: 700, overflowWrap: 'anywhere' }}>
+            <div style={{ fontSize: 15, fontWeight: 600, overflowWrap: 'anywhere' }}>
               {nm(a)}{' '}
               <span className="mono" style={{ fontSize: 11, fontWeight: 600, color: 'var(--blue)' }}>
                 {a.code}

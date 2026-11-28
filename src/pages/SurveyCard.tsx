@@ -61,7 +61,7 @@ export function SurveyCard() {
   return (
     <div className="span-all card" data-test="survey-card" style={{ padding: 16, display: 'flex', flexDirection: 'column', gap: 12 }}>
       <div>
-        <div style={{ fontSize: 16, fontWeight: 700 }}>VILLAIN ERA, 2주 써 보니 어떠세요?</div>
+        <div style={{ fontSize: 16, fontWeight: 600 }}>VILLAIN ERA, 2주 써 보니 어떠세요?</div>
         <div className="hint" style={{ fontSize: 13 }}>
           30초면 끝나요 · 답은 앱을 다듬는 데만 써요
         </div>
@@ -77,7 +77,7 @@ export function SurveyCard() {
               onClick={() => setNps(i)}
               style={{
                 height: 36,
-                borderRadius: 8,
+                borderRadius: 6,
                 fontSize: 13,
                 fontWeight: 600,
                 border: '1px solid ' + (nps === i ? 'var(--blue)' : 'var(--input)'),

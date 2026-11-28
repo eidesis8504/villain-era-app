@@ -61,7 +61,7 @@ export function UIProvider({ children }: { children: ReactNode }) {
               <span>VILLAIN ERA · {banner.kind && KIND_LABEL[banner.kind] ? `${KIND_LABEL[banner.kind]} 알림` : '알림'}</span>
               <span>지금</span>
             </div>
-            <div className="ellipsis" style={{ fontSize: 14, fontWeight: 700, marginTop: 2 }}>
+            <div className="ellipsis" style={{ fontSize: 14, fontWeight: 600, marginTop: 2 }}>
               {banner.title}
             </div>
             <div style={{ fontSize: 12, color: 'var(--sub)' }}>{banner.body}</div>

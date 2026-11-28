@@ -120,7 +120,7 @@ export function RoomItem({
       <Avatar name={name} url={avatarUrl} size={44} />
       <div style={{ flex: 1, minWidth: 0 }}>
         <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
-          <span className="ellipsis" style={{ fontSize: 15, fontWeight: 700 }}>
+          <span className="ellipsis" style={{ fontSize: 15, fontWeight: 600 }}>
             {name}
           </span>
           {badge && (

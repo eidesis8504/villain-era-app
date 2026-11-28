@@ -41,7 +41,7 @@ export function QrPage() {
   return (
     <Screen title="QR 라벨" back={`/animals/${a.id}`}>
       <div style={{ padding: '8px 18px 28px', display: 'flex', flexDirection: 'column', gap: 14 }}>
-        <div style={{ background: '#fff', border: '1.5px solid var(--ink)', borderRadius: 14, padding: 16, display: 'grid', gridTemplateColumns: '132px 1fr', gap: 14, alignItems: 'center' }}>
+        <div style={{ background: '#fff', border: '1.5px solid var(--ink)', borderRadius: 10, padding: 16, display: 'grid', gridTemplateColumns: '132px 1fr', gap: 14, alignItems: 'center' }}>
           <QrGrid n={n} cells={cells} size={132} />
           <div style={{ display: 'flex', flexDirection: 'column', gap: 3, minWidth: 0 }}>
             <span className="mono" style={{ fontWeight: 600, fontSize: 11, letterSpacing: '.1em', color: 'var(--blue)' }}>
@@ -50,7 +50,7 @@ export function QrPage() {
             <span className="mono" style={{ fontWeight: 600, fontSize: 17, overflowWrap: 'anywhere' }}>
               {a.code}
             </span>
-            <span style={{ fontSize: 15, fontWeight: 700 }}>{nm(a)}</span>
+            <span style={{ fontSize: 15, fontWeight: 600 }}>{nm(a)}</span>
             <span style={{ fontSize: 12, color: 'var(--sub)' }}>
               {sexLbl(a.sex)} · {a.morph}
             </span>
@@ -90,7 +90,7 @@ export function AnimalByCode() {
   return (
     <Screen title="개체 찾기" back="/animals">
       <div className="empty-card" style={{ margin: 18 }}>
-        <div style={{ fontSize: 15, fontWeight: 700 }}>
+        <div style={{ fontSize: 15, fontWeight: 600 }}>
           <span className="mono">{c}</span> 개체가 내 목록에 없어요
         </div>
         <div className="hint">다른 사육자의 라벨이거나 아직 분양받지 않은 개체예요</div>

@@ -75,7 +75,7 @@ export function PostCard({ p, compact }: { p: Post; compact?: boolean }) {
         {p.attach && !ad && <span className="tag gray">기록 첨부</span>}
         {p.hidden && <span className="tag warn">숨김</span>}
       </div>
-      <div style={{ fontSize: 15, fontWeight: 700, lineHeight: 1.4 }}>{p.title}</div>
+      <div style={{ fontSize: 15, fontWeight: 600, lineHeight: 1.4 }}>{p.title}</div>
       {adLine && (
         <div className="ellipsis" style={{ fontSize: 13, fontWeight: 600, color: 'var(--sub)' }}>
           {adLine}
@@ -90,7 +90,7 @@ export function PostCard({ p, compact }: { p: Post; compact?: boolean }) {
               {m.t === 'vid' && (
                 <span
                   className="mono"
-                  style={{ position: 'absolute', left: 4, bottom: 4, fontSize: 10, fontWeight: 600, color: '#fff', background: 'rgba(22,24,29,.75)', padding: '2px 5px', borderRadius: 5 }}
+                  style={{ position: 'absolute', left: 4, bottom: 4, fontSize: 10, fontWeight: 600, color: '#fff', background: 'rgba(22,24,29,.75)', padding: '2px 5px', borderRadius: 4 }}
                 >
                   ▶ {fmtDur(m.dur ?? 0)}
                 </span>
@@ -126,7 +126,7 @@ export function PostCard({ p, compact }: { p: Post; compact?: boolean }) {
   )
 }
 
-export function AnimalThumb({ path, mark, size, radius = 12 }: { path: string | null; mark: string; size: number; radius?: number }) {
+export function AnimalThumb({ path, mark, size, radius = 10 }: { path: string | null; mark: string; size: number; radius?: number }) {
   return (
     <div className="ph-stripes" style={{ width: size, height: size, borderRadius: radius, flex: 'none' }}>
       {path ? <img src={publicUrl('animal-photos', path)} alt="" loading="lazy" /> : <span>{mark}</span>}

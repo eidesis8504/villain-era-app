@@ -926,6 +926,8 @@ select.input {
   background: var(--surface);
   font-size: 13px;
   color: var(--sub);
+  text-align: left;
+  width: 100%;
   cursor: pointer;
 }
 .notice b {
@@ -1670,20 +1672,6 @@ select.input {
 }
 .tier-part.minus .tier-part-line {
   color: var(--warn);
-}
-
-/* ── 홈 화면 위쪽의 QR 스캔 버튼 ──────────── */
-.home-scan {
-  height: 36px;
-  padding: 0 12px;
-  border-radius: var(--r-s);
-  background: var(--surface);
-  color: var(--ink);
-  font-size: 13px;
-  font-weight: 500;
-  display: flex;
-  align-items: center;
-  gap: 6px;
 }
 
 /* ── 채팅 ─────────────────────────────────── */

@@ -79,7 +79,7 @@ export default function TransferClaimPage() {
     <Screen title="분양 받기" back="/more">
       <div className="page">
         <div className="hint" style={{ fontSize: 13 }}>
-          분양해 준 사육자에게 받은 <b>분양 코드 8자리</b>를 입력하거나, 스캔 탭에서 분양 QR을 찍으세요. 체중·혈통·산란 기록이 내 계정에 같은 ID로 복사돼요.
+          분양해 준 사육자에게 받은 <b>분양 코드 8자리</b>를 입력하거나, QR 스캔에서 분양 QR을 찍으세요. 체중·혈통·산란 기록이 내 계정에 같은 ID로 복사돼요.
         </div>
         <div style={{ display: 'flex', gap: 8 }}>
           <input

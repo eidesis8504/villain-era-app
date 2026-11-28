@@ -1754,6 +1754,7 @@ select.input {
 }
 .chat-room {
   width: 100%;
+  min-height: 72px;
   text-align: left;
 }
 .chat-dot {

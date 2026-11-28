@@ -116,11 +116,11 @@ export function RoomItem({
   onClick?: () => void
 }) {
   return (
-    <button type="button" className="list-row chat-room" data-test="chat-room" data-unread={unread ? '1' : '0'} onClick={onClick}>
+    <button type="button" className="row chat-room" data-test="chat-room" data-unread={unread ? '1' : '0'} onClick={onClick}>
       <Avatar name={name} url={avatarUrl} size={44} />
       <div style={{ flex: 1, minWidth: 0 }}>
         <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
-          <span className="ellipsis" style={{ fontSize: 15, fontWeight: 600 }}>
+          <span className="ellipsis" style={{ fontSize: 16, lineHeight: '22px', fontWeight: 600 }}>
             {name}
           </span>
           {badge && (
@@ -131,16 +131,14 @@ export function RoomItem({
           {typeof hz === 'number' && <TierBadge hz={hz} />}
         </div>
         {note && (
-          <div className="ellipsis" style={{ fontSize: 11, fontWeight: 600, color: 'var(--blue)' }}>
-            {note}
-          </div>
+          <div className="micro ellipsis">{note}</div>
         )}
-        <div className="ellipsis" style={{ fontSize: 13, color: unread ? 'var(--ink)' : 'var(--muted)', fontWeight: unread ? 600 : 400 }}>
+        <div className="ellipsis" style={{ fontSize: 14, lineHeight: '20px', color: unread ? 'var(--ink)' : 'var(--muted)', fontWeight: unread ? 500 : 400 }}>
           {preview}
         </div>
       </div>
-      <div style={{ flex: 'none', display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 6 }}>
-        <span style={{ fontSize: 11, color: 'var(--muted-2)' }}>{time}</span>
+      <div style={{ flex: 'none', alignSelf: 'flex-start', paddingTop: 3, display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 8 }}>
+        <span style={{ fontSize: 12, lineHeight: '16px', color: 'var(--muted)' }}>{time}</span>
         {unread && <span className="chat-dot" role="img" aria-label="안 읽음" />}
       </div>
     </button>

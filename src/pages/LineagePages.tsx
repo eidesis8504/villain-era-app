@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { useNavigate, useParams } from 'react-router'
+import { ChevronRight } from 'lucide-react'
 import { Screen } from '../app/Screen'
 import { useKeeper } from '../data/keeper'
 import { nm } from '../lib/format'
@@ -65,7 +66,7 @@ export function LineagePage() {
             {node(a.sire_id, '부', true)}
             {node(a.dam_id, '모', true)}
           </div>
-          <div style={{ background: 'var(--blue)', color: 'var(--cream)', borderRadius: 10, padding: '10px 12px', marginTop: 4 }}>
+          <div style={{ background: 'var(--ink)', color: '#fff', borderRadius: 10, padding: '10px 12px', marginTop: 4 }}>
             <div style={{ fontWeight: 600 }}>{nm(a)}</div>
             <div className="mono" style={{ fontSize: 12 }}>
               {a.code} · 본인 · 근친계수 F {(k.lineage.F(a.id) * 100).toFixed(2)}%
@@ -83,7 +84,7 @@ export function LineagePage() {
                 key={x.id}
                 className="mono"
                 onClick={() => nav(`/animals/${x.id}`)}
-                style={{ fontWeight: 600, fontSize: 12, color: 'var(--blue)', background: 'var(--blue-soft)', padding: '5px 9px', borderRadius: 6 }}
+                style={{ fontWeight: 500, fontSize: 12, color: 'var(--sub)', background: 'var(--surface)', padding: '5px 9px', borderRadius: 6 }}
               >
                 {x.code} {nm(x)}
               </button>
@@ -169,7 +170,7 @@ export function LineageHubPage() {
                     <div key={x.id} className="list-row" onClick={() => nav(`/animals/${x.id}/lineage`)} style={{ padding: '11px 0' }}>
                       <div style={{ flex: 1, minWidth: 0 }}>
                         <span style={{ fontSize: 14, fontWeight: 600 }}>{nm(x)}</span>{' '}
-                        <span className="mono" style={{ fontWeight: 500, fontSize: 12, color: 'var(--blue)' }}>
+                        <span className="code" style={{ fontSize: 11, color: 'var(--muted)' }}>
                           {x.code}
                         </span>
                         <div style={{ fontSize: 11, color: 'var(--muted-2)', marginTop: 2 }}>
@@ -182,7 +183,7 @@ export function LineageHubPage() {
                       >
                         {v.toFixed(2)}%
                       </span>
-                      <span style={{ color: 'var(--muted-2)' }}>›</span>
+                      <ChevronRight size={18} className="chev" />
                     </div>
                   )
                 })}

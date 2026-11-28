@@ -103,12 +103,12 @@ export default function TransferClaimPage() {
 
         {pv && a && (
           <div className="card card-pad" style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-            <div className="mono" style={{ fontSize: 11, letterSpacing: '.1em', color: 'var(--blue)', fontWeight: 600 }}>
+            <div className="micro">
               {pv.from ?? '회원'}님이 보낸 개체
             </div>
             <div>
               <span style={{ fontSize: 18, fontWeight: 600 }}>{nm(a)}</span>{' '}
-              <span className="mono" style={{ fontSize: 13, fontWeight: 600, color: 'var(--blue)' }}>
+              <span className="code" style={{ fontSize: 12, color: 'var(--muted)' }}>
                 {a.code}
               </span>
             </div>

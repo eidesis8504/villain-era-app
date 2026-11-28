@@ -1,6 +1,7 @@
 import jsQR from 'jsqr'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router'
+import { ChevronRight } from 'lucide-react'
 import { Screen } from '../app/Screen'
 import { useUI } from '../app/ui'
 import { useKeeper } from '../data/keeper'
@@ -169,8 +170,7 @@ export default function ScanPage() {
         <button
           type="button"
           data-test="cam-toggle"
-          className="btn"
-          style={{ height: 48, border: '1px solid var(--blue)', background: on ? '#fff' : 'var(--blue)', color: on ? 'var(--blue)' : 'var(--cream)' }}
+          className={`btn ${on ? 'btn-outline' : 'btn-primary'}`}
           onClick={() => {
             if (on) {
               stop()
@@ -217,9 +217,9 @@ export default function ScanPage() {
                   type="button"
                   key={a.id}
                   onClick={() => nav(`/animals/${a.id}`)}
-                  style={{ fontSize: 12, fontWeight: 600, padding: '7px 10px', borderRadius: 10, border: '1px solid var(--input)', background: '#fff' }}
+                  style={{ fontSize: 13, fontWeight: 500, padding: '7px 10px', borderRadius: 6, background: 'var(--surface)' }}
                 >
-                  <span className="mono" style={{ color: 'var(--blue)' }}>
+                  <span className="code" style={{ fontSize: 11, color: 'var(--muted)' }}>
                     {a.code}
                   </span>{' '}
                   {nm(a)}
@@ -228,8 +228,8 @@ export default function ScanPage() {
             </div>
           </div>
         )}
-        <button type="button" onClick={() => nav('/transfer')} style={{ fontSize: 13, fontWeight: 600, color: 'var(--blue)', textAlign: 'center' }}>
-          분양 코드로 개체 받기 ›
+        <button type="button" className="lnk" style={{ alignSelf: 'center' }} onClick={() => nav('/transfer')}>
+          분양 코드로 개체 받기 <ChevronRight size={16} />
         </button>
       </div>
     </Screen>

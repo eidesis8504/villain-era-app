@@ -44,7 +44,7 @@ export function HealthPage() {
       <span style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', gap: 4 }}>
         <span style={{ fontSize: 14, fontWeight: 600 }}>
           {x.area} · <span style={{ color: x.level === 3 ? 'var(--warn)' : 'var(--sub)' }}>{LEVEL_LABEL[x.level]}</span>
-          {x.resolved_on && <span style={{ fontSize: 12, color: 'var(--blue)' }}> · {yd(x.resolved_on)} 해결</span>}
+          {x.resolved_on && <span style={{ fontSize: 12, color: 'var(--muted)' }}> · {yd(x.resolved_on)} 해결</span>}
         </span>
         {x.note && <span style={{ fontSize: 13, color: 'var(--sub)', overflowWrap: 'anywhere' }}>{x.note}</span>}
         {x.photos.length > 0 && (
@@ -93,7 +93,7 @@ export function HealthPage() {
                 <span style={{ fontSize: 12, color: 'var(--muted)' }}>
                   {v.cost != null ? `${v.cost.toLocaleString()}원` : ''}
                   {v.next_visit && (
-                    <b style={{ color: v.next_visit >= T ? 'var(--blue)' : 'var(--muted)' }}>
+                    <b style={{ color: v.next_visit >= T ? 'var(--ink)' : 'var(--muted)' }}>
                       {v.cost != null ? ' · ' : ''}재진 {yd(v.next_visit)}
                       {v.next_visit >= T ? ` (D-${gap(T, v.next_visit)})` : ''}
                     </b>

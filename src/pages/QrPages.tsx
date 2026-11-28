@@ -1,4 +1,5 @@
 import { Navigate, useNavigate, useParams } from 'react-router'
+import { ChevronRight } from 'lucide-react'
 import { Screen } from '../app/Screen'
 import { useUI } from '../app/ui'
 import { useKeeper } from '../data/keeper'
@@ -71,8 +72,8 @@ export function QrPage() {
             라벨 인쇄
           </button>
         </div>
-        <button type="button" onClick={() => nav('/scan')} style={{ fontSize: 13, fontWeight: 600, color: 'var(--blue)', textAlign: 'center' }}>
-          스캔 탭에서 인식 테스트 ›
+        <button type="button" className="lnk" style={{ alignSelf: 'center' }} onClick={() => nav('/scan')}>
+          QR 스캔으로 인식해 보기 <ChevronRight size={16} />
         </button>
       </div>
     </Screen>

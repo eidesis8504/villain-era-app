@@ -1,6 +1,7 @@
 // 급여 기록 목록(개체별)과 한꺼번에 기록(여러 개체)
 import { useMemo, useState } from 'react'
 import { useNavigate, useParams } from 'react-router'
+import { Check, ChevronRight } from 'lucide-react'
 import { Screen } from '../app/Screen'
 import { useUI } from '../app/ui'
 import { useKeeper, useRefresh } from '../data/keeper'
@@ -177,28 +178,13 @@ export function FeedingBulkPage() {
             const warn = s.refuseStreak >= REFUSE_ALERT || s.overdue
             return (
               <div key={x.id} className="list-row" style={{ padding: '10px 0' }} onClick={() => toggle(x.id)}>
-                <span
-                  aria-hidden
-                  style={{
-                    width: 22,
-                    height: 22,
-                    borderRadius: 6,
-                    flex: 'none',
-                    border: `2px solid ${on ? 'var(--blue)' : '#BDB8AD'}`,
-                    background: on ? 'var(--blue)' : '#fff',
-                    color: '#fff',
-                    fontSize: 13,
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                  }}
-                >
-                  {on ? '✓' : ''}
+                <span aria-hidden className={`check${on ? ' on' : ''}`}>
+                  {on && <Check size={16} />}
                 </span>
                 <AnimalThumb path={x.photo_path} mark={x.sex === 'F' ? '♀' : x.sex === 'M' ? '♂' : '–'} size={38} radius={10} />
                 <span style={{ flex: 1, minWidth: 0 }}>
                   <span className="ellipsis" style={{ display: 'block', fontSize: 14, fontWeight: 600 }}>
-                    {nm(x)} <span className="mono" style={{ fontSize: 11, color: 'var(--muted-2)' }}>{x.code}</span>
+                    {nm(x)} <span className="code" style={{ fontSize: 11, color: 'var(--muted)' }}>{x.code}</span>
                   </span>
                   <span style={{ display: 'block', fontSize: 12, color: warn ? 'var(--warn)' : 'var(--muted)' }}>{feedLine(s)}</span>
                 </span>
@@ -209,9 +195,9 @@ export function FeedingBulkPage() {
                     e.stopPropagation()
                     nav(`/animals/${x.id}/feeding`)
                   }}
-                  style={{ color: 'var(--muted-2)', padding: '0 4px' }}
+                  className="icon-btn"
                 >
-                  ›
+                  <ChevronRight size={18} className="chev" />
                 </button>
               </div>
             )

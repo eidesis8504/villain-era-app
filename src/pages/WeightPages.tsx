@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { useNavigate, useParams } from 'react-router'
+import { ChevronRight, Plus } from 'lucide-react'
 import { Screen } from '../app/Screen'
 import { useKeeper, type Animal, type Weight } from '../data/keeper'
 import { gap, today, yd } from '../lib/date'
@@ -45,14 +46,14 @@ export function WeightPage() {
               <span className="mono" style={{ fontWeight: 600, fontSize: 34 }}>
                 {l ? fw(l.g) : '—'}
               </span>
-              <span className="mono" style={{ fontWeight: 600, fontSize: 15, color: warn ? 'var(--warn)' : 'var(--blue)' }}>
+              <span className="mono" style={{ fontWeight: 600, fontSize: 15, color: warn ? 'var(--warn)' : 'var(--sub)' }}>
                 {l ? (l.diff === null ? '첫 측정' : fd(l.diff)) : '기록 없음'}
               </span>
             </div>
           </div>
           <div style={{ textAlign: 'right', flex: 'none' }}>
             <div style={{ fontSize: 12, color: 'var(--muted)' }}>월 평균 성장</div>
-            <div className="mono" style={{ fontWeight: 600, fontSize: 16, color: 'var(--blue)' }}>
+            <div className="mono" style={{ fontWeight: 600, fontSize: 16 }}>
               {rate === null ? '—' : (rate >= 0 ? '+' : '−') + fw(Math.abs(rate))}
             </div>
           </div>
@@ -111,7 +112,7 @@ export function WeightPage() {
             </div>
           </div>
         ) : (
-          <div style={{ background: '#fff', border: '1px dashed var(--off)', borderRadius: 10, padding: 28, textAlign: 'center', fontSize: 13, color: 'var(--muted)' }}>
+          <div className="empty">
             아직 체중 기록이 없어요
           </div>
         )}
@@ -136,10 +137,10 @@ export function WeightPage() {
                 >
                   <span style={{ fontSize: 13, color: 'var(--muted)' }}>{yd(x.measured_on)}</span>
                   <span style={{ fontSize: 14, fontWeight: 600 }}>{fw(x.grams)}</span>
-                  <span style={{ fontSize: 13, fontWeight: 600, textAlign: 'right', color: df !== null && df < 0 ? 'var(--warn)' : 'var(--blue)' }}>
+                  <span style={{ fontSize: 13, fontWeight: 600, textAlign: 'right', color: df !== null && df < 0 ? 'var(--warn)' : 'var(--sub)' }}>
                     {df === null ? '첫 측정' : fd(df) + (df < 0 ? ' ▼' : '')}
                   </span>
-                  <span style={{ fontSize: 16, color: '#9A9EA5', textAlign: 'right' }}>›</span>
+                  <ChevronRight size={18} className="chev" style={{ justifySelf: 'end' }} />
                 </div>
               )
             })}
@@ -190,10 +191,10 @@ export function WeightAllPage() {
               <div style={{ flex: 1, minWidth: 0 }}>
                 <div style={{ display: 'flex', flexWrap: 'wrap', columnGap: 6, alignItems: 'baseline' }}>
                   <span style={{ fontSize: 15, fontWeight: 600 }}>{nm(a)}</span>
-                  <span className="mono" style={{ fontWeight: 500, fontSize: 12, color: 'var(--blue)' }}>
+                  <span className="code" style={{ fontSize: 11, color: 'var(--muted)' }}>
                     {a.code}
                   </span>
-                  {stale && <span className="tag warn pill">측정 필요</span>}
+                  {stale && <span className="tag warn">측정 필요</span>}
                 </div>
                 <div className="mono" style={{ fontSize: 12, color: 'var(--muted)', marginTop: 2 }}>
                   {l ? `${yd(l.date)} 측정 · ${gap(l.date, T)}일 전` : '측정 기록 없음'}
@@ -203,7 +204,7 @@ export function WeightAllPage() {
                 <div className="mono" style={{ fontWeight: 600, fontSize: 14 }}>
                   {l ? fw(l.g) : '—'}
                 </div>
-                <div className="mono" style={{ fontWeight: 600, fontSize: 12, color: l && l.diff !== null && l.diff < 0 ? 'var(--warn)' : 'var(--blue)' }}>
+                <div className="mono" style={{ fontWeight: 600, fontSize: 12, color: l && l.diff !== null && l.diff < 0 ? 'var(--warn)' : 'var(--sub)' }}>
                   {l && l.diff !== null ? fd(l.diff) : ''}
                 </div>
               </div>
@@ -214,9 +215,10 @@ export function WeightAllPage() {
                   e.stopPropagation()
                   setSheet(a)
                 }}
-                style={{ width: 34, height: 34, borderRadius: 10, background: 'var(--blue-soft)', color: 'var(--blue)', fontSize: 18, fontWeight: 600, flex: 'none' }}
+                className="icon-btn"
+                style={{ background: '#fff' }}
               >
-                +
+                <Plus size={18} />
               </button>
             </div>
           ))}

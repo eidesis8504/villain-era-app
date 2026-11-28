@@ -1,11 +1,13 @@
 import { useEffect, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router'
+import { Check, ChevronRight, Ellipsis, Plus } from 'lucide-react'
 import { useMe } from '../app/auth'
-import { Screen, useBack } from '../app/Screen'
+import { Screen } from '../app/Screen'
 import { useUI } from '../app/ui'
 import { useToggleCheck } from '../data/actions'
 import { useChecks, useRefresh, useTodos, type Todo } from '../data/keeper'
-import { dateLbl, dow, today } from '../lib/date'
+import { dow, today } from '../lib/date'
+import { dayLabel, homeHeadline } from '../lib/home'
 import { errMsg, supabase } from '../lib/supabase'
 import { alarmLbl, hhmm, ruleLbl, TODO_TAGS, todosOn } from '../lib/todo'
 import { Chips, Seg, Sheet } from '../ui/kit'
@@ -227,7 +229,6 @@ export function TodoSheet({ todo, onClose }: { todo: Todo | null; onClose: () =>
 
 export default function TodoPage() {
   const { profile } = useMe()
-  const goBack = useBack('/')
   const todos = useTodos().data ?? []
   const checks = useChecks().data ?? []
   const toggle = useToggleCheck()
@@ -243,116 +244,89 @@ export default function TodoPage() {
   const items = todosOn(todos, T).map((t) => todoRow(t, T, checks, T))
   const done = items.filter((r) => r.on).length
 
+  const pct = items.length ? Math.round((done / items.length) * 100) : 0
+
   return (
-    <Screen hideHeader>
-      <div>
-        <div style={{ background: 'var(--blue)', color: 'var(--cream)', padding: '2px 20px 22px', borderRadius: '0 0 26px 26px' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', height: 42 }}>
-            <button type="button" aria-label="뒤로" onClick={goBack} style={{ fontSize: 28, lineHeight: 1, paddingRight: 12, color: 'inherit' }}>
-              ‹
-            </button>
-            <span style={{ fontSize: 16, fontWeight: 600 }}>오늘의 할 일</span>
-            <button
-              type="button"
-              data-test="todo-add"
-              onClick={() => setSheet({ todo: null })}
-              style={{ fontSize: 13, fontWeight: 600, border: '1.4px solid rgba(250,249,246,.7)', borderRadius: 999, padding: '4px 12px', color: 'inherit' }}
-            >
-              + 추가
-            </button>
-          </div>
-          <div className="mono" style={{ fontWeight: 500, fontSize: 12, marginTop: 12 }}>
-            {dateLbl(T)}
-          </div>
-          <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', marginTop: 6 }}>
-            <span style={{ fontSize: 20, fontWeight: 600 }}>오늘 할 일</span>
-            <span className="mono" style={{ fontWeight: 600, fontSize: 30 }}>
-              {done}
-              <span style={{ fontSize: 16 }}> / {items.length}</span>
-            </span>
-          </div>
-          <div style={{ display: 'flex', gap: 4, marginTop: 10 }}>
-            {items.map((r) => (
-              <span key={r.t.id} style={{ flex: 1, height: 6, borderRadius: 4, background: r.seg }} />
-            ))}
-          </div>
-          {!profile.todo_alarm && (
-            <div style={{ marginTop: 12, fontSize: 12, background: 'rgba(250,249,246,.16)', borderRadius: 6, padding: '6px 10px' }}>
-              할 일 알림이 꺼져 있어요 · 전체 › 설정에서 켤 수 있어요
-            </div>
-          )}
+    <Screen title="오늘의 할 일" back="/" right={{ label: '추가', icon: <Plus size={18} />, onClick: () => setSheet({ todo: null }), test: 'todo-add' }}>
+      <div className="page" style={{ gap: 0 }}>
+        <div className="meta" style={{ marginTop: 8 }}>
+          {dayLabel(T)}
         </div>
-
-        <div style={{ padding: '16px 20px 4px' }}>
-          {items.map((r) => (
-            <div key={r.t.id} style={{ display: 'grid', gridTemplateColumns: '48px 18px minmax(0,1fr)', gap: 10 }}>
-              <span className="mono" style={{ fontWeight: 500, fontSize: 13, color: 'var(--muted)', paddingTop: 18 }}>
-                {r.time}
-              </span>
-              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                <span style={{ width: 2, height: 20, background: '#E0DCD2' }} />
-                <span style={{ width: 14, height: 14, borderRadius: 6, border: '2px solid var(--blue)', background: r.dot, flex: 'none' }} />
-                <span style={{ width: 2, flex: 1, background: '#E0DCD2' }} />
-              </div>
-              <div
-                className="card"
-                onClick={() => toggle.mutate({ todoId: r.t.id, day: T, on: !r.on })}
-                style={{ borderRadius: 10, padding: '11px 13px', margin: '6px 0', opacity: r.op, cursor: 'pointer', display: 'flex', gap: 8, alignItems: 'flex-start' }}
-              >
-                <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{ fontSize: 14, fontWeight: 600, textDecoration: r.deco }}>{r.t.title}</div>
-                  <div style={{ fontSize: 12, color: 'var(--muted-2)', marginTop: 3 }}>
-                    {r.t.tag} · {r.rule} · {r.alarm}
-                  </div>
-                </div>
-                <button
-                  type="button"
-                  aria-label="수정"
-                  onClick={(e) => {
-                    e.stopPropagation()
-                    setSheet({ todo: r.t })
+        <h1 className="h-display" style={{ marginTop: 4 }}>
+          {homeHeadline(items.length, done)}
+        </h1>
+        {!profile.todo_alarm && (
+          <button type="button" className="notice" style={{ marginTop: 12 }} onClick={() => nav('/more')}>
+            <span className="grow">할 일 알림이 꺼져 있어요 · 전체 › 설정에서 켤 수 있어요</span>
+            <ChevronRight size={16} className="chev" />
+          </button>
+        )}
+        {items.length > 0 && (
+          <>
+            <div className="prog" style={{ margin: '16px 0 4px' }}>
+              <div style={{ width: `${pct}%` }} />
+            </div>
+            <div className="rows">
+              {items.map((r) => (
+                <div
+                  key={r.t.id}
+                  role="checkbox"
+                  aria-checked={r.on}
+                  tabIndex={0}
+                  className={`row${r.on ? ' done' : ''}`}
+                  onClick={() => toggle.mutate({ todoId: r.t.id, day: T, on: !r.on })}
+                  onKeyDown={(e) => {
+                    if (e.key === ' ' || e.key === 'Enter') {
+                      e.preventDefault()
+                      toggle.mutate({ todoId: r.t.id, day: T, on: !r.on })
+                    }
                   }}
-                  style={{ fontSize: 16, color: 'var(--muted-2)', padding: '0 2px 0 8px', lineHeight: 1.2 }}
                 >
-                  ⋯
-                </button>
-              </div>
-            </div>
-          ))}
-          {!items.length && <div className="empty">오늘 예정된 할 일이 없어요</div>}
-        </div>
-
-        <div style={{ padding: '12px 20px 28px' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 8 }}>
-            <span className="section-title">등록된 반복 작업</span>
-            <span className="mono" style={{ fontWeight: 500, fontSize: 12, color: 'var(--muted)' }}>
-              {todos.length}개
-            </span>
-          </div>
-          <div className="list-card">
-            {todos.map((t) => (
-              <div key={t.id} className="list-row" onClick={() => setSheet({ todo: t })} style={{ gap: 12 }}>
-                <span className="mono" style={{ fontWeight: 500, fontSize: 13, color: 'var(--blue)', width: 44, flex: 'none' }}>
-                  {hhmm(t.time_of_day)}
-                </span>
-                <div style={{ flex: 1, minWidth: 0 }}>
-                  <div className="ellipsis" style={{ fontSize: 14, fontWeight: 600 }}>
-                    {t.title}
-                  </div>
-                  <div style={{ fontSize: 12, color: 'var(--muted-2)', marginTop: 2 }}>
-                    {ruleLbl(t, T)} · {alarmLbl(t.alarm_minutes)}
-                  </div>
+                  <span className={`check${r.on ? ' on' : ''}`}>{r.on && <Check size={16} />}</span>
+                  <span className="grow">
+                    <span className="row-t">{r.t.title}</span>
+                    <span className="meta">
+                      {r.time} · {r.t.tag} · {r.rule} · {r.alarm}
+                    </span>
+                  </span>
+                  <button
+                    type="button"
+                    className="icon-btn"
+                    aria-label="수정"
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      setSheet({ todo: r.t })
+                    }}
+                  >
+                    <Ellipsis size={20} className="chev" />
+                  </button>
                 </div>
-                <span style={{ color: 'var(--muted-2)' }}>›</span>
-              </div>
-            ))}
-            {!todos.length && (
-              <div style={{ padding: '18px 0', fontSize: 13, color: 'var(--muted)', textAlign: 'center' }}>
-                + 추가로 급여·분무·청소 같은 반복 작업을 등록하세요
-              </div>
-            )}
-          </div>
+              ))}
+            </div>
+          </>
+        )}
+
+        <div className="sec-h" style={{ marginTop: 28 }}>
+          <h2 className="h-title">등록된 반복 작업</h2>
+          <span className="micro">{todos.length}개</span>
         </div>
+        <div className="rows">
+          {todos.map((t) => (
+            <button type="button" key={t.id} className="row" onClick={() => setSheet({ todo: t })}>
+              <span className="meta" style={{ width: 44, flex: 'none' }}>
+                {hhmm(t.time_of_day)}
+              </span>
+              <span className="grow">
+                <span className="row-t ellipsis">{t.title}</span>
+                <span className="meta">
+                  {ruleLbl(t, T)} · {alarmLbl(t.alarm_minutes)}
+                </span>
+              </span>
+              <ChevronRight size={18} className="chev" />
+            </button>
+          ))}
+        </div>
+        {!todos.length && <div className="empty">오른쪽 위 추가로 급여·분무·청소 같은 반복 작업을 등록하세요</div>}
       </div>
       {sheet && <TodoSheet todo={sheet.todo} onClose={() => setSheet(null)} />}
     </Screen>

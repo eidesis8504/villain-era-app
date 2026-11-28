@@ -7,7 +7,7 @@ export function HealthCardView({ data, photoUrls = [] }: { data: Omit<HealthAtta
   return (
     <div className="card" data-test="consult-card" style={{ borderRadius: 10, padding: '12px 14px', display: 'flex', flexDirection: 'column', gap: 10 }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12 }}>
-        <span style={{ fontWeight: 600, color: 'var(--blue)' }}>상담 카드</span>
+        <span style={{ fontWeight: 600 }}>상담 카드</span>
         <span className="mono" style={{ color: 'var(--muted)' }}>
           {data.label}
         </span>

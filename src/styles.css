@@ -109,6 +109,12 @@ button {
   display: none;
 }
 
+/* 선 아이콘(Lucide): 선 굵기는 여기서 한 번에 정한다 */
+svg.lucide {
+  stroke-width: 1.75;
+  flex: none;
+}
+
 /* ── 앱 프레임 ───────────────────────────── */
 .frame {
   height: 100dvh;
@@ -357,6 +363,9 @@ button {
   display: flex;
   align-items: center;
   justify-content: center;
+}
+.nav-plus svg {
+  stroke-width: 2.2;
 }
 
 /* ── 페이지 레이아웃 ─────────────────────── */
@@ -853,6 +862,10 @@ select.input {
 .rows > .row:last-child {
   border-bottom: 0;
 }
+/* 줄 안에서 제목과 설명이 두 줄로 놓이게 */
+.row .grow > span {
+  display: block;
+}
 .row-t {
   font-size: 15px;
   line-height: 22px;
@@ -945,6 +958,9 @@ select.input {
 .check.on {
   background: var(--blue);
   box-shadow: none;
+}
+.check svg {
+  stroke-width: 2.6;
 }
 
 .tiles {

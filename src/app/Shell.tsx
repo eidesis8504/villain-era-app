@@ -1,6 +1,6 @@
-import { useEffect, useMemo, useRef } from 'react'
+import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
 import { Link, NavLink, Outlet, useLocation, useNavigate } from 'react-router'
-import { Bell } from 'lucide-react'
+import { Bell, House, MessageCircle, MessagesSquare, PawPrint, Plus } from 'lucide-react'
 import { useChatUnread } from '../data/chat'
 import { useNotifications } from '../data/community'
 import { useChecks, useKeeper, useRefresh, useTodos } from '../data/keeper'
@@ -11,19 +11,9 @@ import { trackOpen, trackView } from '../lib/track'
 import { Avatar } from '../ui/kit'
 import { displayName, useAuth } from './auth'
 import { useViewport } from './layout'
+import { isThread, navRoot, type NavRoot } from './nav'
+import { QuickAddSheet } from './QuickAdd'
 import { useUI } from './ui'
-
-function navRoot(path: string) {
-  if (path === '/') return 'home'
-  if (path.startsWith('/animals') || path.startsWith('/a/')) return 'animals'
-  if (path.startsWith('/community')) return 'community'
-  if (path.startsWith('/chat')) return 'chat'
-  if (['/todo', '/weights', '/clutch', '/lineage', '/feedings', '/scan'].some((p) => path.startsWith(p))) return 'home'
-  return 'more'
-}
-
-// 대화 화면에서는 하단 탭을 숨겨 입력 칸에 자리를 준다
-const isThread = (path: string) => /^\/(chat\/[^/]+|inquiry|admin\/(inquiry|chat)\/[^/]+)\/?$/.test(path)
 
 const NONE: never[] = []
 
@@ -97,7 +87,7 @@ function Sidebar() {
         <div className="side-group-title">도구</div>
         {item('/scan', 'QR 스캔')}
         {item('/transfer', '분양 받기')}
-        {item('/more', '설정')}
+        {item('/more', '전체')}
         {isAdmin && item('/admin', '검증 현황')}
       </div>
       <div className="side-foot">
@@ -127,27 +117,37 @@ function BottomNav() {
   const loc = useLocation()
   const root = navRoot(loc.pathname)
   const chatUnread = useChatUnread()
-  const it = (key: string, to: string, label: string, glyph: React.CSSProperties, badge = 0) => (
+  const [add, setAdd] = useState(false)
+  const it = (key: NavRoot, to: string, label: string, icon: ReactNode, badge = 0) => (
     <NavLink to={to} className={`nav-item${root === key ? ' on' : ''}`} data-test={`nav-${key}`} replace={root === key}>
       <span className="nav-glyph">
+        {icon}
         {badge > 0 && (
           <span className="dot-badge" data-test={`nav-${key}-badge`}>
             {badge}
           </span>
         )}
-        <span style={{ border: '1.8px solid currentColor', ...glyph }} />
       </span>
       <span>{label}</span>
     </NavLink>
   )
   return (
-    <nav className="bottom-nav" data-test="nav">
-      {it('home', '/', '홈', { width: 20, height: 18, borderRadius: '4px 4px 3px 3px' })}
-      {it('animals', '/animals', '개체', { width: 18, height: 20, borderRadius: 4 })}
-      {it('community', '/community', '커뮤니티', { width: 20, height: 16, borderRadius: '4px 4px 4px 0' })}
-      {it('chat', '/chat', '채팅', { width: 20, height: 16, borderRadius: '9px 9px 9px 2px' }, chatUnread)}
-      {it('more', '/more', '전체', { width: 18, height: 18, borderRadius: 4, borderStyle: 'dotted' })}
-    </nav>
+    <>
+      <nav className="bottom-nav" data-test="nav">
+        {it('home', '/', '홈', <House size={24} />)}
+        {it('animals', '/animals', '개체', <PawPrint size={24} />)}
+        {/* 가운데 버튼은 화면 이동이 아니라 기록 시트를 연다 */}
+        <button type="button" className="nav-item nav-add" data-test="nav-add" aria-haspopup="dialog" onClick={() => setAdd(true)}>
+          <span className="nav-plus">
+            <Plus size={22} />
+          </span>
+          <span>기록</span>
+        </button>
+        {it('community', '/community', '커뮤니티', <MessagesSquare size={24} />)}
+        {it('chat', '/chat', '채팅', <MessageCircle size={24} />, chatUnread)}
+      </nav>
+      {add && <QuickAddSheet onClose={() => setAdd(false)} />}
+    </>
   )
 }
 

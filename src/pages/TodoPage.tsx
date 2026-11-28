@@ -1,4 +1,5 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
+import { useLocation, useNavigate } from 'react-router'
 import { useMe } from '../app/auth'
 import { Screen, useBack } from '../app/Screen'
 import { useUI } from '../app/ui'
@@ -230,7 +231,14 @@ export default function TodoPage() {
   const todos = useTodos().data ?? []
   const checks = useChecks().data ?? []
   const toggle = useToggleCheck()
-  const [sheet, setSheet] = useState<{ todo: Todo | null } | null>(null)
+  const loc = useLocation()
+  const nav = useNavigate()
+  const wantAdd = !!(loc.state as { add?: boolean } | null)?.add
+  const [sheet, setSheet] = useState<{ todo: Todo | null } | null>(wantAdd ? { todo: null } : null)
+  // 기록 시트의 '할 일 추가'로 들어오면 추가 창을 연 채로 시작한다. 뒤로 돌아왔을 때 다시 열리지 않게 표시는 지운다
+  useEffect(() => {
+    if (wantAdd) nav('.', { replace: true, state: null })
+  }, [wantAdd, nav])
   const T = today()
   const items = todosOn(todos, T).map((t) => todoRow(t, T, checks, T))
   const done = items.filter((r) => r.on).length

@@ -73,17 +73,10 @@ export function SurveyCard() {
             <button
               type="button"
               key={i}
-              className="mono"
+              className={`chip${nps === i ? ' on' : ''}`}
+              aria-pressed={nps === i}
               onClick={() => setNps(i)}
-              style={{
-                height: 36,
-                borderRadius: 6,
-                fontSize: 13,
-                fontWeight: 600,
-                border: '1px solid ' + (nps === i ? 'var(--blue)' : 'var(--input)'),
-                background: nps === i ? 'var(--blue)' : '#fff',
-                color: nps === i ? 'var(--cream)' : 'var(--ink)',
-              }}
+              style={{ height: 36, padding: 0, justifyContent: 'center' }}
             >
               {i}
             </button>

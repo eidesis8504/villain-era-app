@@ -1,6 +1,7 @@
 // 분양 이력서 공개 화면 (/r/<토큰>): 계정 없이 열린다 (앱 화면 밖 라우트).
 // 분양자가 링크를 끄면 더 이상 보이지 않는다.
 import { Link, useNavigate, useParams } from 'react-router'
+import { ChevronLeft } from 'lucide-react'
 import { useResume } from '../data/adopt'
 import { today } from '../lib/date'
 import { cleanToken } from '../lib/resume'
@@ -20,7 +21,7 @@ export default function ResumePage() {
       <header className="legal-hdr resume-hdr">
         <span style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
           <button type="button" className="hdr-back" aria-label="뒤로" data-test="resume-back" onClick={back}>
-            ‹
+            <ChevronLeft size={24} />
           </button>
           <Link to="/" className="legal-brand">
             VILLAIN ERA

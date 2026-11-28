@@ -12,11 +12,11 @@
   --input: #ddd9cf;
   /* 글자 회색: 옅은 면 위에서도 읽히는 값. --faint는 화살표·꺼진 표시에만 쓴다 */
   --muted: #63676e;
-  --muted-2: #6f737a;
+  --muted-2: #63676e;
   --faint: #a3a6ab;
   --sub: #3d4148;
   --blue-soft: #e6edf7;
-  --warn: #b4540a;
+  --warn: #a84e09;
   --warn-soft: #fbeadb;
   /* 옅은 면(묶음·입력 칸·보조 버튼)과 짙은 면(사진 자리·막대 바탕) */
   --seg: #eeebe3;

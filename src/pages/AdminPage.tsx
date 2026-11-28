@@ -37,7 +37,7 @@ type Tab = (typeof TABS)[number][0]
 
 const pctTxt = (v: number | null) => (v === null ? '—' : `${v}%`)
 const VERDICT: Record<Verdict, { color: string; label: string }> = {
-  pass: { color: 'var(--blue)', label: '✓ 기준 이상' },
+  pass: { color: 'var(--blue)', label: '기준 이상' },
   fail: { color: 'var(--warn)', label: '기준 미달' },
   small: { color: 'var(--muted-2)', label: '표본 부족' },
 }

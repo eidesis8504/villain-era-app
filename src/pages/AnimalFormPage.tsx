@@ -6,7 +6,8 @@ import { useUI } from '../app/ui'
 import { newAnimalCode, useKeeper, useRefresh, type Animal, type Keeper } from '../data/keeper'
 import { today } from '../lib/date'
 import { nm, STATUS_LABEL, type AnimalStatus } from '../lib/format'
-import { removeFiles, resizeImage, upload } from '../lib/media'
+import { prepareAnimalPhoto, removeAnimalPhoto, uploadAnimalPhoto, type AnimalPhoto } from '../lib/media'
+import { thumbPath } from '../lib/photo'
 import { firstFeedPath, getFoodPreset } from '../lib/products'
 import { DEFAULT_SPECIES, SPECIES, SPECIES_NAMES, spOf } from '../lib/species'
 import { errMsg, publicUrl, supabase } from '../lib/supabase'
@@ -22,7 +23,8 @@ type Form = {
   sire: string
   dam: string
   status: AnimalStatus
-  photo: { blob: Blob; url: string } | null
+  // 새로 고른 사진 (저장할 때 올린다). url은 미리 보기용
+  photo: (AnimalPhoto & { url: string }) | null
   photoPath: string | null
   feedEvery: string
 }
@@ -116,14 +118,14 @@ function AnimalForm({ k, editing }: { k: Keeper; editing: Animal | null }) {
   const parentOpts = (sex: 'M' | 'F') =>
     k.animals.filter((a) => a.sex === sex && !excluded.has(a.id) && spOf(a) === f.species)
   const pi = f.sire && f.dam ? k.lineage.pairInfo(f.sire, f.dam, k.coiLimit) : null
-  const photoUrl = f.photo?.url ?? (f.photoPath ? publicUrl('animal-photos', f.photoPath) : '')
+  const photoUrl = f.photo?.url ?? (f.photoPath ? publicUrl('animal-photos', thumbPath(f.photoPath)) : '')
 
   const pickPhoto = async (file?: File) => {
     if (!file) return
     setPhotoBusy(true)
     try {
-      const blob = await resizeImage(file, 640, 0.72)
-      set({ photo: { blob, url: URL.createObjectURL(blob) } })
+      const p = await prepareAnimalPhoto(file)
+      set({ photo: { ...p, url: URL.createObjectURL(p.thumb) } })
     } catch (e) {
       ui.toast(errMsg(e, '사진을 읽지 못했어요'), 'warn')
     } finally {
@@ -146,7 +148,7 @@ function AnimalForm({ k, editing }: { k: Keeper; editing: Animal | null }) {
     setBusy(true)
     let newPath = f.photoPath
     try {
-      if (f.photo) newPath = await upload('animal-photos', uid, f.photo.blob, 'jpg')
+      if (f.photo) newPath = await uploadAnimalPhoto(uid, f.photo)
       const rec = {
         species: f.species,
         name: f.name.trim(),
@@ -161,7 +163,7 @@ function AnimalForm({ k, editing }: { k: Keeper; editing: Animal | null }) {
       if (editing) {
         const { error } = await supabase.from('animals').update({ ...rec, status: f.status }).eq('id', editing.id)
         if (error) throw error
-        if (editing.photo_path && editing.photo_path !== newPath) await removeFiles('animal-photos', [editing.photo_path])
+        if (editing.photo_path && editing.photo_path !== newPath) await removeAnimalPhoto(editing.photo_path)
         await refresh('animals')
         ui.toast('개체 정보를 수정했어요')
         goBack()
@@ -190,7 +192,7 @@ function AnimalForm({ k, editing }: { k: Keeper; editing: Animal | null }) {
         nav(next, { replace: true })
       }
     } catch (e) {
-      if (f.photo && newPath && newPath !== f.photoPath) await removeFiles('animal-photos', [newPath])
+      if (f.photo && newPath && newPath !== f.photoPath) await removeAnimalPhoto(newPath)
       ui.toast(errMsg(e, '저장하지 못했어요'), 'warn')
       setBusy(false)
     }
@@ -270,7 +272,7 @@ function AnimalForm({ k, editing }: { k: Keeper; editing: Animal | null }) {
             <div className="label" style={{ marginBottom: 0 }}>
               대표 사진
             </div>
-            <div className="hint">{photoBusy ? '사진을 줄이는 중…' : '촬영 또는 앨범에서 선택 · 640px로 줄여 저장해요'}</div>
+            <div className="hint">{photoBusy ? '사진을 준비하는 중…' : '촬영 또는 앨범에서 선택 · 자르지 않고 큰 사진으로 저장해요'}</div>
             {photoUrl && (
               <button
                 type="button"

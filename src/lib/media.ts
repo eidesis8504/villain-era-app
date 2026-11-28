@@ -1,4 +1,5 @@
 // 사진·동영상 처리와 업로드 (사진은 기기에서 줄여서 올린다 — 무료 저장 용량 1GB 절약)
+import { fitSize, PHOTO_MAX, PHOTO_QUALITY, photoNames, THUMB_MAX, THUMB_QUALITY, thumbPath } from './photo'
 import { supabase, type Bucket } from './supabase'
 
 function loadImage(file: Blob): Promise<HTMLImageElement> {
@@ -18,11 +19,12 @@ function loadImage(file: Blob): Promise<HTMLImageElement> {
 }
 
 function draw(im: CanvasImageSource, w: number, h: number, maxSide: number) {
-  const k = Math.min(1, maxSide / Math.max(w, h))
   const c = document.createElement('canvas')
-  c.width = Math.max(1, Math.round(w * k))
-  c.height = Math.max(1, Math.round(h * k))
-  c.getContext('2d')!.drawImage(im, 0, 0, c.width, c.height)
+  ;[c.width, c.height] = fitSize(w, h, maxSide)
+  const ctx = c.getContext('2d')!
+  // 크게 줄일 때(목록용 작은 사진) 계단 무늬가 생기지 않게 한다
+  ctx.imageSmoothingQuality = 'high'
+  ctx.drawImage(im, 0, 0, c.width, c.height)
   return c
 }
 
@@ -45,6 +47,17 @@ export async function squareImage(file: File, side: number): Promise<Blob> {
   c.height = side
   c.getContext('2d')!.drawImage(im, (im.naturalWidth - s) / 2, (im.naturalHeight - s) / 2, s, s, 0, 0, side, side)
   return toJpeg(c, 0.86)
+}
+
+// 개체 대표 사진: 자르지 않은 큰 사진과 목록용 작은 사진을 함께 만든다.
+// 다시 그려 저장하므로 촬영 위치 같은 사진 속 정보는 남지 않는다
+export type AnimalPhoto = { full: Blob; thumb: Blob }
+export async function prepareAnimalPhoto(file: File): Promise<AnimalPhoto> {
+  if (file.type && !/^image\//.test(file.type)) throw new Error('사진 파일만 올릴 수 있어요')
+  const im = await loadImage(file)
+  const full = await toJpeg(draw(im, im.naturalWidth, im.naturalHeight, PHOTO_MAX), PHOTO_QUALITY)
+  const thumb = await toJpeg(draw(im, im.naturalWidth, im.naturalHeight, THUMB_MAX), THUMB_QUALITY)
+  return { full, thumb }
 }
 
 export type MediaDraft = { t: 'img' | 'vid'; file: Blob; thumb: Blob; dur: number; preview: string }
@@ -121,6 +134,24 @@ export async function upload(bucket: Bucket, uid: string, blob: Blob, ext: strin
   if (error) throw new Error(/exceeded|too large|size/i.test(error.message) ? '파일이 너무 커요' : '파일을 올리지 못했어요')
   return path
 }
+
+// 큰 사진과 작은 사진을 같은 이름으로 짝지어 올리고 큰 사진의 경로를 돌려준다 (작은 사진의 경로는 photo.ts의 thumbPath로 구한다)
+export async function uploadAnimalPhoto(uid: string, photo: AnimalPhoto): Promise<string> {
+  const names = photoNames(rand())
+  const bucket = supabase.storage.from('animal-photos')
+  const put = (name: string, blob: Blob) => bucket.upload(`${uid}/${name}`, blob, { contentType: 'image/jpeg', cacheControl: '31536000', upsert: false })
+  const a = await put(names.full, photo.full)
+  if (a.error) throw new Error(/exceeded|too large|size/i.test(a.error.message) ? '파일이 너무 커요' : '파일을 올리지 못했어요')
+  const b = await put(names.thumb, photo.thumb)
+  if (b.error) {
+    await bucket.remove([`${uid}/${names.full}`])
+    throw new Error('파일을 올리지 못했어요')
+  }
+  return `${uid}/${names.full}`
+}
+
+// 개체 사진을 지울 때는 짝인 작은 사진도 함께 지운다
+export const removeAnimalPhoto = (path: string | null | undefined) => removeFiles('animal-photos', [...new Set([path, thumbPath(path)])])
 
 export async function removeFiles(bucket: Bucket, paths: (string | null | undefined)[]) {
   const list = paths.filter((p): p is string => !!p && !/^https?:/.test(p))

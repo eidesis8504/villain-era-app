@@ -4,6 +4,7 @@ import { Link, useNavigate, useParams } from 'react-router'
 import { ChevronLeft } from 'lucide-react'
 import { useResume } from '../data/adopt'
 import { today } from '../lib/date'
+import { thumbPath } from '../lib/photo'
 import { cleanToken } from '../lib/resume'
 import { publicUrl } from '../lib/supabase'
 import { Spinner } from '../ui/kit'
@@ -46,7 +47,7 @@ export default function ResumePage() {
         ) : !q.data ? (
           <Spinner center />
         ) : (
-          <ResumeView r={q.data} today={today()} photoUrl={publicUrl('animal-photos', q.data.animal.photo_path)} />
+          <ResumeView r={q.data} today={today()} photoUrl={publicUrl('animal-photos', thumbPath(q.data.animal.photo_path))} />
         )}
         <div className="resume-cta">
           <div>

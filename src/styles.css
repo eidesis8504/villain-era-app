@@ -1098,6 +1098,19 @@ select.input {
   height: 360px;
   border-radius: var(--r-m);
 }
+/* 사진이 있으면 자르지 않고 원래 비율로 보여 준다. 아주 긴 사진만 높이를 막고 그 안에 맞춘다 */
+.hero.photo,
+.frame.desk .hero.photo {
+  height: auto;
+  min-height: 160px;
+}
+.hero.photo img {
+  display: block;
+  width: 100%;
+  height: auto;
+  max-height: min(140vw, 640px);
+  object-fit: contain;
+}
 .specs {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));

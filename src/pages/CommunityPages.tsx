@@ -27,6 +27,7 @@ import { isoDay, today, yd } from '../lib/date'
 import { fd, fw, nm } from '../lib/format'
 import { fmtDur, prepareImage, prepareVideo, removeFiles, upload, videoExt, type MediaDraft } from '../lib/media'
 import { buildConsult } from '../lib/health'
+import { thumbPath } from '../lib/photo'
 import { resumePath } from '../lib/resume'
 import { errMsg, publicUrl, signedUrls, supabase } from '../lib/supabase'
 import { Chips, ErrorBox, Seg, Sheet, Sparkline, Spinner, Toggle } from '../ui/kit'
@@ -269,7 +270,7 @@ export function PostPage() {
         {ad ? (
           <AdoptCard
             at={ad}
-            photoUrl={publicUrl('animal-photos', ad.animal?.photo_path)}
+            photoUrl={publicUrl('animal-photos', thumbPath(ad.animal?.photo_path))}
             onResume={ad.resume ? () => nav(resumePath(ad.resume!)) : undefined}
           >
             {mine && ad.mode === 'sale' && ad.status && (

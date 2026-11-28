@@ -245,9 +245,9 @@ export default function AnimalDetailPage() {
     <Screen title="" back="/animals" right={{ label: '편집', onClick: () => nav(`/animals/${a.id}/edit`) }} wide>
       <div className="detail">
         <div style={{ minWidth: 0 }}>
-          <div className="hero" data-test="animal-photo" onClick={() => nav(`/animals/${a.id}/edit`)}>
+          <div className={`hero${photo ? ' photo' : ''}`} data-test="animal-photo" onClick={() => nav(`/animals/${a.id}/edit`)}>
             {photo ? (
-              <img src={photo} alt="" className="cover" />
+              <img src={photo} alt={`${nm(a)} 사진`} />
             ) : (
               <>
                 <Camera size={24} />

@@ -7,6 +7,7 @@ import { badgeOf, displayName } from '../app/auth'
 import { ADOPT_MODE_LABEL, ADOPT_STATUS_LABEL, ADOPT_STATUS_TAG } from '../lib/adopt'
 import { md, isoDay } from '../lib/date'
 import { fmtDur } from '../lib/media'
+import { thumbPath } from '../lib/photo'
 import { publicUrl } from '../lib/supabase'
 import { alarmLbl, hhmm, ruleLbl } from '../lib/todo'
 import { TierBadge } from './TierViews'
@@ -88,7 +89,7 @@ export function PostCard({ p, compact }: { p: Post; compact?: boolean }) {
 export function AnimalThumb({ path, mark, size, radius = 10 }: { path: string | null; mark: string; size: number; radius?: number }) {
   return (
     <div className="ph-stripes" style={{ width: size, height: size, borderRadius: radius, flex: 'none' }}>
-      {path ? <img src={publicUrl('animal-photos', path)} alt="" loading="lazy" /> : <span>{mark}</span>}
+      {path ? <img src={publicUrl('animal-photos', thumbPath(path))} alt="" loading="lazy" /> : <span>{mark}</span>}
     </div>
   )
 }

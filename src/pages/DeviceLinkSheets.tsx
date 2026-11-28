@@ -1,6 +1,7 @@
 // 다른 기기에서 이어 쓰기: 코드 받기(쓰던 기기) · 코드 입력(새 기기) · 다른 기기 기록 불러오기 · 다른 기기 모두 연결 끊기
 import { useQuery } from '@tanstack/react-query'
 import { useCallback, useEffect, useRef, useState } from 'react'
+import { ChevronRight } from 'lucide-react'
 import { useAuth } from '../app/auth'
 import { useUI } from '../app/ui'
 import {
@@ -170,7 +171,7 @@ function CodeView() {
           className="mono"
           style={{
             fontSize: 30,
-            fontWeight: 700,
+            fontWeight: 600,
             letterSpacing: '.14em',
             color: issued && !expired ? undefined : 'var(--muted-2)',
             textDecoration: expired ? 'line-through' : undefined,
@@ -291,8 +292,8 @@ export function DeviceLinkSheet({ onClose }: { onClose: () => void }) {
   const [view, setView] = useState<keyof typeof TITLES>('code')
   const row = (label: string, test: string, to: keyof typeof TITLES) => (
     <div className="list-row" data-test={test} onClick={() => setView(to)} style={{ padding: '14px 0', cursor: 'pointer' }}>
-      <span style={{ fontSize: 14, fontWeight: 600, flex: 1 }}>{label}</span>
-      <span style={{ color: 'var(--muted-2)' }}>›</span>
+      <span style={{ fontSize: 15, fontWeight: 500, flex: 1 }}>{label}</span>
+      <ChevronRight size={18} className="chev" />
     </div>
   )
   return (

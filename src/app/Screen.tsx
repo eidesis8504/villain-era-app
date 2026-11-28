@@ -1,5 +1,6 @@
 import type { CSSProperties, ReactNode } from 'react'
 import { useLocation, useNavigate } from 'react-router'
+import { ChevronLeft } from 'lucide-react'
 import { useViewport } from './layout'
 
 // 뒤로가기: 앱 안에서 이동해 온 경우 이전 화면, 직접 들어온 경우 상위 화면으로
@@ -13,7 +14,7 @@ export function useBack(fallback: string) {
   }
 }
 
-type Right = { label: string; onClick: () => void; test?: string }
+type Right = { label: string; onClick: () => void; test?: string; icon?: ReactNode }
 
 export function Screen({
   title,
@@ -39,29 +40,26 @@ export function Screen({
   const side = desk ? `max(32px, calc((100% - ${width}px) / 2))` : tablet ? 'max(0px, calc((100% - 760px) / 2))' : '0px'
   const pad = desk ? `20px ${side} 40px` : `0 ${side}`
   const showHeader = !hideHeader && !!(title || right)
+  // 휴대폰에서 뒤로 가기가 없는 화면(탭의 첫 화면)은 왼쪽에 큰 제목을 둔다
+  const root = !desk && !back
   return (
     <>
       {showHeader && (
         <div
-          className="hdr"
-          style={desk ? ({ '--desk-pad': `max(32px, calc((100% - ${width}px) / 2 + 18px))` } as CSSProperties) : undefined}
+          className={`hdr${root ? ' root' : ''}`}
+          style={desk ? ({ '--desk-pad': `max(32px, calc((100% - ${width}px) / 2 + 20px))` } as CSSProperties) : undefined}
         >
-          {desk && !back ? (
+          {root ? null : desk && !back ? (
             <span />
           ) : (
-            <button
-              type="button"
-              className="hdr-back"
-              aria-label="뒤로"
-              style={{ visibility: back ? 'visible' : 'hidden' }}
-              onClick={goBack}
-            >
-              ‹
+            <button type="button" className="hdr-back" aria-label="뒤로" onClick={goBack}>
+              <ChevronLeft size={24} />
             </button>
           )}
           <div className="hdr-title ellipsis">{title}</div>
           {right ? (
             <button type="button" className="hdr-right" data-test={right.test} onClick={right.onClick}>
+              {right.icon}
               {right.label}
             </button>
           ) : (

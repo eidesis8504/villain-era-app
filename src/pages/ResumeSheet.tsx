@@ -62,10 +62,10 @@ export function ResumeSheet({ animal, token, onClose }: { animal: Animal; token:
     <Sheet title={`분양 이력서 · ${nm(animal)}`} onClose={onClose}>
       {qr ? (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 12, alignItems: 'center', textAlign: 'center' }}>
-          <div style={{ background: '#fff', padding: 12, borderRadius: 14, border: '1px solid var(--line)' }}>
+          <div style={{ background: '#fff', padding: 12, borderRadius: 10 }}>
             <QrGrid n={qr.n} cells={qr.cells} size={168} />
           </div>
-          <div className="mono" data-test="resume-url" style={{ fontSize: 12, color: 'var(--blue)', overflowWrap: 'anywhere' }}>
+          <div className="code" data-test="resume-url" style={{ fontSize: 12, color: 'var(--sub)', overflowWrap: 'anywhere' }}>
             {url}
           </div>
           <div className="hint" style={{ maxWidth: 360 }}>

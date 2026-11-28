@@ -268,7 +268,7 @@ function HatchSheet({ k, clutch, onClose }: { k: Keeper; clutch: Clutch; onClose
         <input type="date" className="input mono" style={{ fontSize: 14 }} value={date} min={clutch.laid_on} max={today()} onChange={(e) => setDate(e.target.value)} />
         {dead > 0 && <input className="input" value={note} maxLength={100} onChange={(e) => setNote(e.target.value)} placeholder="폐사 사유 (예: 곰팡이, 함몰)" />}
         {hatched > 0 && (
-          <div style={{ background: 'var(--blue-soft)', borderRadius: 12, padding: '12px 14px', fontSize: 13, lineHeight: 1.6, color: 'var(--blue)' }}>
+          <div style={{ background: 'var(--surface)', borderRadius: 10, padding: '12px 14px', fontSize: 13, lineHeight: 1.6, color: 'var(--sub)' }}>
             <b>자동 등록 예정</b>
             <br />
             <span className="mono">{hatched}마리 · VE- ID 자동 생성</span>
@@ -301,7 +301,7 @@ export function ClutchPage() {
               [
                 [cl.length, '산란', ''],
                 [cl.reduce((n, c) => n + c.eggs, 0), '총 알', ''],
-                [cl.reduce((n, c) => n + k.incub(c), 0), '인큐 중', 'var(--blue)'],
+                [cl.reduce((n, c) => n + k.incub(c), 0), '인큐 중', ''],
                 [cl.reduce((n, c) => n + k.hatched(c).length, 0), '부화', ''],
               ] as const
             ).map(([v, l, col]) => (
@@ -313,7 +313,7 @@ export function ClutchPage() {
               </div>
             ))}
           </div>
-          <div className="span-all" style={{ fontSize: 15, fontWeight: 700, paddingTop: 4 }}>
+          <div className="span-all" style={{ fontSize: 15, fontWeight: 600, paddingTop: 4 }}>
             산란 암컷
           </div>
           {k.loading && (
@@ -332,8 +332,8 @@ export function ClutchPage() {
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 8 }}>
                   <div style={{ minWidth: 0 }}>
                     <div>
-                      <span style={{ fontSize: 16, fontWeight: 700 }}>{nm(f)}</span>{' '}
-                      <span className="mono" style={{ fontWeight: 500, fontSize: 12, color: 'var(--blue)' }}>
+                      <span style={{ fontSize: 16, fontWeight: 600 }}>{nm(f)}</span>{' '}
+                      <span className="code" style={{ fontSize: 11, color: 'var(--muted)' }}>
                         {f?.code}
                       </span>
                     </div>
@@ -372,7 +372,7 @@ export function ClutchPage() {
           })}
           {!k.loading && !k.breeders.length && (
             <div className="span-all" style={{ padding: 24, textAlign: 'center', fontSize: 13, color: 'var(--muted)' }}>
-              등록된 산란 암컷이 없어요 · 우측 상단 + 암컷
+              등록된 산란 암컷이 없어요 · 오른쪽 위 + 암컷
             </div>
           )}
         </div>
@@ -419,18 +419,18 @@ export function ClutchFemalePage() {
   return (
     <Screen title={`산란 · ${nm(f)}`} back="/clutch">
       <div className="page" style={{ gap: 12 }}>
-        <div style={{ background: 'var(--blue)', color: 'var(--cream)', borderRadius: 18, padding: 16 }}>
+        <div className="card" style={{ padding: 16 }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
-            <span style={{ fontSize: 20, fontWeight: 700 }}>{nm(f)}</span>
-            <span className="mono" style={{ fontWeight: 500, fontSize: 13 }}>
+            <span style={{ fontSize: 20, fontWeight: 600 }}>{nm(f)}</span>
+            <span className="code" style={{ fontSize: 12, color: 'var(--muted)' }}>
               {f.code}
             </span>
           </div>
-          <div style={{ fontSize: 12, opacity: 0.9, marginTop: 2 }}>{f.morph}</div>
+          <div style={{ fontSize: 12, color: 'var(--muted)', marginTop: 2 }}>{f.morph}</div>
           <div style={{ fontSize: 13, marginTop: 10 }}>
             페어 {m ? `${nm(m)} ${m.code}` : '미지정'} · <span className="mono">COI {pi ? pi.txt : '—'}</span>
           </div>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: 6, textAlign: 'center', marginTop: 14, background: 'rgba(250,249,246,.12)', borderRadius: 12, padding: '10px 4px' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: 6, textAlign: 'center', marginTop: 14, background: '#fff', borderRadius: 10, padding: '10px 4px' }}>
             {(
               [
                 [sum((c) => c.eggs), '총 알'],
@@ -443,7 +443,7 @@ export function ClutchFemalePage() {
                 <div className="mono" style={{ fontWeight: 600, fontSize: 18 }}>
                   {v}
                 </div>
-                <div style={{ fontSize: 11, opacity: 0.85 }}>{l}</div>
+                <div style={{ fontSize: 11, color: 'var(--muted)' }}>{l}</div>
               </div>
             ))}
           </div>
@@ -453,8 +453,8 @@ export function ClutchFemalePage() {
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5,1fr)', gap: 4 }} aria-label="번식 단계">
             {STEPS.map((t, i) => (
               <div key={t} style={{ textAlign: 'center' }}>
-                <div style={{ height: 6, borderRadius: 3, background: i <= stage ? 'var(--blue)' : 'var(--seg)' }} />
-                <div style={{ fontSize: 11, marginTop: 4, fontWeight: i === stage ? 700 : 500, color: i === stage ? 'var(--blue)' : 'var(--muted)' }}>{t}</div>
+                <div style={{ height: 4, borderRadius: 2, background: i <= stage ? 'var(--blue)' : 'var(--surface2)' }} />
+                <div style={{ fontSize: 11, marginTop: 4, fontWeight: i === stage ? 600 : 500, color: i === stage ? 'var(--ink)' : 'var(--muted)' }}>{t}</div>
               </div>
             ))}
           </div>
@@ -484,10 +484,10 @@ export function ClutchFemalePage() {
           const inc = k.incub(c)
           const kids = k.hatched(c)
           return (
-            <div key={c.id} className="card" style={{ borderRadius: 14, padding: '13px 14px', display: 'flex', flexDirection: 'column', gap: 7 }}>
+            <div key={c.id} className="card" style={{ borderRadius: 10, padding: '13px 14px', display: 'flex', flexDirection: 'column', gap: 7 }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
                 <span className="ellipsis" style={{ minWidth: 0 }}>
-                  <span className="mono" style={{ fontWeight: 600, fontSize: 17, color: 'var(--blue)' }}>
+                  <span className="mono" style={{ fontWeight: 600, fontSize: 17 }}>
                     {c.seq}차
                   </span>
                   <span className="mono" style={{ fontSize: 13, color: 'var(--muted)' }}>
@@ -500,9 +500,9 @@ export function ClutchFemalePage() {
                   style={{
                     fontSize: 11,
                     fontWeight: 600,
-                    padding: '3px 8px',
-                    borderRadius: 999,
-                    background: inc ? 'var(--blue-soft)' : c.dead ? 'var(--warn-soft)' : 'var(--seg)',
+                    padding: '2px 7px',
+                    borderRadius: 4,
+                    background: inc ? 'var(--blue-soft)' : c.dead ? 'var(--warn-soft)' : 'var(--surface2)',
                     color: inc ? 'var(--blue)' : c.dead ? 'var(--warn)' : 'var(--sub)',
                   }}
                 >
@@ -526,7 +526,7 @@ export function ClutchFemalePage() {
                       key={x.id}
                       className="mono"
                       onClick={() => nav(`/animals/${x.id}`)}
-                      style={{ fontWeight: 600, fontSize: 12, color: 'var(--blue)', background: 'var(--blue-soft)', padding: '3px 8px', borderRadius: 6 }}
+                      style={{ fontFamily: 'var(--mono)', fontSize: 11, color: 'var(--sub)', background: '#fff', padding: '3px 8px', borderRadius: 4 }}
                     >
                       {x.code}
                     </button>
@@ -534,7 +534,7 @@ export function ClutchFemalePage() {
                 </div>
               )}
               {inc > 0 && c.expected_from && (
-                <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--blue)' }}>
+                <div style={{ fontSize: 12, fontWeight: 500, color: 'var(--sub)' }}>
                   부화 예정 {yd(c.expected_from)}~{yd(c.expected_to ?? c.expected_from)}
                   {(() => {
                     const d = hatchDday(c.expected_from, T)
@@ -571,7 +571,7 @@ export function ClutchFemalePage() {
 
         {timeline.length > 0 && (
           <>
-            <div style={{ fontSize: 15, fontWeight: 700, paddingTop: 6 }}>번식 기록</div>
+            <div style={{ fontSize: 15, fontWeight: 600, paddingTop: 6 }}>번식 기록</div>
             <div className="list-card" style={{ padding: '0 16px' }}>
               {timeline.slice(0, 12).map((e, i) => (
                 <div key={i} className="list-row" style={{ padding: '10px 0', alignItems: 'flex-start' }}>
@@ -588,7 +588,7 @@ export function ClutchFemalePage() {
           </>
         )}
 
-        <div style={{ fontSize: 15, fontWeight: 700, paddingTop: 6 }}>
+        <div style={{ fontSize: 15, fontWeight: 600, paddingTop: 6 }}>
           후손{' '}
           <span className="mono" style={{ fontWeight: 500, fontSize: 12, color: 'var(--muted)' }}>
             {desc.length}마리
@@ -598,7 +598,7 @@ export function ClutchFemalePage() {
           {desc.map((x) => (
             <div key={x.id} className="list-row" onClick={() => nav(`/animals/${x.id}`)} style={{ padding: '11px 0' }}>
               <span className="tag">{x.dam_id === id ? '자' : '손'}</span>
-              <span className="mono" style={{ fontWeight: 600, fontSize: 13, color: 'var(--blue)' }}>
+              <span className="code" style={{ fontSize: 12, color: 'var(--muted)' }}>
                 {x.code}
               </span>
               <span style={{ fontSize: 14, flex: 1 }}>{nm(x)}</span>

@@ -98,7 +98,7 @@ export function WeightSheet({
               autoFocus
             />
             {ok && v >= 1000 && (
-              <div className="mono" style={{ fontWeight: 600, fontSize: 12, color: 'var(--blue)', marginTop: 6 }}>
+              <div className="mono" style={{ fontWeight: 600, fontSize: 12, color: 'var(--sub)', marginTop: 6 }}>
                 = {fw(v)}
               </div>
             )}
@@ -107,7 +107,7 @@ export function WeightSheet({
         <div
           style={{
             background: neg ? 'var(--warn-soft)' : 'var(--blue-soft)',
-            borderRadius: 12,
+            borderRadius: 10,
             padding: '12px 14px',
             display: 'flex',
             justifyContent: 'space-between',
@@ -117,7 +117,7 @@ export function WeightSheet({
           <span style={{ fontSize: 13, color: 'var(--sub)' }}>
             {prev ? `직전 ${yd(prev.measured_on)} · ${fw(prev.grams)}` : '첫 측정이에요'}
           </span>
-          <span className="mono" style={{ fontWeight: 600, fontSize: 16, color: neg ? 'var(--warn)' : 'var(--blue)' }}>
+          <span className="mono" style={{ fontWeight: 600, fontSize: 16, color: neg ? 'var(--warn)' : 'var(--ink)' }}>
             {df === null ? '—' : fd(df)}
           </span>
         </div>
@@ -168,10 +168,10 @@ export function TransferCode({ t }: { t: Transfer }) {
   }
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 12, alignItems: 'center', textAlign: 'center' }}>
-      <div className="mono" data-test="transfer-code" style={{ fontWeight: 600, fontSize: 30, letterSpacing: '.08em', color: 'var(--blue)' }}>
+      <div className="code" data-test="transfer-code" style={{ fontWeight: 600, fontSize: 30, letterSpacing: '.08em' }}>
         {fmtCode(t.code)}
       </div>
-      <div style={{ background: '#fff', padding: 12, borderRadius: 14, border: '1px solid var(--line)' }}>
+      <div style={{ background: '#fff', padding: 12, borderRadius: 10 }}>
         <QrGrid n={n} cells={cells} size={168} />
       </div>
       <div className="hint" style={{ maxWidth: 360 }}>
@@ -223,7 +223,7 @@ export function TransferSheet({ animal, existing, onClose }: { animal: Animal; e
             <div className="label">함께 전달할 기록</div>
             <Chips
               wrap
-              items={(['w', 'l', 'c'] as const).map((key) => [key, (inc[key] ? '✓ ' : '') + LBL[key]] as const)}
+              items={(['w', 'l', 'c'] as const).map((key) => [key, LBL[key]] as const)}
               value={(['w', 'l', 'c'] as const).filter((key) => inc[key])}
               onChange={(key) => setInc((s) => ({ ...s, [key]: !s[key] }))}
             />

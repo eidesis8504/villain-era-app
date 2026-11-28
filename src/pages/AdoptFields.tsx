@@ -130,7 +130,7 @@ export function AdoptFields({
         </ul>
         <div style={{ fontWeight: 600, color: 'var(--ink)' }}>{NOT_A_PARTY}</div>
         <a href={WIMS_URL} target="_blank" rel="noreferrer" style={{ fontWeight: 600, color: 'var(--blue)' }}>
-          야생동물종합관리시스템 ›
+          야생동물종합관리시스템 열기
         </a>
       </div>
       <label style={{ display: 'flex', gap: 10, alignItems: 'flex-start', fontSize: 14, cursor: 'pointer' }}>

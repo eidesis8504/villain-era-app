@@ -1,6 +1,7 @@
 // 약관·정책·지원 페이지 공통 틀: 계정 없이 열리고(스토어 심사·링크용), 앱 안에서도 같은 주소로 연다
 import type { ReactNode } from 'react'
 import { Link, useNavigate } from 'react-router'
+import { ChevronLeft } from 'lucide-react'
 import { OPERATOR } from '../../lib/operator'
 
 export function LegalLayout({ title, children }: { title: string; children: ReactNode }) {
@@ -10,7 +11,7 @@ export function LegalLayout({ title, children }: { title: string; children: Reac
     <div className="legal-wrap">
       <header className="legal-hdr">
         <button type="button" className="hdr-back" aria-label="뒤로" onClick={back}>
-          ‹
+          <ChevronLeft size={24} />
         </button>
         <Link to="/" className="legal-brand">
           VILLAIN ERA

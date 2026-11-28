@@ -44,13 +44,13 @@ export function HealthPage() {
       <span style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', gap: 4 }}>
         <span style={{ fontSize: 14, fontWeight: 600 }}>
           {x.area} · <span style={{ color: x.level === 3 ? 'var(--warn)' : 'var(--sub)' }}>{LEVEL_LABEL[x.level]}</span>
-          {x.resolved_on && <span style={{ fontSize: 12, color: 'var(--blue)' }}> · {yd(x.resolved_on)} 해결</span>}
+          {x.resolved_on && <span style={{ fontSize: 12, color: 'var(--muted)' }}> · {yd(x.resolved_on)} 해결</span>}
         </span>
         {x.note && <span style={{ fontSize: 13, color: 'var(--sub)', overflowWrap: 'anywhere' }}>{x.note}</span>}
         {x.photos.length > 0 && (
           <span style={{ display: 'flex', gap: 6 }}>
             {x.photos.map((p) => (
-              <img key={p} src={urls[p]} alt="" style={{ width: 52, height: 52, borderRadius: 8, objectFit: 'cover', background: 'var(--seg)' }} />
+              <img key={p} src={urls[p]} alt="" style={{ width: 52, height: 52, borderRadius: 6, objectFit: 'cover', background: 'var(--seg)' }} />
             ))}
           </span>
         )}
@@ -93,7 +93,7 @@ export function HealthPage() {
                 <span style={{ fontSize: 12, color: 'var(--muted)' }}>
                   {v.cost != null ? `${v.cost.toLocaleString()}원` : ''}
                   {v.next_visit && (
-                    <b style={{ color: v.next_visit >= T ? 'var(--blue)' : 'var(--muted)' }}>
+                    <b style={{ color: v.next_visit >= T ? 'var(--ink)' : 'var(--muted)' }}>
                       {v.cost != null ? ' · ' : ''}재진 {yd(v.next_visit)}
                       {v.next_visit >= T ? ` (D-${gap(T, v.next_visit)})` : ''}
                     </b>
@@ -177,7 +177,7 @@ export function ConsultPage() {
                     style={{ position: 'relative', width: 72, height: 72, borderRadius: 10, overflow: 'hidden', border: `3px solid ${on ? 'var(--blue)' : 'transparent'}` }}
                   >
                     <img src={urls[p]} alt="" className="cover" />
-                    {on && <span style={{ position: 'absolute', top: 2, right: 4, color: '#fff', fontWeight: 700, textShadow: '0 0 3px #000' }}>✓</span>}
+                    {on && <span style={{ position: 'absolute', top: 2, right: 4, color: '#fff', fontWeight: 600, textShadow: '0 0 3px #000' }}>✓</span>}
                   </button>
                 )
               })}

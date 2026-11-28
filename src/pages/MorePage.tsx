@@ -1,10 +1,11 @@
 import { useQueryClient } from '@tanstack/react-query'
-import { useEffect, useState } from 'react'
+import { useEffect, useState, type ReactNode } from 'react'
 import { useNavigate } from 'react-router'
+import { Award, Ban, Bell, ChartColumn, ChevronRight, CircleHelp, LogIn, Megaphone, ScanLine, Send, Shield, Smartphone, Trash2, UserRound } from 'lucide-react'
 import { badgeOf, displayName, useAuth, useMe, type Profile } from '../app/auth'
 import { Screen } from '../app/Screen'
 import { useUI } from '../app/ui'
-import { useMyPostCount } from '../data/community'
+import { useMyPostCount, useNotifications } from '../data/community'
 import { useKeeper } from '../data/keeper'
 import { squareImage, upload } from '../lib/media'
 import { currentSubscription, disablePush, enablePush, isIOS, isStandalone, pushSupport } from '../lib/push'
@@ -117,7 +118,7 @@ function ProfileSheet({ profile, onClose }: { profile: Profile; onClose: () => v
             placeholder="예: 크레스티드게코 7마리 · 릴리화이트 라인 브리딩"
           />
         </div>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#F3F1EB', borderRadius: 12, padding: '12px 14px' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#F3F1EB', borderRadius: 10, padding: '12px 14px' }}>
           <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--sub)' }}>등급</span>
           {badge ? (
             <span className="tag dark" style={{ fontSize: 12, padding: '3px 9px', borderRadius: 6 }}>
@@ -213,13 +214,13 @@ function PushToggle() {
         : '켜면 알림 권한을 요청해요'
 
   return (
-    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12 }}>
-      <div>
-        <div style={{ fontSize: 14, fontWeight: 600 }}>기기 알림 (푸시)</div>
-        <div style={{ fontSize: 12, color: 'var(--muted)', lineHeight: 1.5 }}>{sub}</div>
+    <>
+      <div className="grow">
+        <div className="row-t">기기 알림 (푸시)</div>
+        <div className="meta">{sub}</div>
       </div>
       <Toggle label="기기 알림" on={on} busy={busy || !sup.ok} onClick={toggle} />
-    </div>
+    </>
   )
 }
 
@@ -241,113 +242,95 @@ export default function MorePage() {
     qc.invalidateQueries({ queryKey: ['profile'] })
   }
 
-  const row = (label: string, sub: string, to: () => void) => (
-    <div key={label} className="list-row" onClick={to} style={{ padding: '14px 0' }}>
-      <span style={{ fontSize: 15, fontWeight: 600, flex: 1 }}>{label}</span>
-      <span style={{ fontSize: 12, color: 'var(--muted-2)' }}>{sub}</span>
-      <span style={{ color: 'var(--muted-2)' }}>›</span>
-    </div>
+  const unread = (useNotifications().data ?? []).filter((n) => !n.read_at).length
+
+  const row = (id: string, label: string, sub: string, to: () => void, icon?: ReactNode, warn = false) => (
+    <button type="button" key={id} className="row" data-test={`more-${id}`} onClick={to}>
+      {icon && <span className={`row-ic${warn ? ' warn' : ''}`}>{icon}</span>}
+      <span className={`row-t grow${warn ? ' warn' : ''}`}>{label}</span>
+      {sub && <span className="row-v">{sub}</span>}
+      <ChevronRight size={18} className="chev" />
+    </button>
   )
 
+  // 사육 관리 도구(급여·체중·산란·혈통·할 일)는 홈의 '사육 관리'와 하단 기록 버튼에 있다.
+  // 묶음 이름 '설정'·'계정'은 앱 안 글이 '전체 › 설정', '전체 › 계정'으로 안내하므로 그대로 둔다
+  const top = [
+    row('tier', '내 등급', `${tierOf(profile.hz).name} · ${profile.hz} Hz`, () => nav('/tier'), <Award size={20} />),
+    row('alerts', '알림', unread ? `새 알림 ${unread}` : '', () => nav('/alerts'), <Bell size={20} />),
+    row('notices', '공지사항', '', () => nav('/notices'), <Megaphone size={20} />),
+  ]
+  const tools = [
+    row('scan', 'QR 스캔', '', () => nav('/scan'), <ScanLine size={20} />),
+    row('transfer', '분양 받기', '코드 입력', () => nav('/transfer'), <LogIn size={20} />),
+  ]
   const groups: [string, ReturnType<typeof row>[]][] = [
     [
-      '사육 관리',
+      '지원',
       [
-        row('개체 등록·관리', `${k.owned.length}마리`, () => nav('/animals')),
-        row('혈통 관리', '페어링 검사', () => nav('/lineage')),
-        row('산란 관리', `${k.breeders.length}마리`, () => nav('/clutch')),
-        row('급여 기록', '한꺼번에 기록', () => nav('/feedings')),
-        row('체중 측정', '', () => nav('/weights')),
-        row('오늘의 할 일', '', () => nav('/todo')),
+        row('inquiry', '도움말·문의', '운영자에게 문의', () => nav('/inquiry'), <CircleHelp size={20} />),
+        row('feedback', '의견 보내기', '불편한 점 · 바라는 기능', () => setSheet('feedback'), <Send size={20} />),
       ],
     ],
     [
-      '도구',
+      '약관과 정책',
       [
-        row('QR 라벨 스캔', '', () => nav('/scan')),
-        row('분양 받기', '코드 입력', () => nav('/transfer')),
-        row('공지사항', '', () => nav('/notices')),
-        row('알림', '', () => nav('/alerts')),
-      ],
-    ],
-    [
-      '안내',
-      [
-        row('도움말·문의', '운영자에게 문의', () => nav('/inquiry')),
-        row('개인정보 처리방침', '', () => nav('/privacy')),
-        row('이용약관', '', () => nav('/terms')),
-        row('커뮤니티 운영정책', '', () => nav('/policy')),
+        row('privacy', '개인정보 처리방침', '', () => nav('/privacy')),
+        row('terms', '이용약관', '', () => nav('/terms')),
+        row('policy', '커뮤니티 운영정책', '', () => nav('/policy')),
       ],
     ],
     [
       '계정',
       [
-        row('프로필 편집', '사진 · 닉네임 · 소개', () => setSheet('profile')),
-        row('내 등급', `${tierOf(profile.hz).name} · ${profile.hz} Hz`, () => nav('/tier')),
-        row('다른 기기에서 이어 쓰기', '코드로 연결', () => setSheet('link')),
-        row('차단 관리', '', () => nav('/blocked')),
-        row('계정과 기록 삭제', '되돌릴 수 없어요', () => setSheet('delete')),
-        ...(isAdmin ? [row('검증 현황', '운영자 전용', () => nav('/admin'))] : []),
-        row(isAdmin ? '운영자 권한' : '관리자 코드 입력', isAdmin ? '적용됨' : '운영자 전용', () =>
-          isAdmin ? ui.toast('이미 운영자 권한이 적용된 계정이에요') : setSheet('admin'),
+        row('profile', '프로필 편집', '사진 · 닉네임 · 소개', () => setSheet('profile'), <UserRound size={20} />),
+        row('link', '다른 기기에서 이어 쓰기', '코드로 연결', () => setSheet('link'), <Smartphone size={20} />),
+        row('blocked', '차단 관리', '', () => nav('/blocked'), <Ban size={20} />),
+        ...(isAdmin ? [row('admin', '검증 현황', '운영자 전용', () => nav('/admin'), <ChartColumn size={20} />)] : []),
+        row(
+          'admin-code',
+          isAdmin ? '운영자 권한' : '관리자 코드 입력',
+          isAdmin ? '적용됨' : '운영자 전용',
+          () => (isAdmin ? ui.toast('이미 운영자 권한이 적용된 계정이에요') : setSheet('admin')),
+          <Shield size={20} />,
         ),
+        row('delete', '계정과 기록 삭제', '되돌릴 수 없어요', () => setSheet('delete'), <Trash2 size={20} />, true),
       ],
     ],
   ]
 
   return (
-    <Screen title="전체">
-      <div className="page">
-        <div
-          data-test="feedback-card"
-          className="welcome-card"
-          onClick={() => setSheet('feedback')}
-          style={{ cursor: 'pointer', flexDirection: 'row', alignItems: 'center', gap: 12 }}
-        >
-          <span className="beta" style={{ flex: 'none' }}>
-            BETA
-          </span>
-          <div style={{ flex: 1, minWidth: 0 }}>
-            <div className="welcome-card-title" style={{ fontSize: 14 }}>
-              의견 보내기
-            </div>
-            <div style={{ fontSize: 12 }}>불편한 점·바라는 기능을 알려 주세요</div>
-          </div>
-          <span style={{ color: 'var(--blue)', fontWeight: 700 }}>›</span>
-        </div>
-
-        <div data-test="profile-card" className="card card-pad" onClick={() => setSheet('profile')} style={{ display: 'flex', alignItems: 'center', gap: 14, cursor: 'pointer' }}>
+    <Screen title="전체" back="/">
+      <div className="page" style={{ gap: 0 }}>
+        <div data-test="profile-card" className="row" style={{ paddingTop: 8 }} onClick={() => setSheet('profile')}>
           <Avatar name={displayName(profile)} url={profile.avatar_url} size={56} />
-          <div style={{ flex: 1, minWidth: 0 }}>
-            <div style={{ display: 'flex', gap: 6, alignItems: 'center', flexWrap: 'wrap' }}>
-              <span style={{ fontSize: 17, fontWeight: 700 }}>{displayName(profile)}</span>
+          <div className="grow">
+            <div className="nm" style={{ fontSize: 18, lineHeight: '26px', alignItems: 'center' }}>
+              <span>{displayName(profile)}</span>
               {badge && <span className="tag dark">{badge}</span>}
               {!isAdmin && <TierBadge hz={profile.hz} />}
             </div>
-            {profile.bio && <div style={{ fontSize: 13, color: 'var(--sub)', marginTop: 3, overflowWrap: 'anywhere' }}>{profile.bio}</div>}
-            <div style={{ fontSize: 12, color: 'var(--muted)', marginTop: 3 }}>
+            {profile.bio && <div style={{ fontSize: 13, color: 'var(--sub)', marginTop: 2, overflowWrap: 'anywhere' }}>{profile.bio}</div>}
+            <div className="meta">
               사육 중 {k.owned.length}마리 · 작성 글 {posts}
             </div>
           </div>
-          <span style={{ flex: 'none', fontSize: 13, fontWeight: 600, color: 'var(--blue)', border: '1px solid var(--blue)', borderRadius: 999, padding: '6px 12px' }}>편집</span>
+          <span className="btn btn-outline btn-xs">편집</span>
         </div>
 
-        {groups.map(([title, items]) => (
-          <div key={title}>
-            <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--muted)', margin: '0 0 6px 4px' }}>{title}</div>
-            <div className="list-card" style={{ padding: '0 16px' }}>
-              {items}
-            </div>
-          </div>
-        ))}
+        <div className="rows" style={{ marginTop: 8 }}>
+          {top}
+        </div>
 
-        <div>
-          <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--muted)', margin: '0 0 6px 4px' }}>설정</div>
-          <div className="card" style={{ padding: '14px 16px', display: 'flex', flexDirection: 'column', gap: 14 }}>
-            <div>
-              <div style={{ fontSize: 14, fontWeight: 600, marginBottom: 8 }}>근친 페어링 차단 기준 (COI 초과)</div>
+        <div className="grp">도구</div>
+        <div className="rows">{tools}</div>
+
+        <div className="grp">설정</div>
+        <div className="rows">
+          <div className="row" style={{ display: 'block', cursor: 'default' }}>
+            <div className="row-t">근친 페어링 차단 기준 (COI 초과)</div>
+            <div style={{ marginTop: 8 }}>
               <Seg
-                mono
                 items={[
                   [3.125, '3.125%'],
                   [6.25, '6.25%'],
@@ -356,21 +339,23 @@ export default function MorePage() {
                 value={Number(profile.coi_limit)}
                 onChange={(v) => update({ coi_limit: v })}
               />
-              <div className="hint" style={{ marginTop: 6 }}>
-                6.25% = 사촌 간 페어링 수준 · 12.5% = 이복 남매 수준
-              </div>
             </div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12 }}>
-              <div>
-                <div style={{ fontSize: 14, fontWeight: 600 }}>할 일 사전 알림</div>
-                <div style={{ fontSize: 12, color: 'var(--muted)' }}>설정한 시간 전에 알림함 · 배너 · 기기 알림으로 알려줘요</div>
-              </div>
-              <Toggle label="할 일 알림" on={profile.todo_alarm} onClick={() => update({ todo_alarm: !profile.todo_alarm })} />
+            <div className="meta" style={{ marginTop: 8 }}>
+              6.25% = 사촌 간 페어링 수준 · 12.5% = 이복 남매 수준
             </div>
+          </div>
+          <div className="row" style={{ cursor: 'default' }}>
+            <div className="grow">
+              <div className="row-t">할 일 사전 알림</div>
+              <div className="meta">설정한 시간 전에 알림함 · 배너 · 기기 알림으로 알려줘요</div>
+            </div>
+            <Toggle label="할 일 알림" on={profile.todo_alarm} onClick={() => update({ todo_alarm: !profile.todo_alarm })} />
+          </div>
+          <div className="row" style={{ cursor: 'default' }}>
             {isNative() ? (
-              <div>
-                <div style={{ fontSize: 14, fontWeight: 600 }}>기기 알림</div>
-                <div style={{ fontSize: 12, color: 'var(--muted)' }}>스토어 앱의 기기 알림은 정식 버전에서 지원해요 · 알림함과 앱 안 배너로는 계속 알려 드려요</div>
+              <div className="grow">
+                <div className="row-t">기기 알림</div>
+                <div className="meta">스토어 앱의 기기 알림은 정식 버전에서 지원해요 · 알림함과 앱 안 배너로는 계속 알려 드려요</div>
               </div>
             ) : (
               <PushToggle />
@@ -378,13 +363,20 @@ export default function MorePage() {
           </div>
         </div>
 
-        <div className="mono" style={{ fontSize: 11, lineHeight: 1.6, color: 'var(--muted-2)', textAlign: 'center' }}>
+        {groups.map(([title, items]) => (
+          <div key={title}>
+            <div className="grp">{title}</div>
+            <div className="rows">{items}</div>
+          </div>
+        ))}
+
+        <p className="meta" style={{ margin: '28px 0 0', lineHeight: 1.7 }}>
           VILLAIN ERA {APP_VERSION} · 게스트 계정
           <br />
           기록은 서버에 저장돼요 · 다른 기기에서도 쓰려면 ‘다른 기기에서 이어 쓰기’
           <br />
           이 기기 데이터를 지우기 전에 다른 기기에 연결해 두세요
-        </div>
+        </p>
       </div>
       {sheet === 'profile' && <ProfileSheet profile={profile} onClose={() => setSheet(null)} />}
       {sheet === 'admin' && <AdminCodeSheet onClose={() => setSheet(null)} />}

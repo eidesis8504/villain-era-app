@@ -79,7 +79,7 @@ export default function TransferClaimPage() {
     <Screen title="분양 받기" back="/more">
       <div className="page">
         <div className="hint" style={{ fontSize: 13 }}>
-          분양해 준 사육자에게 받은 <b>분양 코드 8자리</b>를 입력하거나, 스캔 탭에서 분양 QR을 찍으세요. 체중·혈통·산란 기록이 내 계정에 같은 ID로 복사돼요.
+          분양해 준 사육자에게 받은 <b>분양 코드 8자리</b>를 입력하거나, QR 스캔에서 분양 QR을 찍으세요. 체중·혈통·산란 기록이 내 계정에 같은 ID로 복사돼요.
         </div>
         <div style={{ display: 'flex', gap: 8 }}>
           <input
@@ -103,12 +103,12 @@ export default function TransferClaimPage() {
 
         {pv && a && (
           <div className="card card-pad" style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-            <div className="mono" style={{ fontSize: 11, letterSpacing: '.1em', color: 'var(--blue)', fontWeight: 600 }}>
+            <div className="micro">
               {pv.from ?? '회원'}님이 보낸 개체
             </div>
             <div>
-              <span style={{ fontSize: 18, fontWeight: 700 }}>{nm(a)}</span>{' '}
-              <span className="mono" style={{ fontSize: 13, fontWeight: 600, color: 'var(--blue)' }}>
+              <span style={{ fontSize: 18, fontWeight: 600 }}>{nm(a)}</span>{' '}
+              <span className="code" style={{ fontSize: 12, color: 'var(--muted)' }}>
                 {a.code}
               </span>
             </div>

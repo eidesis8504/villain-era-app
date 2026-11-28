@@ -3,6 +3,7 @@
 import { useQueryClient } from '@tanstack/react-query'
 import { useEffect, useRef, useState, type ReactNode } from 'react'
 import { Link, useNavigate, useParams, useSearchParams } from 'react-router'
+import { ChevronRight } from 'lucide-react'
 import { badgeOf, displayName, useAuth, useMe } from '../app/auth'
 import { useViewport } from '../app/layout'
 import { Screen } from '../app/Screen'
@@ -129,7 +130,7 @@ export function ChatThread({
         type="button"
         data-test="chat-send"
         className={`btn btn-primary${canSend(text) ? '' : ' off'}`}
-        style={{ width: 64, height: 46, fontSize: 14, flex: 'none' }}
+        style={{ width: 64, height: 46, padding: 0, fontSize: 14, flex: 'none' }}
         onClick={send}
         disabled={busy}
       >
@@ -158,22 +159,20 @@ export function ChatListPage() {
   const rooms = q.data ?? []
   return (
     <Screen title="채팅">
-      <div className="page" style={{ gap: 10 }}>
+      <div className="page" style={{ gap: 0 }}>
         {q.isLoading && <Spinner center />}
         {q.error && <ErrorBox error={q.error} onRetry={() => q.refetch()} />}
         {q.data && !rooms.length && (
-          <div className="empty-card" data-test="chat-none">
-            <div style={{ fontSize: 15, fontWeight: 700 }}>아직 대화가 없어요</div>
-            <div style={{ fontSize: 13, color: 'var(--muted)', lineHeight: 1.6 }}>
-              분양·홍보 글의 ‘채팅으로 문의’나 글·댓글의 ⋯ 메뉴에서 대화를 시작할 수 있어요
-            </div>
-            <button type="button" className="btn btn-primary btn-sm" style={{ padding: '0 18px' }} onClick={() => nav('/community')}>
+          <div className="empty" data-test="chat-none" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6, paddingTop: 56 }}>
+            <div style={{ fontSize: 17, fontWeight: 600, color: 'var(--ink)' }}>아직 대화가 없어요</div>
+            <div style={{ lineHeight: 1.6, maxWidth: 280 }}>분양·홍보 글의 ‘채팅으로 문의’나 글·댓글의 메뉴에서 대화를 시작할 수 있어요</div>
+            <button type="button" className="btn btn-primary btn-sm" style={{ marginTop: 10 }} onClick={() => nav('/community')}>
               커뮤니티 보기
             </button>
           </div>
         )}
         {rooms.length > 0 && (
-          <div className="list-card" data-test="chat-rooms">
+          <div className="rows" data-test="chat-rooms">
             {rooms.map((r) => {
               const p = peerOf(r, uid)
               const badge = badgeOf(p)
@@ -195,7 +194,7 @@ export function ChatListPage() {
             })}
           </div>
         )}
-        <div className="hint" style={{ textAlign: 'center' }}>
+        <div className="hint" style={{ marginTop: 16 }}>
           운영자에게 문의하려면 전체 › 도움말·문의
         </div>
       </div>
@@ -242,7 +241,7 @@ export function ChatRoomPage() {
                 <span className="ellipsis" style={{ flex: 1, minWidth: 0 }}>
                   {r.post.title}
                 </span>
-                <span style={{ color: 'var(--muted-2)' }}>›</span>
+                <ChevronRight size={16} className="chev" />
               </Link>
             )}
             <div className="hint chat-safety" data-test="chat-safety">
@@ -284,7 +283,7 @@ export function InquiryPage() {
           <Link to="/support" className="chat-post" data-test="inquiry-help">
             <span className="tag">도움말</span>
             <span style={{ flex: 1 }}>자주 묻는 질문 먼저 보기</span>
-            <span style={{ color: 'var(--muted-2)' }}>›</span>
+            <ChevronRight size={16} className="chev" />
           </Link>
           <div className="hint chat-safety" data-test="inquiry-note">
             운영자에게 보내는 1:1 문의예요. 답변이 오면 알림으로 알려 드려요.

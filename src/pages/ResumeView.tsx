@@ -121,7 +121,7 @@ export function ResumeView({ r, today, photoUrl }: { r: Resume; today: string; p
           ))}
         </ul>
         <a href={WIMS_URL} target="_blank" rel="noreferrer">
-          야생동물종합관리시스템 열기 ›
+          야생동물종합관리시스템 열기
         </a>
         <p className="resume-sub">이 링크를 만든 날 {yd(r.shared_at)}</p>
       </div>

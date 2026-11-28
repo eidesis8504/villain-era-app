@@ -865,8 +865,17 @@ select.input {
 .rows > .row:last-child {
   border-bottom: 0;
 }
+/* PC의 넓은 화면에서는 줄을 여러 칸으로 놓는다 */
+.frame.desk .rows.cols {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+  column-gap: 40px;
+}
+.frame.desk .rows.cols > .row:last-child {
+  border-bottom: 1px solid var(--line);
+}
 /* 줄 안에서 제목과 설명이 두 줄로 놓이게 */
-.row .grow > span {
+.row .grow > span:not(.nm) {
   display: block;
 }
 .row-t {
@@ -1111,7 +1120,7 @@ select.input {
   font-weight: 500;
   letter-spacing: 0;
 }
-.spec span {
+.spec > span {
   display: block;
   margin-top: 2px;
   font-size: 12px;
@@ -1122,6 +1131,32 @@ select.input {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 8px;
+}
+/* 주의 색: 위에서 정한 회색보다 뒤에 와야 이긴다 */
+.row-t.warn,
+.row-v.warn,
+.row-ic.warn,
+.meta.warn,
+.micro.warn,
+.spec > span.warn {
+  color: var(--warn);
+}
+/* 개체 상세: 휴대폰은 한 줄(사진은 화면 끝까지), PC는 두 칸 */
+.detail {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+}
+.detail-pad {
+  padding: 0 20px;
+}
+.frame.desk .detail {
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  column-gap: 40px;
+  padding: 0 20px;
+}
+.frame.desk .detail-pad {
+  padding-left: 0;
+  padding-right: 0;
 }
 
 /* 글 줄 (커뮤니티) */

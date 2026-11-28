@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router'
+import { Plus, Search } from 'lucide-react'
 import { Screen } from '../app/Screen'
 import { useKeeper } from '../data/keeper'
 import { fd, fw, nm, sexLbl, sexMark, STATUS_LABEL, type AnimalStatus } from '../lib/format'
@@ -25,20 +26,18 @@ export default function AnimalsPage() {
     .filter((a) => !qq || `${a.code} ${a.name} ${a.morph} ${spOf(a)}`.toLowerCase().includes(qq))
 
   return (
-    <Screen title="개체 관리" right={{ label: '+ 등록', onClick: () => nav('/animals/new'), test: 'animal-add' }} wide>
+    <Screen title="개체" right={{ label: '등록', icon: <Plus size={18} />, onClick: () => nav('/animals/new'), test: 'animal-add' }} wide>
       {k.error ? (
         <ErrorBox error={k.error} />
       ) : (
-        <div className="page-grid" style={{ gridTemplateColumns: 'repeat(auto-fill,minmax(min(100%,300px),1fr))' }}>
-          <input
-            className="input span-all"
-            value={q}
-            onChange={(e) => setQ(e.target.value)}
-            placeholder="이름 · ID · 모프 검색"
-            style={{ fontSize: 15 }}
-          />
+        <div className="page" style={{ gap: 0 }}>
+          <label className="field">
+            <Search size={18} />
+            <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="이름 · ID · 모프 검색" aria-label="개체 검색" data-test="animal-search" />
+          </label>
           <Chips
-            style={{ gridColumn: '1 / -1' }}
+            tabs
+            style={{ marginTop: 8 }}
             items={[
               ['all', '전체'],
               ['F', '암컷'],
@@ -49,60 +48,36 @@ export default function AnimalsPage() {
             value={filter}
             onChange={setFilter}
           />
-          {sps.length > 1 && (
-            <Chips
-              style={{ gridColumn: '1 / -1' }}
-              items={[['all', '모든 종'] as const, ...sps.map((s) => [s, s] as const)]}
-              value={sp}
-              onChange={setSpF}
-            />
-          )}
-          <div className="span-all mono" style={{ fontWeight: 500, fontSize: 12, color: 'var(--muted)' }}>
+          {sps.length > 1 && <Chips small style={{ marginTop: 12 }} items={[['all', '모든 종'] as const, ...sps.map((s) => [s, s] as const)]} value={sp} onChange={setSpF} />}
+          <div className="micro" style={{ marginTop: 14 }}>
             {list.length}마리
           </div>
-          {k.loading && (
-            <div className="span-all">
-              <Spinner center />
-            </div>
-          )}
-          {list.map((a) => {
-            const l = k.lastW(a.id)
-            return (
-              <div
-                key={a.id}
-                className="card"
-                onClick={() => nav(`/animals/${a.id}`)}
-                style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '12px 14px', cursor: 'pointer' }}
-              >
-                <AnimalThumb path={a.photo_path} mark={sexMark(a.sex)} size={46} />
-                <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{ display: 'flex', flexWrap: 'wrap', columnGap: 6, alignItems: 'baseline' }}>
-                    <span style={{ fontSize: 15, fontWeight: 600 }}>{nm(a)}</span>
-                    <span className="mono" style={{ fontWeight: 500, fontSize: 12, color: 'var(--blue)' }}>
-                      {a.code}
+          {k.loading && <Spinner center />}
+          <div className="rows cols">
+            {list.map((a) => {
+              const l = k.lastW(a.id)
+              return (
+                <button type="button" key={a.id} className="row" data-test="animal-row" onClick={() => nav(`/animals/${a.id}`)}>
+                  <AnimalThumb path={a.photo_path} mark={sexMark(a.sex)} size={56} />
+                  <span className="grow">
+                    <span className="nm">
+                      {nm(a)}
+                      <span className="code">{a.code}</span>
                     </span>
-                  </div>
-                  <div className="ellipsis" style={{ fontSize: 12, color: 'var(--muted)', marginTop: 2 }}>
-                    {a.status !== 'keeping' ? STATUS_LABEL[a.status as AnimalStatus] + ' · ' : ''}
-                    {spOf(a)} · {sexLbl(a.sex)} · {a.morph || '미정'}
-                  </div>
-                </div>
-                <div style={{ textAlign: 'right', flex: 'none' }}>
-                  <div className="mono" style={{ fontWeight: 600, fontSize: 14 }}>
-                    {l ? fw(l.g) : '—'}
-                  </div>
-                  <div className="mono" style={{ fontWeight: 600, fontSize: 12, color: l && l.diff !== null && l.diff < 0 ? 'var(--warn)' : 'var(--blue)' }}>
-                    {l ? (l.diff === null ? '첫 측정' : fd(l.diff)) : '기록 없음'}
-                  </div>
-                </div>
-              </div>
-            )
-          })}
-          {!k.loading && !list.length && (
-            <div className="span-all empty">
-              {k.animals.length ? '조건에 맞는 개체가 없어요' : '아직 등록된 개체가 없어요 · 우측 상단 + 등록'}
-            </div>
-          )}
+                    <span className="meta ellipsis">
+                      {a.status !== 'keeping' ? STATUS_LABEL[a.status as AnimalStatus] + ' · ' : ''}
+                      {spOf(a)} · {sexLbl(a.sex)} · {a.morph || '미정'}
+                    </span>
+                  </span>
+                  <span className="num">
+                    <b>{l ? fw(l.g) : '—'}</b>
+                    <span className={l && l.diff !== null && l.diff < 0 ? 'warn' : undefined}>{l ? (l.diff === null ? '첫 측정' : fd(l.diff)) : '기록 없음'}</span>
+                  </span>
+                </button>
+              )
+            })}
+          </div>
+          {!k.loading && !list.length && <div className="empty">{k.animals.length ? '조건에 맞는 개체가 없어요' : '아직 등록된 개체가 없어요 · 오른쪽 위 등록을 눌러 주세요'}</div>}
         </div>
       )}
     </Screen>

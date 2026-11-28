@@ -1,11 +1,13 @@
-import { useEffect, useState } from 'react'
+import { Fragment, useEffect, useState, type ReactNode } from 'react'
 import { useNavigate, useParams, useSearchParams } from 'react-router'
+import { ArrowLeftRight, Camera, ChevronRight, Egg, FileText, HeartPulse, Network, QrCode, Utensils, Weight } from 'lucide-react'
 import { Screen } from '../app/Screen'
 import { useUI } from '../app/ui'
 import { useKeeper, useRefresh, useTransfers, type Animal, type Keeper, type Origin, type Transfer } from '../data/keeper'
+import { ageParts } from '../lib/age'
 import { gap, isoDay, today, yd } from '../lib/date'
-import { fd, fw, nm, sexLbl } from '../lib/format'
-import { spInfo, spOf } from '../lib/species'
+import { fd, fw, nm, sexLbl, sexMark, STATUS_LABEL, type AnimalStatus } from '../lib/format'
+import { spOf } from '../lib/species'
 import { errMsg, publicUrl, supabase } from '../lib/supabase'
 import { ErrorBox, Spinner } from '../ui/kit'
 import { useMyShares } from '../data/adopt'
@@ -13,8 +15,7 @@ import { useMatings } from '../data/breeding'
 import { useHealthLogs, useVetVisits } from '../data/health'
 import type { Mating } from '../lib/breeding'
 import { FEED_RESULT_LABEL, REFUSE_ALERT } from '../lib/feeding'
-import { HEALTH_NOTICE, LEVEL_LABEL, type HealthLog, type VetVisit } from '../lib/health'
-import { SymptomSheet, VetSheet } from './HealthSheets'
+import { LEVEL_LABEL, type HealthLog, type VetVisit } from '../lib/health'
 import { FeedingSheet } from './FeedingSheet'
 import { feedLine } from './FeedingPages'
 import { ResumeSheet } from './ResumeSheet'
@@ -167,7 +168,7 @@ export default function AnimalDetailPage() {
   const transfers = useTransfers().data ?? []
   // ?feed=1 (제품 QR로 시작해 첫 개체를 등록한 직후): 급여 기록을 한 번 열고 주소에서 표시를 지운다
   const [params, setParams] = useSearchParams()
-  const [sheet, setSheet] = useState<null | 'weight' | 'transfer' | 'feeding' | 'symptom' | 'vet' | 'resume'>(() =>
+  const [sheet, setSheet] = useState<null | 'weight' | 'transfer' | 'feeding' | 'resume'>(() =>
     params.get('feed') === '1' ? 'feeding' : null,
   )
   // 분양 이력서 링크가 살아 있는 개체
@@ -224,213 +225,184 @@ export default function AnimalDetailPage() {
     ui.toast('분양을 취소했어요 · 다시 사육 중으로 바뀌었어요')
   }
 
-  const node = (role: string, x: Animal | null, pid: string | null) => (
-    <div onClick={() => x && nav(`/animals/${x.id}`)} style={{ cursor: x ? 'pointer' : 'default', minWidth: 0 }}>
-      <div style={{ fontSize: 11, opacity: 0.75 }}>{role}</div>
-      <div className="mono" style={{ fontWeight: 600, fontSize: 13, overflowWrap: 'anywhere' }}>
-        {x?.code ?? (pid ? '미등록' : '미상')}
-      </div>
-      <div style={{ fontSize: 12 }}>{x ? nm(x) : '—'}</div>
-    </div>
-  )
+  const T = today()
+  const age = ageParts(a.hatch_date, T)
+  const feedWarn = fsum.refuseStreak >= REFUSE_ALERT || fsum.overdue
+  const lastOpen = openLogs[openLogs.length - 1]
+  const parent = (x: Animal | null, pid: string | null) => (x ? nm(x) : pid ? '미등록' : '미상')
 
-  const stat = (label: string, big: string, small: string, col: string, onClick: () => void) => (
-    <div className="stat" onClick={onClick} style={{ padding: '11px 12px' }}>
-      <div style={{ fontSize: 11, color: 'var(--muted)' }}>{label}</div>
-      <div className="mono" style={{ fontWeight: 600, fontSize: 18 }}>
-        {big}
-      </div>
-      <div className="mono" style={{ fontWeight: 600, fontSize: 11, color: col }}>
-        {small}
-      </div>
-    </div>
+  // 기록 한 줄: 왼쪽에 이름, 오른쪽에 최근 상태. 누르면 그 기록 화면으로 간다
+  const line = (test: string, icon: ReactNode, label: string, value: ReactNode, onClick: () => void, warn = false) => (
+    <button type="button" className="row" data-test={test} onClick={onClick}>
+      <span className="row-ic">{icon}</span>
+      <span className="row-t grow">{label}</span>
+      <span className={`row-v${warn ? ' warn' : ''}`}>{value}</span>
+      <ChevronRight size={18} className="chev" />
+    </button>
   )
 
   return (
-    <Screen title="개체 상세" back="/animals" right={{ label: '편집', onClick: () => nav(`/animals/${a.id}/edit`) }} wide>
-      <div className="page-grid" style={{ gridTemplateColumns: 'repeat(auto-fit,minmax(min(100%,380px),1fr))', gap: 20 }}>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 14, minWidth: 0 }}>
-          <div style={{ background: 'var(--blue)', color: 'var(--cream)', borderRadius: 10, padding: 18, display: 'flex', flexDirection: 'column', gap: 14 }}>
-            <div className="mono" style={{ display: 'flex', justifyContent: 'space-between', fontWeight: 500, fontSize: 11, letterSpacing: '.12em', opacity: 0.8 }}>
-              <span>VILLAIN ERA · ID</span>
-              <span>{spInfo(a).en}</span>
-            </div>
-            <div style={{ display: 'grid', gridTemplateColumns: '96px 1fr', gap: 14 }}>
-              <div
-                onClick={() => nav(`/animals/${a.id}/edit`)}
-                className="mono"
-                style={{
-                  height: 116,
-                  borderRadius: 10,
-                  overflow: 'hidden',
-                  cursor: 'pointer',
-                  background: 'repeating-linear-gradient(135deg,rgba(250,249,246,.18) 0 8px,rgba(250,249,246,.08) 8px 16px)',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  fontWeight: 500,
-                  fontSize: 11,
-                }}
-              >
-                {photo ? <img src={photo} alt="" className="cover" /> : <span>+ 사진</span>}
-              </div>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 3, minWidth: 0 }}>
-                <span className="mono" style={{ fontWeight: 600, fontSize: 20, letterSpacing: '.02em', overflowWrap: 'anywhere' }}>
-                  {a.code}
-                </span>
-                <span style={{ fontSize: 22, fontWeight: 600 }}>{nm(a)}</span>
-                <span style={{ fontSize: 12, opacity: 0.9 }}>
-                  {spOf(a)} · {sexLbl(a.sex)} · {a.morph || '미정'}
-                </span>
-                <span className="mono" style={{ fontSize: 12, opacity: 0.9 }}>
-                  HATCH {a.hatch_date ?? '미상'}
-                </span>
-              </div>
-            </div>
-            <div style={{ height: 1, background: 'rgba(250,249,246,.3)' }} />
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 64px', gap: 10, alignItems: 'end' }}>
-              {node('부', sire, a.sire_id)}
-              {node('모', dam, a.dam_id)}
-              <button
-                type="button"
-                className="mono"
-                onClick={() => nav(`/animals/${a.id}/qr`)}
-                style={{
-                  width: 64,
-                  height: 64,
-                  borderRadius: 6,
-                  background: 'repeating-linear-gradient(90deg,#FAF9F6 0 4px,#E3E8F0 4px 8px)',
-                  fontWeight: 600,
-                  fontSize: 10,
-                  color: 'var(--blue)',
-                }}
-              >
-                QR
-              </button>
-            </div>
+    <Screen title="" back="/animals" right={{ label: '편집', onClick: () => nav(`/animals/${a.id}/edit`) }} wide>
+      <div className="detail">
+        <div style={{ minWidth: 0 }}>
+          <div className="hero" data-test="animal-photo" onClick={() => nav(`/animals/${a.id}/edit`)}>
+            {photo ? (
+              <img src={photo} alt="" className="cover" />
+            ) : (
+              <>
+                <Camera size={24} />
+                <span>사진 추가</span>
+              </>
+            )}
           </div>
 
-          {statusTxt && (
-            <div style={{ background: 'var(--seg)', borderRadius: 10, padding: '10px 14px', fontSize: 13, fontWeight: 600, color: 'var(--sub)', display: 'flex', flexDirection: 'column', gap: 8 }}>
-              <span>{statusTxt}</span>
-              {pending && (
-                <div style={{ display: 'flex', gap: 8 }}>
-                  <button type="button" className="btn btn-outline btn-xs" style={{ flex: 1 }} onClick={() => setShowCode(pending)}>
-                    코드 · QR 보기
-                  </button>
-                  <button type="button" className={`btn btn-danger btn-xs${cancelling ? ' on' : ''}`} style={{ flex: 1 }} onClick={cancelTransfer}>
-                    {cancelling ? '한 번 더 누르면 취소' : '분양 취소'}
-                  </button>
-                </div>
+          <div className="detail-pad">
+            <div className="sec-h" style={{ marginTop: 20 }}>
+              <h1 className="h-display" style={{ minWidth: 0, overflowWrap: 'anywhere' }}>
+                {nm(a)}
+              </h1>
+              <span className="meta" style={{ flex: 'none' }}>
+                {sexMark(a.sex)} {sexLbl(a.sex)} · {STATUS_LABEL[a.status as AnimalStatus]}
+              </span>
+            </div>
+            <div className="meta" style={{ marginTop: 4 }}>
+              <span className="code">{a.code}</span> · {spOf(a)} · {a.morph || '모프 미정'}
+            </div>
+
+            {statusTxt && (
+              <div className="card" style={{ marginTop: 16, padding: '12px 14px', fontSize: 13, color: 'var(--sub)', display: 'flex', flexDirection: 'column', gap: 10 }}>
+                <span>{statusTxt}</span>
+                {pending && (
+                  <div style={{ display: 'flex', gap: 8 }}>
+                    <button type="button" className="btn btn-outline btn-xs" style={{ flex: 1 }} onClick={() => setShowCode(pending)}>
+                      코드 · QR 보기
+                    </button>
+                    <button type="button" className={`btn btn-danger btn-xs${cancelling ? ' on' : ''}`} style={{ flex: 1 }} onClick={cancelTransfer}>
+                      {cancelling ? '한 번 더 누르면 취소' : '분양 취소'}
+                    </button>
+                  </div>
+                )}
+              </div>
+            )}
+
+            <div className="specs" data-test="animal-specs" style={{ marginTop: 20 }}>
+              <div className="spec">
+                <b>
+                  {l ? (
+                    <>
+                      {l.g}
+                      <small>g</small>
+                    </>
+                  ) : (
+                    '—'
+                  )}
+                </b>
+                <span className={l && l.diff !== null && l.diff < 0 ? 'warn' : undefined}>
+                  체중 · {l ? (l.diff === null ? '첫 측정' : fd(l.diff)) : '기록 없음'}
+                </span>
+              </div>
+              <div className="spec">
+                <b>
+                  {age.length
+                    ? age.map((x, i) => (
+                        <Fragment key={x.u}>
+                          {i > 0 && ' '}
+                          {x.n}
+                          <small>{x.u}</small>
+                        </Fragment>
+                      ))
+                    : '—'}
+                </b>
+                <span>{a.hatch_date ? `해칭 ${yd(a.hatch_date)}` : '해칭일 미상'}</span>
+              </div>
+              <div className="spec">
+                <b>
+                  {!fsum.last ? (
+                    '—'
+                  ) : fsum.daysSince === 0 ? (
+                    '오늘'
+                  ) : (
+                    <>
+                      {fsum.daysSince}
+                      <small>일 전</small>
+                    </>
+                  )}
+                </b>
+                <span className={feedWarn ? 'warn' : undefined}>마지막 급여{fsum.last ? ` · ${FEED_RESULT_LABEL[fsum.last.result]}` : ''}</span>
+              </div>
+            </div>
+
+            <div className="cta" style={{ marginTop: 20 }}>
+              <button type="button" data-test="feed-open" className="btn btn-primary" onClick={() => setSheet('feeding')}>
+                급여 기록
+              </button>
+              <button type="button" data-test="weight-open" className="btn btn-outline" onClick={() => setSheet('weight')}>
+                체중 기록
+              </button>
+            </div>
+
+            <h2 className="h-title" style={{ marginTop: 28 }}>
+              기록
+            </h2>
+            <div className="rows">
+              {line('row-feeding', <Utensils size={20} />, '급여', fsum.last ? feedLine(fsum) : '기록 없음', () => nav(`/animals/${a.id}/feeding`), feedWarn)}
+              {line('row-weight', <Weight size={20} />, '체중', l ? `${fw(l.g)} · ${yd(l.date)}` : '기록 없음', () => nav(`/animals/${a.id}/weight`))}
+              {line(
+                'health-section',
+                <HeartPulse size={20} />,
+                '건강',
+                lastOpen
+                  ? `${lastOpen.area} · ${LEVEL_LABEL[lastOpen.level]}${openLogs.length > 1 ? ` 외 ${openLogs.length - 1}건` : ''}`
+                  : nextVisit
+                    ? `다음 재진 ${yd(nextVisit)} (D-${gap(T, nextVisit)})`
+                    : '진행 중인 증상 없음',
+                () => nav(`/animals/${a.id}/health`),
+                !!lastOpen,
+              )}
+              {line(
+                'row-clutch',
+                <Egg size={20} />,
+                a.sex === 'F' ? '산란' : '페어 산란',
+                `${cs.length}${a.sex === 'F' ? '차' : '회'} · 알 ${cs.reduce((n, c) => n + c.eggs, 0)} · 자손 ${kids.length}`,
+                () => nav(a.sex === 'F' && k.breeders.some((b) => b.female_id === a.id) ? `/clutch/${a.id}` : '/clutch'),
+              )}
+              {line(
+                'row-lineage',
+                <Network size={20} />,
+                '혈통',
+                `부 ${parent(sire, a.sire_id)} · 모 ${parent(dam, a.dam_id)} · COI ${(k.lineage.F(a.id) * 100).toFixed(2)}%`,
+                () => nav(`/animals/${a.id}/lineage`),
               )}
             </div>
-          )}
 
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2,1fr)', gap: 8 }}>
-            {stat(
-              '급여',
-              fsum.last ? (fsum.daysSince === 0 ? '오늘' : `${fsum.daysSince}일 전`) : '—',
-              fsum.last
-                ? FEED_RESULT_LABEL[fsum.last.result] + (fsum.refuseStreak >= 2 ? ` · 거부 ${fsum.refuseStreak}회` : '')
-                : '기록 없음',
-              fsum.refuseStreak >= REFUSE_ALERT || fsum.overdue ? 'var(--warn)' : 'var(--blue)',
-              () => nav(`/animals/${a.id}/feeding`),
-            )}
-            {stat(
-              '체중',
-              l ? fw(l.g) : '—',
-              l ? (l.diff === null ? '첫 측정' : fd(l.diff)) : '기록 없음',
-              l && l.diff !== null && l.diff < 0 ? 'var(--warn)' : 'var(--blue)',
-              () => nav(`/animals/${a.id}/weight`),
-            )}
-            {stat(
-              a.sex === 'F' ? '산란' : '페어 산란',
-              cs.length + (a.sex === 'F' ? '차' : '회'),
-              `알 ${cs.reduce((n, c) => n + c.eggs, 0)} · 자손 ${kids.length}`,
-              'var(--muted)',
-              () => nav(a.sex === 'F' && k.breeders.some((b) => b.female_id === a.id) ? `/clutch/${a.id}` : '/clutch'),
-            )}
-            {stat('COI', (k.lineage.F(a.id) * 100).toFixed(2), `조상 ${k.lineage.knownAnc(a.id)}/6`, 'var(--muted)', () =>
-              nav(`/animals/${a.id}/lineage`),
-            )}
-          </div>
-
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
-            <button type="button" data-test="feed-open" className="btn btn-primary btn-sm" onClick={() => setSheet('feeding')}>
-              + 급여
-            </button>
-            <button type="button" className="btn btn-outline btn-sm" onClick={() => setSheet('weight')}>
-              + 체중
-            </button>
-            <button type="button" data-test="resume-open" className="btn btn-outline btn-sm" onClick={() => setSheet('resume')}>
-              {shares?.has(a.id) ? '이력서 공유 중' : '분양 이력서'}
-            </button>
-            <button
-              type="button"
-              className="btn btn-outline btn-sm"
-              onClick={() => (a.status === 'keeping' ? setSheet('transfer') : ui.toast('사육 중인 개체만 분양 이전할 수 있어요', 'warn'))}
-            >
-              분양 이전
-            </button>
-          </div>
-
-          <div className="card card-pad" data-test="health-section" style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
-              <span className="section-title">건강</span>
-              <button type="button" onClick={() => nav(`/animals/${a.id}/health`)} style={{ fontSize: 13, fontWeight: 600, color: 'var(--blue)' }}>
-                기록 보기
-              </button>
+            <h2 className="h-title" style={{ marginTop: 28 }}>
+              분양 · 라벨
+            </h2>
+            <div className="rows">
+              {line('resume-open', <FileText size={20} />, '분양 이력서', shares?.has(a.id) ? '링크 켜짐' : '링크 만들기', () => setSheet('resume'))}
+              {line('transfer-open', <ArrowLeftRight size={20} />, '분양 이전', '코드로 넘기기', () =>
+                a.status === 'keeping' ? setSheet('transfer') : ui.toast('사육 중인 개체만 분양 이전할 수 있어요', 'warn'),
+              )}
+              {line('row-qr', <QrCode size={20} />, 'QR 라벨', '', () => nav(`/animals/${a.id}/qr`))}
             </div>
-            {openLogs.length > 0 ? (
-              <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
-                {openLogs.slice(-3).map((x) => (
-                  <span key={x.id} className="tag warn">
-                    {x.area} · {LEVEL_LABEL[x.level]}
-                  </span>
-                ))}
-              </div>
-            ) : (
-              <div style={{ fontSize: 13, color: 'var(--muted)' }}>진행 중인 증상이 없어요</div>
-            )}
-            {nextVisit && (
-              <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--blue)' }}>
-                다음 재진 {yd(nextVisit)} (D-{gap(today(), nextVisit)})
-              </div>
-            )}
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 8 }}>
-              <button type="button" className="btn btn-outline btn-xs" onClick={() => setSheet('symptom')}>
-                + 증상
-              </button>
-              <button type="button" className="btn btn-outline btn-xs" onClick={() => setSheet('vet')}>
-                + 진료
-              </button>
-              <button type="button" className="btn btn-outline btn-xs" onClick={() => nav(`/animals/${a.id}/consult`)}>
-                상담 카드
-              </button>
-            </div>
-            <div className="hint">{HEALTH_NOTICE}</div>
           </div>
         </div>
 
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 8, minWidth: 0 }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', paddingTop: 6 }}>
-            <span className="section-title">활동 기록</span>
-            <span style={{ fontSize: 12, color: 'var(--muted)' }}>{feedLine(fsum)}</span>
-          </div>
-          <div>
+        <div className="detail-pad" style={{ minWidth: 0, paddingBottom: 28 }}>
+          <h2 className="h-title" style={{ marginTop: 28 }}>
+            활동 기록
+          </h2>
+          <div className="rows log">
             {feed(k, a, sent, myLogs, myVisits, matings).map((f, i) => (
-              <div key={i} style={{ display: 'grid', gridTemplateColumns: '62px 1fr', gap: 10, padding: '12px 0', borderTop: '1px solid var(--line)' }}>
-                <span className="mono" style={{ fontWeight: 500, fontSize: 12, color: 'var(--muted)', paddingTop: 2 }}>
+              <div key={i} className="row" style={{ alignItems: 'flex-start' }}>
+                <span className="meta" style={{ width: 58, flex: 'none', paddingTop: 2 }}>
                   {f.date}
                 </span>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 3, minWidth: 0 }}>
-                  <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
-                    <span style={{ width: 8, height: 8, borderRadius: 4, background: f.col }} />
-                    <span style={{ fontSize: 11, fontWeight: 600, color: f.col }}>{f.kind}</span>
-                  </div>
-                  <span style={{ fontSize: 14, fontWeight: 600 }}>{f.title}</span>
-                  <span style={{ fontSize: 12, color: 'var(--muted)' }}>{f.sub}</span>
-                </div>
+                <span className="grow">
+                  <span className={`micro${f.col === 'var(--warn)' ? ' warn' : ''}`}>{f.kind}</span>
+                  <span className="row-t">{f.title}</span>
+                  {f.sub && <span className="meta">{f.sub}</span>}
+                </span>
               </div>
             ))}
           </div>
@@ -438,8 +410,6 @@ export default function AnimalDetailPage() {
       </div>
       {sheet === 'weight' && <WeightSheet k={k} animal={a} onClose={() => setSheet(null)} />}
       {sheet === 'feeding' && <FeedingSheet k={k} animal={a} onClose={() => setSheet(null)} />}
-      {sheet === 'symptom' && <SymptomSheet animal={a} onClose={() => setSheet(null)} />}
-      {sheet === 'vet' && <VetSheet animal={a} onClose={() => setSheet(null)} />}
       {sheet === 'transfer' && <TransferSheet animal={a} onClose={() => setSheet(null)} />}
       {sheet === 'resume' && <ResumeSheet animal={a} token={shares?.get(a.id) ?? null} onClose={() => setSheet(null)} />}
       {showCode && <TransferSheet animal={a} existing={showCode} onClose={() => setShowCode(null)} />}

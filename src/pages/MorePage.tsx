@@ -263,7 +263,6 @@ export default function MorePage() {
   const tools = [
     row('scan', 'QR 스캔', '', () => nav('/scan'), <ScanLine size={20} />),
     row('transfer', '분양 받기', '코드 입력', () => nav('/transfer'), <LogIn size={20} />),
-    row('link', '다른 기기에서 이어 쓰기', '코드로 연결', () => setSheet('link'), <Smartphone size={20} />),
   ]
   const groups: [string, ReturnType<typeof row>[]][] = [
     [
@@ -285,6 +284,7 @@ export default function MorePage() {
       '계정',
       [
         row('profile', '프로필 편집', '사진 · 닉네임 · 소개', () => setSheet('profile'), <UserRound size={20} />),
+        row('link', '다른 기기에서 이어 쓰기', '코드로 연결', () => setSheet('link'), <Smartphone size={20} />),
         row('blocked', '차단 관리', '', () => nav('/blocked'), <Ban size={20} />),
         ...(isAdmin ? [row('admin', '검증 현황', '운영자 전용', () => nav('/admin'), <ChartColumn size={20} />)] : []),
         row(

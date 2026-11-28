@@ -43,7 +43,7 @@ export function AdoptCard({
           <div style={{ minWidth: 0, flex: 1 }}>
             <div style={{ fontSize: 15, fontWeight: 600, overflowWrap: 'anywhere' }}>
               {nm(a)}{' '}
-              <span className="mono" style={{ fontSize: 11, fontWeight: 600, color: 'var(--blue)' }}>
+              <span className="code" style={{ fontSize: 11, color: 'var(--muted)' }}>
                 {a.code}
               </span>
             </div>

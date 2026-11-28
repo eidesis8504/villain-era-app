@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { Link, useLocation, useNavigate, useParams } from 'react-router'
+import { Check, Ellipsis, Heart, SquarePen } from 'lucide-react'
 import { badgeOf, displayName, useAuth, useMe } from '../app/auth'
 import { Screen } from '../app/Screen'
 import { useUI } from '../app/ui'
@@ -41,38 +42,32 @@ export function CommunityPage() {
   const [cat, setCat] = useState('전체')
   const q = usePosts(cat)
   return (
-    <Screen title="커뮤니티" right={{ label: '글쓰기', onClick: () => nav('/community/new'), test: 'write' }} wide>
-      <div className="page-grid" style={{ gridTemplateColumns: 'repeat(auto-fill,minmax(min(100%,340px),1fr))' }}>
-        <Chips style={{ gridColumn: '1 / -1' }} items={['전체', ...CATS].map((c) => [c, c] as const)} value={cat} onChange={setCat} />
+    <Screen title="커뮤니티" right={{ label: '글쓰기', icon: <SquarePen size={18} />, onClick: () => nav('/community/new'), test: 'write' }} wide>
+      <div className="page" style={{ gap: 0 }}>
+        <Chips tabs items={['전체', ...CATS].map((c) => [c, c] as const)} value={cat} onChange={setCat} />
         {cat === ADOPT_CAT && (
-          <div className="welcome-card span-all" data-test="adopt-notice" style={{ fontSize: 12 }}>
+          <div className="welcome-card" data-test="adopt-notice" style={{ fontSize: 12, marginTop: 12 }}>
             <div>
               {NOT_A_PARTY} 글을 쓰기 전에 <Link to="/policy">운영정책</Link>의 분양·홍보 규칙을 확인해 주세요.
             </div>
           </div>
         )}
-        {q.isLoading && (
-          <div className="span-all">
-            <Spinner center />
-          </div>
-        )}
-        {q.error && (
-          <div className="span-all">
-            <ErrorBox error={q.error} onRetry={() => q.refetch()} />
-          </div>
-        )}
+        {q.isLoading && <Spinner center />}
+        {q.error && <ErrorBox error={q.error} onRetry={() => q.refetch()} />}
         {q.data && !q.data.length && (
-          <div className="empty-card span-all">
-            <div style={{ fontSize: 15, fontWeight: 600 }}>아직 글이 없어요</div>
-            <div style={{ fontSize: 13, color: 'var(--muted)' }}>사육 경험이나 궁금한 점을 첫 글로 남겨보세요</div>
-            <button type="button" className="btn btn-primary btn-sm" style={{ padding: '0 18px' }} onClick={() => nav('/community/new')}>
+          <div className="empty" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6, paddingTop: 56 }}>
+            <div style={{ fontSize: 17, fontWeight: 600, color: 'var(--ink)' }}>아직 글이 없어요</div>
+            <div>사육 경험이나 궁금한 점을 첫 글로 남겨보세요</div>
+            <button type="button" className="btn btn-primary btn-sm" style={{ marginTop: 10 }} onClick={() => nav('/community/new')}>
               글쓰기
             </button>
           </div>
         )}
-        {(q.data ?? []).map((p) => (
-          <PostCard key={p.id} p={p} />
-        ))}
+        <div className="posts">
+          {(q.data ?? []).map((p) => (
+            <PostCard key={p.id} p={p} />
+          ))}
+        </div>
       </div>
     </Screen>
   )
@@ -84,7 +79,7 @@ function AttachView({ at }: { at: RecordAttach }) {
   return (
     <div className="card" style={{ borderRadius: 10, padding: '12px 14px', display: 'flex', flexDirection: 'column', gap: 8 }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12 }}>
-        <span style={{ fontWeight: 600, color: 'var(--blue)' }}>{kindLbl}</span>
+        <span style={{ fontWeight: 600 }}>{kindLbl}</span>
         <span className="mono" style={{ color: 'var(--muted)' }}>
           {at.label}
         </span>
@@ -95,7 +90,7 @@ function AttachView({ at }: { at: RecordAttach }) {
             <div className="mono" style={{ fontWeight: 600, fontSize: 20 }}>
               {at.last}
             </div>
-            <div className="mono" style={{ fontWeight: 600, fontSize: 12, color: at.diff.startsWith('−') ? 'var(--warn)' : 'var(--blue)' }}>
+            <div className="mono" style={{ fontWeight: 600, fontSize: 12, color: at.diff.startsWith('−') ? 'var(--warn)' : 'var(--sub)' }}>
               {at.diff} · {at.count}회
             </div>
           </div>
@@ -108,7 +103,7 @@ function AttachView({ at }: { at: RecordAttach }) {
             [
               [at.n, '산란', 'var(--ink)'],
               [at.eggs, '알', 'var(--ink)'],
-              [at.hatched, '부화', 'var(--blue)'],
+              [at.hatched, '부화', 'var(--ink)'],
               [at.dead, '폐사', 'var(--warn)'],
             ] as const
           ).map(([v, l, c]) => (
@@ -214,11 +209,13 @@ export function PostPage() {
   return (
     <Screen title="게시글" back="/community">
       <div className="page">
-        <div style={{ display: 'flex', gap: 6 }}>
-          <span className="tag">{p.cat}</span>
-          {p.has_adopted && <span className="tag solid">채택 완료</span>}
+        <div className="post-k" style={{ marginTop: 8 }}>
+          <span>{p.cat}</span>
+          {p.has_adopted && <span className="st solid">채택 완료</span>}
         </div>
-        <div style={{ fontSize: 20, fontWeight: 600, lineHeight: 1.4, marginTop: -6 }}>{p.title}</div>
+        <h1 className="h-display" style={{ marginTop: -10, overflowWrap: 'anywhere' }}>
+          {p.title}
+        </h1>
         <div style={{ display: 'flex', gap: 6, alignItems: 'center', fontSize: 13, color: 'var(--muted)' }}>
           <span style={{ fontWeight: 600, color: 'var(--ink)' }}>{displayName(p.author)}</span>
           {badge && (
@@ -227,16 +224,17 @@ export function PostPage() {
             </span>
           )}
           {p.author && p.author.role !== 'admin' && <TierBadge hz={p.author.hz} />}
-          <span className="mono">· {yd(isoDay(p.created_at))}</span>
+          <span>· {yd(isoDay(p.created_at))}</span>
           {!mine && (
             <button
               type="button"
               aria-label="글 메뉴"
               data-test="post-menu"
               onClick={() => setMenu({ kind: 'post', id: p.id, authorId: p.author_id, authorName: displayName(p.author), postId: p.id })}
-              style={{ marginLeft: 'auto', padding: '0 4px', fontSize: 18, color: 'var(--muted)' }}
+              className="icon-btn"
+              style={{ marginLeft: 'auto', marginRight: -10 }}
             >
-              ⋯
+              <Ellipsis size={20} />
             </button>
           )}
         </div>
@@ -299,27 +297,21 @@ export function PostPage() {
         <div style={{ display: 'flex', gap: 8 }}>
           <button
             type="button"
-            className="mono"
+            className="btn btn-outline btn-xs"
+            data-test="post-like"
+            aria-pressed={liked}
             onClick={() => like.mutate(liked)}
-            style={{
-              height: 38,
-              padding: '0 16px',
-              borderRadius: 999,
-              border: '1px solid var(--blue)',
-              background: liked ? 'var(--blue)' : '#fff',
-              color: liked ? 'var(--cream)' : 'var(--blue)',
-              fontWeight: 600,
-              fontSize: 13,
-            }}
+            style={liked ? { color: 'var(--blue)', fontWeight: 600 } : undefined}
           >
-            ♡ {p.like_count}
+            <Heart size={16} fill={liked ? 'currentColor' : 'none'} /> {p.like_count}
           </button>
           {(mine || isAdmin) && (
             <button
               type="button"
               data-test="post-delete"
               onClick={() => setConfirm(true)}
-              style={{ marginLeft: 'auto', height: 38, padding: '0 16px', borderRadius: 999, border: '1px solid var(--warn)', color: 'var(--warn)', fontSize: 13, fontWeight: 600 }}
+              className="btn btn-danger btn-xs"
+              style={{ marginLeft: 'auto' }}
             >
               삭제
             </button>
@@ -327,30 +319,19 @@ export function PostPage() {
         </div>
 
         {mine && qa && !p.has_adopted && list.length > 0 && (
-          <div style={{ background: 'var(--blue-soft)', borderRadius: 10, padding: '10px 12px', fontSize: 12, fontWeight: 600, color: 'var(--blue)' }}>
+          <div className="notice" style={{ cursor: 'default', padding: '10px 12px' }}>
             도움이 된 답변을 채택해 주세요 · 채택 후에는 바꿀 수 없어요
           </div>
         )}
 
-        <div style={{ fontSize: 15, fontWeight: 600, borderTop: '1px solid var(--line)', paddingTop: 14 }}>
+        <h2 className="h-title" style={{ borderTop: '1px solid var(--line)', paddingTop: 20, marginBottom: -12 }}>
           {qa ? '답변' : '댓글'} {p.comment_count}
-        </div>
+        </h2>
 
         {list.map((c) => {
           const cb = badgeOf(c.author)
           return (
-            <div
-              key={c.id}
-              style={{
-                background: c.adopted ? 'var(--blue-soft)' : '#fff',
-                border: `1px solid ${c.adopted ? 'var(--blue)' : 'var(--line)'}`,
-                borderRadius: 10,
-                padding: '12px 14px',
-                display: 'flex',
-                flexDirection: 'column',
-                gap: 6,
-              }}
-            >
+            <div key={c.id} className={`cmt${c.adopted ? ' adopted' : ''}`} data-test="comment">
               <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
                 <span style={{ fontSize: 13, fontWeight: 600 }}>{displayName(c.author)}</span>
                 {cb && (
@@ -360,16 +341,21 @@ export function PostPage() {
                 )}
                 {c.author && c.author.role !== 'admin' && <TierBadge hz={c.author.hz} />}
                 {c.hidden && <span className="tag warn">숨김</span>}
-                {c.adopted && <span style={{ marginLeft: 'auto', fontSize: 11, fontWeight: 600, color: 'var(--blue)' }}>✓ 채택된 답변</span>}
+                {c.adopted && (
+                  <span style={{ marginLeft: 'auto', display: 'inline-flex', alignItems: 'center', gap: 3, fontSize: 12, fontWeight: 600, color: 'var(--blue)' }}>
+                    <Check size={14} /> 채택된 답변
+                  </span>
+                )}
                 {c.author_id !== uid && (
                   <button
                     type="button"
                     aria-label="댓글 메뉴"
                     data-test="comment-menu"
                     onClick={() => setMenu({ kind: 'comment', id: c.id, authorId: c.author_id, authorName: displayName(c.author), postId: p.id })}
-                    style={{ marginLeft: c.adopted ? 4 : 'auto', padding: '0 4px', fontSize: 16, color: 'var(--muted)' }}
+                    className="icon-btn"
+                    style={{ marginLeft: c.adopted ? 0 : 'auto', margin: c.adopted ? '-10px -10px -10px 0' : '-10px -10px -10px auto' }}
                   >
-                    ⋯
+                    <Ellipsis size={18} />
                   </button>
                 )}
               </div>
@@ -378,7 +364,8 @@ export function PostPage() {
                 <button
                   type="button"
                   onClick={() => adopt(c.id)}
-                  style={{ alignSelf: 'flex-start', height: 32, padding: '0 12px', borderRadius: 6, border: '1px solid var(--blue)', color: 'var(--blue)', fontSize: 12, fontWeight: 600 }}
+                  className="btn btn-outline btn-xs"
+                  style={{ alignSelf: 'flex-start' }}
                 >
                   이 답변 채택
                 </button>
@@ -618,7 +605,7 @@ export function WritePage() {
     <Screen title="글쓰기" back="/community">
       <div style={{ padding: '8px 18px 28px', display: 'flex', flexDirection: 'column', gap: 14 }}>
         <Seg items={CATS.map((c) => [c, c] as const)} value={cat} onChange={setCat} />
-        {cat === 'Q&A' && <div style={{ fontSize: 12, color: 'var(--blue)', fontWeight: 600, marginTop: -6 }}>Q&amp;A 글은 받은 답변 중 하나를 채택할 수 있어요</div>}
+        {cat === 'Q&A' && <div className="hint" style={{ marginTop: -6 }}>Q&amp;A 글은 받은 답변 중 하나를 채택할 수 있어요</div>}
         <div>
           <input
             className={`input${titleErr ? ' bad' : ''}`}
@@ -758,9 +745,8 @@ const pickBox = {
   width: 76,
   height: 76,
   borderRadius: 10,
-  border: '1.5px dashed #9FB6D9',
-  background: '#F5F8FC',
-  color: 'var(--blue)',
+  background: '#fff',
+  color: 'var(--ink)',
   display: 'flex',
   flexDirection: 'column',
   alignItems: 'center',

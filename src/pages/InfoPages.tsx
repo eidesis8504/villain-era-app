@@ -114,9 +114,9 @@ export function AlertsPage() {
             onClick={() => n.link && nav(n.link)}
             style={{ borderRadius: 10, padding: '12px 14px', display: 'flex', gap: 10, alignItems: 'flex-start', cursor: n.link ? 'pointer' : 'default' }}
           >
-            <span style={{ width: 8, height: 8, borderRadius: 4, background: n.read_at ? '#D6D2C8' : 'var(--warn)', marginTop: 6, flex: 'none' }} />
+            <span style={{ width: 8, height: 8, borderRadius: 4, background: n.read_at ? 'var(--surface2)' : 'var(--blue)', marginTop: 6, flex: 'none' }} />
             <div style={{ flex: 1, minWidth: 0 }}>
-              <div style={{ fontSize: 11, fontWeight: 600, color: n.kind === 'feeding' || n.kind === 'health' ? 'var(--warn)' : 'var(--blue)' }}>
+              <div style={{ fontSize: 11, fontWeight: 600, color: n.kind === 'feeding' || n.kind === 'health' ? 'var(--warn)' : 'var(--muted)' }}>
                 {KIND_LABEL[n.kind] ?? '알림'}
               </div>
               <div style={{ fontSize: 14, fontWeight: 600 }}>{n.title}</div>

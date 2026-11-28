@@ -1179,12 +1179,48 @@ select.input {
   font-weight: 500;
   color: var(--muted);
 }
+/* 분류 · 상태를 가운뎃점으로 잇는다. 상태 색: 진행 중(파랑) · 주의(주황) · 끝남(회색) */
+.post-k > * + *::before {
+  content: '·';
+  margin-right: 6px;
+  font-weight: 500;
+  color: var(--muted);
+}
 .post-k .st {
   font-weight: 600;
+}
+.post-k .st.solid {
   color: var(--blue);
 }
 .post-k .st.warn {
   color: var(--warn);
+}
+/* PC의 넓은 화면에서는 글을 여러 칸으로 놓는다 */
+.frame.desk .posts {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+  column-gap: 40px;
+}
+.frame.desk .posts > .post:last-child {
+  border-bottom: 1px solid var(--line);
+}
+/* 댓글 줄 */
+.cmt {
+  padding: 14px 0;
+  border-bottom: 1px solid var(--line);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.cmt:last-of-type {
+  border-bottom: 0;
+}
+.cmt.adopted {
+  margin: 8px 0;
+  padding: 14px;
+  border: 0;
+  border-radius: var(--r-m);
+  background: var(--blue-soft);
 }
 .post-t {
   margin-top: 4px;

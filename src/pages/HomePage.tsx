@@ -167,7 +167,7 @@ export default function HomePage() {
               <h2 className="h-title">확인이 필요해요</h2>
               <div className="rows">
                 {feedRow('feed-attention', '급여 주기가 지났어요', overdue)}
-                {feedRow('feed-refuse', `${REFUSE_ALERT}번 넘게 이어서 먹지 않았어요`, refusing)}
+                {feedRow('feed-refuse', `${REFUSE_ALERT}번 이어서 먹지 않았어요`, refusing)}
                 {layDue.slice(0, 5).map((b) => {
                   const d = gap(T, b.lay_expected_on!)
                   return (

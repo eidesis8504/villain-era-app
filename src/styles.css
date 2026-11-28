@@ -47,6 +47,9 @@ body {
   background: var(--page);
   font-family: var(--sans);
   font-variant-numeric: tabular-nums;
+  /* 한글은 낱말 단위로 줄을 바꾼다 (긴 주소 같은 것은 넘치지 않게 끊는다) */
+  word-break: keep-all;
+  overflow-wrap: break-word;
   color: var(--ink);
   -webkit-font-smoothing: antialiased;
   -webkit-tap-highlight-color: transparent;
